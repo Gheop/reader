@@ -1,0 +1,80 @@
+<?php
+function imgbase64($f) {
+ // echo "<h1>$f[1]</h1>";
+  //transforme les //image.com en http://image.com
+  $f[1] = preg_replace('/^\/\//s','http://',$f[1]);
+  $data = file_get_contents($f[1]) ;
+  if(!$data) return '';
+  $tmpfile='tmp/'.md5($data);
+  file_put_contents($tmpfile, $data);
+  $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
+  if($type == "inode/x-empty") return "";
+  if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
+  else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
+  else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
+  else return "IMAGE UNKNOW $type $f[1]";
+//  $base64 = 'data: '.$type.';base64,'. base64_encode(file_get_contents($tmpfile));
+  $base64 = "//reader.gheop.com/$tmpfile";
+  list($width, $height, $t, $attr) = getimagesize("$tmpfile");
+  //unlink($tmpfile);
+  if($width == 1 && $height == 1) {
+  	unlink($tmpfile);
+  	return '';
+  }
+  return '<img src="'.$base64.'" '.$attr.' />';
+}
+
+function clean_txt($v) {
+  require_once 'HTMLPurifier/HTMLPurifier.auto.php';
+  $config = HTMLPurifier_Config::createDefault();
+//$config->set('Filter.YouTube', true); //don't work, je l'utilise mal ?
+  $purifier = new HTMLPurifier($config);
+
+  $p = array();
+  $p[] = '/<img .*?src="http:\/\/feeds\.feedburner\.com\/.*?".*?>/s';
+  $p[]='/<a *?.*?>/s';
+  $p[]='/<\/a>/s';
+  $p[]='/<table *?.*?>/s';
+  $p[]='/<\/table *?>/s';
+  $p[]='/<td *?.*?>/s';
+  $p[]='/<\/td *?>/s';
+  $p[]='/<tr *?.*?>/s';
+  $p[]='/<\/tr *?>/s';
+  $p[]='/<tbody *?.*?>/s';
+  $p[]='/<\/tbody *?>/s';
+  $p[] = '/<img .*?src="http:\/\/www\.gstatic\.com\/.*?".*?>/s';
+  $p[]='/<img .*?src="http:\/\/.*?\.feedsportal\.com\/.*?".*?>/s';
+  $p[]='/<iframe.*?>/s';
+  $p[]='/<\/iframe *>/s';
+  $p[]='/<img .*?src=".*feeds\.lefigaro\.fr\/.*\/mf.gif".*?>/s';
+  $p[]='/<img .*?src="http:\/\/.*?\.doubleclick\.net\/.*?".*?>/s';
+  $p[]='/<img .*?src="http:\/\/.*?\.fsdn\.com\/.*?".*?>/';
+  $p[]='/<div.*?>/s';
+  $p[]='/<\/div>/s';
+  /* $p[]='/<span.*?>/s';
+  $p[]='/<\/span>/s';*/
+  $p[]='/<p *?.*?>/s';
+  $p[]='/<\/p>/s';
+  /* $p[] = '/(class|id|style|align)=".*?"/s';*/
+  $p[] = '/(id|style|align)=".*?"/s';
+  $p[] = '/ onmouseover=("|\').*?("|\')/s';
+  $p[] = '/ onclick=("|\').*?("|\')/s';
+  $p[]='/<\s*script.*?<\/script>/s';
+  $p[]='/<\s*style.*?<\/style>/s';
+
+
+  $v = preg_replace($p,'', $v);
+  $v = $purifier->purify($v);
+
+  $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*http://www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"http://www.lewistrondheim.com/blog/images/$1\" />", $v);
+  $v = preg_replace('#<span class="youtube-embed">([^<]*)</span>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
+  $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*>#Ssi', "imgbase64", $v);
+
+  $p[]='/<span.*?>/s';
+  $p[]='/<\/span>/s';
+  $v = preg_replace($p,'', $v);
+  $a = array( "\\", "\n", "\t", "\r", "\b", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'");
+  $b = array('\\\\', '', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'');
+  $v = str_replace($a, $b, $v);
+  return $v;
+}
