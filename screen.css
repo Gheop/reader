@@ -1,0 +1,336 @@
+@font-face {
+    font-family: 'Awesome';
+    src: local("FontAwesome"), local("fontawesome-webfont"),url('fonts/fontawesome-webfont.eot');
+    src: local("FontAwesome"), local("fontawesome-webfont"),url('fonts/fontawesome-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/fontawesome-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+/*@font-face {
+  font-family: 'Christmas';
+    src: url('fonts/Christmas.ttf');
+  src: url('fonts/COCKTAIL.TTF');
+}*/
+  @font-face {
+    font-family: 'Gheop';
+    src: url('fonts/gheop-webfont.eot');
+    src: local("hybrid"),url('fonts/gheop-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/gheop-webfont.woff2') format('woff2'),
+         url('fonts/gheop-webfont.woff') format('woff'),
+         url('fonts/gheop-webfont.ttf') format('truetype'),
+         url('fonts/gheop-webfont.svg#hybridoutline') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+@keyframes swing { 
+    20% { transform: rotate(15deg); } 
+    40% { transform: rotate(-10deg); } 
+    60% { transform: rotate(5deg); } 
+    80% { transform: rotate(-5deg); } 
+    100% { transform: rotate(0deg); } 
+} 
+.swing { 
+    animation-duration: 1s; 
+    animation-fill-mode: both; 
+    transform-origin: top center; 
+    animation-name: swing; 
+}
+
+
+.tags {
+    padding-right: 10px;
+    float: right;
+    visibility: hidden;
+}
+
+ul{
+    list-style: none;
+}
+
+body { 
+        font: normal 100%/1.15 Awesome; 
+    font-feature-settings: "kern";
+	word-wrap: break-word;
+	color: #444444;
+    background: white url("data:image/gif;base64,R0lGODdhAwADAOcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///ywAAAAAAwADAAAICQDb/Rv4T6DAgAA7");
+    color: #444;
+/*    font: normal 11px "Verdana",sans-serif;*/
+}
+a {
+    text-decoration: none;
+    color:#444;
+}
+
+b,strong,legend{
+    font-weight:bold;
+    color:#444;
+}
+
+#g{
+    position:absolute;
+    top:0;
+    left:0;
+    text-align:left;
+    margin:0 6px;
+    font:2.5em Gheop;
+    text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
+}
+#g a:hover{
+  /*    color:red;*/
+      color:#fff;
+}
+#g a.anim{
+    color: #444;
+    text-shadow:none;
+}
+#g a{
+    color: #444;
+    transition: color 1s linear;
+}
+
+#menu { 
+    padding:0px;
+    position: absolute;
+    margin:0;
+    margin-top:2em;
+    top:30px;
+    bottom:10px;
+    left:4px;
+    width:20%;
+    overflow:auto;
+}
+
+
+#page { 
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+    background: #eee;
+    position: absolute;
+    bottom:10px;
+    margin:0;
+    top: 30px;
+    left:20%;
+    right: 10px;
+    padding:10px;
+    overflow:auto;
+}
+
+.light { 
+    background:#eee;
+    border:#eee 1px solid;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.item1,.item0 {
+    background:#fff;
+    margin-bottom:10px;
+    border:1px solid #444;
+    border-radius:1em;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-width:100%;
+    overflow: hidden;
+}
+.descr img,.descr pre,.descr code,.item0 pre,.item0 code, .item0 img { max-width:100%; }
+
+.item0 {opacity:0.8}
+
+.action {
+    margin:-1px;
+    background:#444;
+    border:1px solid #444;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+    color:white;
+}
+.item1 {
+    box-shadow: 8px 8px 12px #444;
+}
+.action a {
+    color:white;
+    cursor:pointer;
+    padding-left: 10px;
+}
+
+.item0 .action a {opacity:0.8}
+.item1 .lu:before{content:""}
+.item0 .lu:before{content:""}
+.search:before{content:""}
+.star:before{content:""}
+.starred:before{content:""}
+.love:before{content:""}
+.loved:before{content:""}
+.print:before{content:""}
+.title {
+    font-size: 1.5em;
+    padding-left: 10px;
+}
+
+.date {
+    float:right;
+    padding-right:10px;
+}
+
+.author {
+    font-size:0.8em;
+    padding-left: 10px;
+}
+
+.descr{
+    margin-top:10px;
+    padding-left: 10px;
+}
+
+p {
+    width: 100%; 
+    text-align:center;
+}
+
+@keyframes blink {  
+    0% { /*opacity:0.5;*/
+        color:white; }
+    100% { /*opacity:1;*/
+        color:black; }
+}
+
+.blink {
+    animation: blink 0.75s linear 1;
+} 
+.fluxnew {
+    padding-left:2px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.flux {
+    display:none;
+       opacity:1;
+/*     -webkit-transition: opacity 0.5s ease-in-out;/* transition pour Chrome et Safari */
+/*    -moz-transition: opacity 0.5s ease-in-out;/* transition pour Firefox */
+/*    -o-transition: opacity 0.5s ease-in-out;/* transition pour Opéra */
+    transition: opacity 0.5s ease-in-out; /* on écrit cette ligne à la fin de façon à ce que ce soit elle qui soit prise en compte lorsque l'attribut transition sera pris en compte par tous les navigateurs */
+}
+
+.fluxnew a {
+    text-shadow:none;
+    display:none;
+}
+
+.fluxnew:hover a {
+    display:inline;
+    color:#444;
+}
+.fluxnew a:hover {
+    color:red;
+}
+
+#error {
+    z-index: 100;
+    background: #444;
+    text-align: center;
+    font-weight: bold;
+    color: red;
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    top: 80px;
+    height: 2em;
+    border-radius: 1em;
+}
+
+#register {
+    color: #444;
+    position: absolute;
+    padding: 5px;
+    top: 0px;
+    right: 0px;
+}
+
+.show {
+    color:#fff;
+    background: #eee;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+    display:block;
+    text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
+}
+
+
+input, textarea,button {
+    border : 1px solid black;
+    color: black;
+    opacity: 0.8;
+    border-radius: 5px;
+    background-color: #ffffff;
+    margin:0;
+    padding:0;
+    z-index:99;
+    height:1.7em;
+}
+
+#s{
+    position:absolute;
+    top:2px;
+    left:38%;
+
+   /* border:1px solid black;
+    color: black;*/
+    width:24%;
+   border-top-right-radius:0;
+   border-bottom-right-radius:0;
+    position:absolute;
+}
+
+#bs {
+   border-top-left-radius:0;
+   border-bottom-left-radius:0;
+   position:absolute;
+   top:2px;
+   left:62%;
+   width:2em;
+  /* border:1px solid black;*/
+   border-left:none;
+   background:white url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAARCAYAAADdRIy+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAAd0SU1FB9kCBxQkAPQ1ZpQAAAGrSURBVDjLjdRNiE5xFAbw372v14zvkEGsjLD20UghKTay1uykyEIWSpY2Stmp2dhMoWQ1USYbScrKhpKyGkVDNDaGfM21ed5ct/cOp/7dc+89/+c8z/k/9xYoUPkTu7EXm7EQM3iO+3jfp/6v6NTyJbiEY1iE13iXfB+O4BdeoAxo0Q+0yLqGCRxFt1GzChfDctR/xDncxY5ak7KW9+I8JjE8H9iagJ36R9Nek5u43FZUYicGcCv3ZQtYhTk8xFYsbgPcgGnM1jb1A+vFMwxifRtgmdOba1FR1WrhR8MhRRPwA9ZFdtlgVo9ewy34mn0a9inK+KrC4TA9EZvUZe7BweQHAvipoaKABXiVNYoHmeV1PMZbbMcmnIlHh/JuPHabCc7PurS1MfU4VmN5vozjYSdgE7iBFdlzG/u1zGlbvoaleIKnkTaEQ9iIjznhQVyNoiuYwli/wXdwEiOxU5W5vsQdPMLpzLMbT47F7NO4UPRhW9V+FgP4jO+NxiM4G6azebYMk50W+WWG/C12KRpefBO2u7AyDbuY6sxj5uYqatcCX3AvhzgcX479BrxnZh85IOwcAAAAAElFTkSuQmCC") no-repeat scroll 0.2em center;
+   padding-left:22px;
+   height:1.9em;
+} 
+
+.bsborder {
+   border-top-left-radius:0;
+   border-bottom-left-radius:0;
+   border-left:none;
+}
+
+.surligne {
+    border : 1px solid #444;
+    border-radius:2px;
+    background: #444;
+    color: white;
+}
+/*he gros, c'est quoi cette feuille de style pourrage hein ? */
+
+
+@media screen and (max-width: 640px) {
+#g2 {
+		display: none;
+	}
+#menu {
+	display:none;
+	width:0;
+}
+#page {
+	left:0%;
+}
+}
+@media screen and (max-width: 1280px) {
+#g1 {
+		display: none;
+	}
+}
