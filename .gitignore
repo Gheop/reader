@@ -1,0 +1,7 @@
+conf.php
+tmp/
+test.php
+*.save
+*.txt
+*~
+
