@@ -4,4 +4,6 @@ test.php
 *.save
 *.txt
 *~
+.well-know
+
 
