@@ -79,7 +79,7 @@ else {
 </html>
 <script src="//reader.gheop.com/lib.js" type="text/javascript"></script>
 <!-- Piwik -->
-<!--<script type="text/javascript">
+<script type="text/javascript">
   var _paq = _paq || [];
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
@@ -91,6 +91,6 @@ else {
     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
   })();
 </script>
-<noscript><p><img src="//gheop.com/stats/piwik.php?idsite=2" style="border:0;" alt="" /></p></noscript> -->
+<noscript><p><img src="//gheop.com/stats/piwik.php?idsite=2" style="border:0;" alt="" /></p></noscript> 
 <!-- End Piwik Code -->
 
