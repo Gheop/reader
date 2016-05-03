@@ -1,8 +1,8 @@
 <?php
 function imgbase64($f) {
  // echo "<h1>$f[1]</h1>";
-  //transforme les //image.com en http://image.com
-  $f[1] = preg_replace('/^\/\//s','http://',$f[1]);
+  //transforme les //image.com en //image.com
+  $f[1] = preg_replace('/^\/\//s','//',$f[1]);
   $data = file_get_contents($f[1]) ;
   if(!$data) return '';
   $tmpfile='tmp/'.md5($data);
@@ -31,7 +31,7 @@ function clean_txt($v) {
   $purifier = new HTMLPurifier($config);
 
   $p = array();
-  $p[] = '/<img .*?src="http:\/\/feeds\.feedburner\.com\/.*?".*?>/s';
+  $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
   $p[]='/<table *?.*?>/s';
@@ -42,13 +42,13 @@ function clean_txt($v) {
   $p[]='/<\/tr *?>/s';
   $p[]='/<tbody *?.*?>/s';
   $p[]='/<\/tbody *?>/s';
-  $p[] = '/<img .*?src="http:\/\/www\.gstatic\.com\/.*?".*?>/s';
-  $p[]='/<img .*?src="http:\/\/.*?\.feedsportal\.com\/.*?".*?>/s';
+  $p[] = '/<img .*?src="\/\/www\.gstatic\.com\/.*?".*?>/s';
+  $p[]='/<img .*?src="\/\/.*?\.feedsportal\.com\/.*?".*?>/s';
   $p[]='/<iframe.*?>/s';
   $p[]='/<\/iframe *>/s';
   $p[]='/<img .*?src=".*feeds\.lefigaro\.fr\/.*\/mf.gif".*?>/s';
-  $p[]='/<img .*?src="http:\/\/.*?\.doubleclick\.net\/.*?".*?>/s';
-  $p[]='/<img .*?src="http:\/\/.*?\.fsdn\.com\/.*?".*?>/';
+  $p[]='/<img .*?src="\/\/.*?\.doubleclick\.net\/.*?".*?>/s';
+  $p[]='/<img .*?src="\/\/.*?\.fsdn\.com\/.*?".*?>/';
   $p[]='/<div.*?>/s';
   $p[]='/<\/div>/s';
   /* $p[]='/<span.*?>/s';
@@ -66,15 +66,17 @@ function clean_txt($v) {
   $v = preg_replace($p,'', $v);
   $v = $purifier->purify($v);
 
-  $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*http://www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"http://www.lewistrondheim.com/blog/images/$1\" />", $v);
+  $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
   $v = preg_replace('#<span class="youtube-embed">([^<]*)</span>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
   $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*>#Ssi', "imgbase64", $v);
 
   $p[]='/<span.*?>/s';
   $p[]='/<\/span>/s';
   $v = preg_replace($p,'', $v);
-  $a = array( "\\", "\n", "\t", "\r", "\b", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'");
-  $b = array('\\\\', '', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'');
+  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'");//,"\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
+  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'');//"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
+//  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'","\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
+//  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'',"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
   $v = str_replace($a, $b, $v);
   return $v;
 }

@@ -114,7 +114,7 @@ for($i=0; $i<8;$i++) {
 echo "<div class=\"CSSTableGenerator\" >\n";
 echo "<table>\n";
 echo "\t<tr>\n\t\t<td>id</td>\n\t\t<td>$d[0]</td>\n\t</tr>\n";
-echo "\t<tr>\n\t\t<td>id_flux</td>\n\t\t<td>",$d[1],' (<a href="http://reader.gheop.com/up.php?id=',$d[1],"&debug\">up flux</a>)</td>\n\t</tr>\n";
+echo "\t<tr>\n\t\t<td>id_flux</td>\n\t\t<td>",$d[1],' (<a href="//reader.gheop.com/up.php?id=',$d[1],"&debug\">up flux</a>)</td>\n\t</tr>\n";
 echo "\t<tr>\n\t\t<td>pubdate</td>\n\t\t<td>$d[2]</td>\n\t</tr>\n";
 echo "\t<tr>\n\t\t<td>guid</td>\n\t\t<td>$d[3]</td>\n\t</tr>\n";
 echo "\t<tr>\n\t\t<td>title</td>\n\t\t<td>$d[4]</td>\n\t</tr>\n";

@@ -30,13 +30,13 @@ window.onload = function() {
 }
 
 function getSelectedText() {
-  if (window.getSelection) {
-    return window.getSelection();
+  if (typeof window.getSelection !== 'undefined') {
+    return window.getSelection().trim();
   }
-  if (document.selection) {
-    return document.selection.createRange().text;
+  else if (typeof document.selection !== 'undefined') {
+    return document.selection.createRange().text.trim();
   }
-  return '';
+  else return undefined;
 }
 
 function search(t) {
@@ -179,7 +179,10 @@ function addflux() {
 
 function up() {
   var xhr = getHTTPObject('up');
-  affError("Mise à jour des flux en cours!", 10);
+  $('up').style.display="inline-block";
+  $('up').style.animation='spin 4s infinite linear';
+  $('up').style.color = "red";
+  //affError("Mise à jour des flux en cours!", 10);
     xhr.open("POST", 'up.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1');
@@ -224,7 +227,7 @@ function getHTTPObject(action) {
           M[f.f[k].i].n = f.f[k].n;
           M[f.f[k].i].i = f.f[k].i;
           if (f.f[k].n > 0) {
-            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + ' (' + f.f[k].n + ') <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></li>\n';
+            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></li>\n';
             nb_title += f.f[k].n || 0;
           } else page += '\t<li href="' + f.f[k].l + '" id="f' + f.f[k].i + '" class="flux" onclick="view(' + f.f[k].i + ');" title="' + f.f[k].d + '">' + f.f[k].t + '</li>\n';
         }
@@ -326,7 +329,8 @@ function unread(k) {
   if (nb_title < 0) nb_title = 0;
   D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
   M[d.i[k].f].n++;
-  if ($('S' + d.i[k].f)) $('S' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' (' + M[d.i[k].f].n + ')';
+//  if ($('S' + d.i[k].f)) $('S' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' (' + M[d.i[k].f].n + ')';
+    if ($('f' + d.i[k].f)) $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span>';
   $('f' + d.i[k].f).className = "fluxnew";
   if (id == d.i[k].f) $('f' + d.i[k].f).className = "fluxnew show";
   light('f' + d.i[k].f);
@@ -356,7 +360,7 @@ function read(k) {
   d.i[k].r = 0;
   M[d.i[k].f].n--;
   if (M[d.i[k].f].n > 0) {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' (' + M[d.i[k].f].n + ') <a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a>';
+    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span><a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a>';
     light('f' + d.i[k].f);
   } else {
     $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a>';
@@ -500,15 +504,14 @@ function openActif() {
 function goWikipedia() {
   var t = getSelectedText();
   if (t && t !== '')
-    window.open("//fr.wikipedia.org/wiki/Special:Search?search=" + getSelectedText());
+    window.open("//fr.wikipedia.org/wiki/Special:Search?search=" + t);
   return false;
-  // url = "//fr.wikipedia.org/wiki/Special:Search?search=
 }
 
 function goGoogle() {
   var t = getSelectedText();
   if (t && t !== '')
-    window.open("https://www.google.fr/search?q=" + getSelectedText() + "&ie=utf-8&oe=utf-8&lr=lang_fr");
+    window.open("https://www.google.fr/search?q=" + t + "&ie=utf-8&oe=utf-8&lr=lang_fr");
   return false;
 }
 

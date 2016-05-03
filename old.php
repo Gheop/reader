@@ -8,5 +8,5 @@ $r = $mysqli->query("select F.id,F.title, F.description, F.link, F.language from
 $i = 0;
 while($d = $r->fetch_row()) {
 	$i++;
-	echo "$i <a href=\"$d[3]\"><b>$d[1]</b></a> : <i>$d[2]</i> (<a href=\"http://reader.gheop.com/up.php?id=$d[0]&debug\">up flux</a>)<br />";	
+	echo "$i <a href=\"$d[3]\"><b>$d[1]</b></a> : <i>$d[2]</i> (<a href=\"//reader.gheop.com/up.php?id=$d[0]&debug\">up flux</a>)<br />";	
 }

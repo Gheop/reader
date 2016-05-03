@@ -8,7 +8,7 @@ include('/www/conf.php');
 function validate_url($url) {
 	$url = filter_var($url, FILTER_SANITIZE_URL);
 	$test = filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
-	// deal with bug http://bugs.php.net/51192 (present in PHP 5.2.13 and PHP 5.3.2)
+	// deal with bug //bugs.php.net/51192 (present in PHP 5.2.13 and PHP 5.3.2)
 	if ($test === false) {
 		$test = filter_var(strtr($url, '-', '_'), FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED);
 	}
@@ -20,11 +20,7 @@ function validate_url($url) {
 }
 
 $debug= 0;
-//include('../config.php');
-include('/www/reader/clean_text.php');
-// if (!$mysqli->set_charset("utf8")) {
-//     printf("Erreur lors du chargement du jeu de caractères utf8 : %s\n", $mysqli->error);
-// }
+include('clean_text.php');
 
 if(!isset($_SESSION['pseudo'])) {
      if (isset($_COOKIE['session'])) {
@@ -46,7 +42,7 @@ if(!isset($_SESSION['user_id'])) {
 }
 
 
-//$_POST['link'] = "http://accessoires-moto.shop.ebay.fr/14780/i.html?_ipg=25&_saact=1&_sop=12&LH_AvailTo=1&LH_PrefLoc=2&_nkw=(bop)&_dmpt=FR_JG_Moto_Pi%25C3%25A8ces&_rss=1";
+//$_POST['link'] = "//accessoires-moto.shop.ebay.fr/14780/i.html?_ipg=25&_saact=1&_sop=12&LH_AvailTo=1&LH_PrefLoc=2&_nkw=(bop)&_dmpt=FR_JG_Moto_Pi%25C3%25A8ces&_rss=1";
 if(isset($_POST['link'])) {
   $rsslink = $_POST['link'];
 }
@@ -63,7 +59,7 @@ if(!$rsslink) {
 	exit;
 }
 
-if(!preg_match('/^https?:\/\//',$rsslink)) $rsslink = 'http://'.$rsslink;
+if(!preg_match('/^https?:\/\//',$rsslink)) $rsslink = '//'.$rsslink;
 $title = $link = $description = $language = '';
 if($debug) echo "<b><u>$rsslink</b></u> : <br />";
 $ch = curl_init();
@@ -74,13 +70,15 @@ CURLOPT_USERAGENT => 'spider',
 CURLOPT_TIMEOUT => 120,
 CURLOPT_CONNECTTIMEOUT => 30,
 CURLOPT_RETURNTRANSFER => TRUE,
-CURLOPT_ENCODING => 'UTF-8'
+CURLOPT_ENCODING => 'UTF-8',
+CURLOPT_SSL_VERIFYPEER => FALSE,
+CURLOPT_SSL_VERIFYHOST => FALSE
 ));
 // curl_setopt($ch, CURLOPT_URL, $rsslink);
 // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 // curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 $page = trim(curl_exec($ch));
-//print $page;
+//print $rsslink."|".$page."|";
 if($rss = @simplexml_load_string($page)) {
   if($rss->channel->title) $title = $rss->channel->title;
   elseif($rss->title) $title = $rss->title;
@@ -153,7 +151,7 @@ if($rss = @simplexml_load_string($page)) {
 
 	$guid = null;
 	if(isset($item->guid)) $guid = $item->guid;
-	if(isset($guid) && preg_match('/^http:\/\//',$guid)) $link = $guid;
+	if(isset($guid) && preg_match('/^\/\//',$guid)) $link = $guid;
 
 	$v = $mysqli->query("select id from reader_item where id_flux=".$id_flux." and link='".$mysqli->real_escape_string($link)."';") or die($mysqli->error);
 	if (!$v->num_rows) {
@@ -232,6 +230,6 @@ if($rss = @simplexml_load_string($page)) {
   if($debug) echo "<br />";
 }
 else {
-   var_dump($page);
+  // var_dump($page);
   echo 'Ce flux n\'est pas actif pour le moment.';
 }
