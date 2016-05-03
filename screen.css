@@ -27,7 +27,26 @@
 
 }
 
+/*#disconnect:hover {
+	position:fixed;
+	right:10px;
+	opacity:0.5;
+	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+	transform: rotate(360deg);
+}
+*/
 
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+/*
+#up {
+
+
+
+}
+*/
 @keyframes swing { 
     20% { transform: rotate(15deg); } 
     40% { transform: rotate(-10deg); } 
@@ -42,7 +61,28 @@
     animation-name: swing; 
 }
 
+@keyframes pulse {
+  from {
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
 
+  50% {
+    -webkit-transform: scale3d(1.05, 1.05, 1.05);
+    transform: scale3d(1.05, 1.05, 1.05);
+  }
+
+  to {
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+.pulse {
+      animation-duration: 1s; 
+  -webkit-animation-name: pulse;
+  animation-name: pulse;
+}
 .tags {
     padding-right: 10px;
     float: right;
@@ -140,7 +180,9 @@ b,strong,legend{
 }
 .descr img,.descr pre,.descr code,.item0 pre,.item0 code, .item0 img { max-width:100%; }
 
-.item0 {opacity:0.8}
+.item0 {opacity:0.8;
+    box-shadow: inset 0 -5px 45px rgba(100,100,100,0.2), 0 1px 1px rgba(255,255,255,0.2);
+    }
 
 .action {
     margin:-1px;
@@ -194,28 +236,190 @@ p {
 }
 
 @keyframes blink {  
-    0% { /*opacity:0.5;*/
-        color:white; }
-    100% { /*opacity:1;*/
-        color:black; }
+    0% { opacity:0.5;
+        color:white;
+        }
+    50% {opacity: 0.75;
+    	color:#eee;}
+    100% { opacity:1;
+        color:black;
+        }
 }
-
+@keyframes shake-base {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  2% {
+    transform: translate(2.5px, -0.5px) rotate(1.5deg);
+  }
+  4% {
+    transform: translate(2.5px, 2.5px) rotate(-0.5deg);
+  }
+  6% {
+    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
+  }
+  8% {
+    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
+  }
+  10% {
+    transform: translate(2.5px, -1.5px) rotate(-0.5deg);
+  }
+  12% {
+    transform: translate(2.5px, 1.5px) rotate(0.5deg);
+  }
+  14% {
+    transform: translate(2.5px, 0.5px) rotate(-0.5deg);
+  }
+  16% {
+    transform: translate(-1.5px, 2.5px) rotate(-0.5deg);
+  }
+  18% {
+    transform: translate(-1.5px, 2.5px) rotate(0.5deg);
+  }
+  20% {
+    transform: translate(-0.5px, -0.5px) rotate(0.5deg);
+  }
+  22% {
+    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
+  }
+  24% {
+    transform: translate(2.5px, 1.5px) rotate(-0.5deg);
+  }
+  26% {
+    transform: translate(1.5px, 2.5px) rotate(1.5deg);
+  }
+  28% {
+    transform: translate(-0.5px, 0.5px) rotate(1.5deg);
+  }
+  30% {
+    transform: translate(0.5px, -1.5px) rotate(-0.5deg);
+  }
+  32% {
+    transform: translate(-1.5px, 1.5px) rotate(1.5deg);
+  }
+  34% {
+    transform: translate(2.5px, 2.5px) rotate(0.5deg);
+  }
+  36% {
+    transform: translate(0.5px, -0.5px) rotate(-0.5deg);
+  }
+  38% {
+    transform: translate(1.5px, 0.5px) rotate(0.5deg);
+  }
+  40% {
+    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
+  }
+  42% {
+    transform: translate(1.5px, 2.5px) rotate(-0.5deg);
+  }
+  44% {
+    transform: translate(0.5px, 2.5px) rotate(-0.5deg);
+  }
+  46% {
+    transform: translate(2.5px, 2.5px) rotate(0.5deg);
+  }
+  48% {
+    transform: translate(2.5px, -0.5px) rotate(1.5deg);
+  }
+  50% {
+    transform: translate(-1.5px, -0.5px) rotate(0.5deg);
+  }
+  52% {
+    transform: translate(0.5px, 1.5px) rotate(0.5deg);
+  }
+  54% {
+    transform: translate(-0.5px, 1.5px) rotate(0.5deg);
+  }
+  56% {
+    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
+  }
+  58% {
+    transform: translate(-1.5px, -0.5px) rotate(-0.5deg);
+  }
+  60% {
+    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
+  }
+  62% {
+    transform: translate(-0.5px, 2.5px) rotate(0.5deg);
+  }
+  64% {
+    transform: translate(2.5px, -0.5px) rotate(0.5deg);
+  }
+  66% {
+    transform: translate(0.5px, -1.5px) rotate(1.5deg);
+  }
+  68% {
+    transform: translate(2.5px, 0.5px) rotate(-0.5deg);
+  }
+  70% {
+    transform: translate(0.5px, 0.5px) rotate(1.5deg);
+  }
+  72% {
+    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
+  }
+  74% {
+    transform: translate(0.5px, 0.5px) rotate(1.5deg);
+  }
+  76% {
+    transform: translate(1.5px, 1.5px) rotate(0.5deg);
+  }
+  78% {
+    transform: translate(-0.5px, 0.5px) rotate(1.5deg);
+  }
+  80% {
+    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
+  }
+  82% {
+    transform: translate(2.5px, 1.5px) rotate(-0.5deg);
+  }
+  84% {
+    transform: translate(1.5px, -1.5px) rotate(0.5deg);
+  }
+  86% {
+    transform: translate(-0.5px, -0.5px) rotate(1.5deg);
+  }
+  88% {
+    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
+  }
+  90% {
+    transform: translate(2.5px, -0.5px) rotate(0.5deg);
+  }
+  92% {
+    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
+  }
+  94% {
+    transform: translate(-1.5px, 0.5px) rotate(1.5deg);
+  }
+  96% {
+    transform: translate(-0.5px, 0.5px) rotate(0.5deg);
+  }
+  98% {
+    transform: translate(-0.5px, 2.5px) rotate(0.5deg);
+  }
+}
 .blink {
-    animation: blink 0.75s linear 1;
+/*	transition:all 0.5s ease-in-out; 
+    animation: blink 1.5s linear 1;*/
+  animation-name: shake-base;
+  animation-duration: 100ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
 } 
+.nb_flux {
+	font-size: .8em;
+vertical-align: super
+}
 .fluxnew {
-    padding-left:2px;
+    padding-left:2px; 	
     cursor: pointer;
     font-weight: bold;
 }
 
 .flux {
     display:none;
-       opacity:1;
-/*     -webkit-transition: opacity 0.5s ease-in-out;/* transition pour Chrome et Safari */
-/*    -moz-transition: opacity 0.5s ease-in-out;/* transition pour Firefox */
-/*    -o-transition: opacity 0.5s ease-in-out;/* transition pour Opéra */
-    transition: opacity 0.5s ease-in-out; /* on écrit cette ligne à la fin de façon à ce que ce soit elle qui soit prise en compte lorsque l'attribut transition sera pris en compte par tous les navigateurs */
+    opacity:1;
+    transition: opacity 0.5s ease-in-out;
 }
 
 .fluxnew a {
@@ -251,8 +455,15 @@ p {
     padding: 5px;
     top: 0px;
     right: 0px;
-}
 
+}
+/*
+#register:hover {
+	    	opacity:0.5;
+	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+	transform: rotate(360deg);
+}
+*/
 .show {
     color:#fff;
     background: #eee;
@@ -302,6 +513,12 @@ input, textarea,button {
    height:1.9em;
 } 
 
+/* marrant mais fait tourner l'input aussi
+#bs:hover {
+	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+	transform: rotate(360deg);
+}*/
+
 .bsborder {
    border-top-left-radius:0;
    border-bottom-left-radius:0;
@@ -334,3 +551,5 @@ input, textarea,button {
 		display: none;
 	}
 }
+
+

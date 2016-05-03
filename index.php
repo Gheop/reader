@@ -19,10 +19,11 @@ include('/www/conf.php');
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<script src="//reader.gheop.com/lib.js" type="text/javascript"></script>
 </head>
 <body>
-<?php 
-  if(!isset($_SESSION['pseudo'])) {
+<?php
+if(!isset($_SESSION['pseudo'])) {
     if (isset($_COOKIE['session'])) {
       $auth = explode("|",$_COOKIE['session']);
       $req = $mysqli->query("select id, pseudo, pwd from users where pseudo='$auth[0]'");
@@ -41,10 +42,10 @@ include('/www/conf.php');
 if(!isset($_SESSION['pseudo'])) {
   echo '<a href="//gheop.com/register?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
 else {
-  echo $_SESSION['pseudo'],' <a href="?a=destroy" title="Se déconnecter"></a>';}
+  echo $_SESSION['pseudo'],' <a id="disconnect" href="?a=destroy" title="Se déconnecter"></a>';}
 ?>
 </div>
-    <h1 id="g" class="animated swing"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
+    <h1 id="g" class="pulse"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
 <?php
 if(isset($_SESSION['user_id'])) {
 echo '
@@ -64,7 +65,7 @@ echo '<ul id="menu">
     <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp;
     <a onclick="navigator.registerContentHandler(\'application/atom+xml\', \'//reader.gheop.com/add_flux.php?f=%s\',  \'Gheop Reader\');return false;" title="Enregistrer comme lecteur de flux du navigateur"></a>&nbsp;&nbsp;&nbsp;
     <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp;
-    <a onclick="up();" title="Mettre à jour les flux"></a>
+    <a id="up" onclick="up();" title="Mettre à jour les flux"></a>
   </li>
 </ul>
 <div id="page">
@@ -77,8 +78,9 @@ else {
 ?>
   </body>
 </html>
-<script src="//reader.gheop.com/lib.js" type="text/javascript"></script>
+
 <!-- Piwik -->
+<!--
 <script type="text/javascript">
   var _paq = _paq || [];
   _paq.push(['trackPageView']);
@@ -92,5 +94,6 @@ else {
   })();
 </script>
 <noscript><p><img src="//gheop.com/stats/piwik.php?idsite=2" style="border:0;" alt="" /></p></noscript> 
+-->
 <!-- End Piwik Code -->
 
