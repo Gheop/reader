@@ -41,11 +41,11 @@ while($d = $r->fetch_array()) {
 			CURLOPT_URL => $d[1],
 			CURLOPT_USERAGENT => 'GheopReader',
 			CURLOPT_TIMEOUT => 5,
-			CURLOPT_CONNECTTIMEOUT => 10,
+			CURLOPT_CONNECTTIMEOUT => 5,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => 'UTF-8',
-CURLOPT_SSL_VERIFYPEER => FALSE,
-CURLOPT_SSL_VERIFYHOST => FALSE
+            CURLOPT_SSL_VERIFYPEER => FALSE,
+            CURLOPT_SSL_VERIFYHOST => FALSE
 			)
 		);
 	curl_multi_add_handle($mh, $ch[$i]);
