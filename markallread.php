@@ -1,7 +1,6 @@
 <?php
 session_start();
 include('/www/conf.php');
-$_POST['f'] = 601;
 $r = $mysqli->query('select RI.id from reader_item RI where RI.id_flux='.$_POST['f'].' and RI.id not in (select id_item from reader_user_item as UI where UI.id_user='.$_SESSION['user_id'].')') or die($mysqli->error);
 $t = array();
 while($e = $r->fetch_array()) {
