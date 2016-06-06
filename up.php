@@ -126,8 +126,8 @@ for($j=0;$j<$i;$j++) {
 		}
 		$guid = null;
 		if(isset($item->guid)) $guid = $item->guid;
-		if(isset($guid) && preg_match('/^http(s)?\/\//',$guid)) $link = $guid;
-		//if($DEBUG) echo 'Lien : <a href="'.$link.'">'.$link.'</a><br />';
+		if(isset($guid) && preg_match('/^https?:\/\/.*/',$guid)) $link = $guid;
+		if($DEBUG) echo 'Lien : <a href="'.$link.'">'.$link.'</a><br />';
 
 
 
