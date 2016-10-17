@@ -62,13 +62,14 @@ do {
 
 $test = '';
 for($j=0;$j<$i;$j++) {
+	//echo "<i>$dd[$j]</i><br />";
 	$tt = $mysqli->query("select link, title, rss from reader_flux where id=".$dd[$j].";") or die($mysqli->error);
 	$ttt = $tt->fetch_array();
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
 
 	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
-
+//echo "OK!<br />";
 	if (!$rss and $DEBUG) {
 		foreach (libxml_get_errors() as $error) {
 			print $error;

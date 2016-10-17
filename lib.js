@@ -15,6 +15,9 @@ var M = []; //new Array();
 var varscroll = 0;
 var loadinprogress = 0;
 var zhr;
+var totalItems = 0;
+var readItems =0;
+
 function $(i) {
   return D.getElementById(i);
 }
@@ -236,6 +239,9 @@ function getHTTPObject(action) {
         D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
 //        $('favico').href = "//reader.gheop.com/favicon" + nb_title + ".gif";
         $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
+        totalItems = nb_title;
+        readItems = 0;
+        progressBar();
 
         f = null;
         return;
@@ -249,18 +255,21 @@ function getHTTPObject(action) {
       } else if (action === 'view') {
 
         varscroll = 0;
+        loadmore = 0;
         if (xhr.responseText) {
           //                    log("JSON de view : "+xhr.responseText);
           d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
-          loadmore = 0;
+
+
           for (var z = 0, len = d.i.length; z < len; z++) {
             loadmore++;
             page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
           }
         }
+        if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
         page += '<div id="addblank">&nbsp;</div>';
         $('page').innerHTML = page;
-        $('addblank').style.height = ($('page').offsetHeight - 60) + 'px';
+        if(loadmore) $('addblank').style.height = ($('page').offsetHeight - 60) + 'px';
         $('page').addEventListener('DOMMouseScroll', scroll, false);
         $('page').onscroll = scroll;
         $('page').onmousewheel = scroll;
@@ -344,7 +353,8 @@ function unread(k) {
   }, 4000); //a voir si ça marche
   xhr = null;
   $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
-
+  readItems--;
+  progressBar();
 }
 
 function read(k) {
@@ -378,9 +388,14 @@ function read(k) {
   if (nb_title < 0) nb_title = 0;
   $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
   xhr = null;
+  readItems++;
+  progressBar();
 }
 
-
+function progressBar() {
+  var perc = (readItems/totalItems)*100;
+  $('progbar').style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
+}
 
 function menu() {
   //alert('menu');
@@ -401,13 +416,13 @@ var pressedKeys = [],
 function konami() {
   //document.body.style.background = "url(stickmen.png)";
   //document.body.style.fontFamily = "LaChatteAMaman";
-  $('page').innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ ☺ ☻ <!-- ♡ ♥ --></div></div>'+$('page').innerHTML;
+  $('page').innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+$('page').innerHTML;
   $('konami').style.display='block';
 
   ////js1k.com/2014-dragons/details/1955
-        var a = $('c');
-a.style.width=(a.width=1e3)+"px";a.style.height=(a.height=500)+"px";for(p in c){c[p[0]+(p[6]||"")]=c[p]}J=K=C=B=0;u=50;D=250;E=F=G=H=1;I=250;setInterval(function(){L=300;M=500;N=400;with(c){A=function(S,x,y,T){T&&a(x,y,T,0,7,0);fillStyle=S.P?S:"#"+"ceff99aaffff333f99ff7".substr(S*3,3);fill();ba()};A(0,0,0,10000);A(6,800,300,140);O=G*u%400;l(0-O,N+100);l(0-O,N);for(i=0;i<7;i++){qt(i*200+100-O,i%2?L:M,i*200+200-O,N)}l(i*200-O,N+100);ca();fillStyle="#5c1";fill();ba();t=(G*(u+E)+I)%200/200;U=1-t;K2=U*U*N+2*t*U*((G*(u+E)+I)%400>200?L:M)+t*t*N;D+=F;if(D>=K){if(K2<K){if(F>0&&(K2-K)<0&&!J){E=E/3;K2=K}E-=E<2?0:0.1}else{E+=0.1*H*H}J=1;D=K;if(K2<K&&F>(K2-K)){F=(K2-K)}}else{J=0}F+=0.4*H;K=K2;A(3-H,I,D-10,10);A(3,I+3,D-12,4);A(4,I+4,D-12,1);Q=200+Math.pow(B,1.3)-u;R=50+Math.sin(B/2)*2;A(1,Q,R,30);A(3,Q+20,R+5,7);A(4,Q+22,R+7,2);A(6,0,0,0);fx(++B+" ☆",5,10);fx((C<B?C=B:C)+" ★",40,10);if(Q>4*I){alert(B);E=F=u=B=K=2}}u+=E},30);onkeydown=onkeyup=function(b){H=b.type[5]?2:1}
-    //c=$('kona');h=t=150;L=w=c.width=800;u=DD=50;H=[];R=Math.random;for(mavar in C=c.getContext('2d'))C[mavar[J=X=Y=0]+(mavar[6]||'')]=C[mavar];timerkona = setInterval("if(DD)for(x=405,i=y=I=0;i<1e4;)L=H[i++]=i<9|L<w&R()<.3?w:R()*u+80|0;mavar=++t%99-u;mavar=mavar*mavar/8+20;y+=Y;x+=y-H[(x+X)/u|0]>9?0:X;j=H[o=x/u|0];Y=y<j|Y<0?Y+1:(y=j,J?-10:0);with(C){A=function(c,x,y,r){r&&arc(x,y,r,0,7,0);fillStyle=c.P?c:'#'+'ceff99ff78f86eeaaffffd45333'.substr(c*3,3); f(); ba()};for(DD=Z=0;Z<21;Z++){Z<7&&A(Z%6,w/2,235,Z?250-15*Z:w);i=o-5+Z;S=x-i*u;B=S>9&S<41;ta(u-S,0);G=cL(0,T=H[i],0,T+9);T%6||(A(2,25,T-7,5),y^j||B&&(H[i]-=.1,I++));G.P=G.addColorStop;G.P(0,i%7?'#7e3':(i^o||y^T||(y=H[i]+=mavar/99),'#c7a'));G.P(1,'#ca6');i%4&&A(6,t/2%200,9,i%2?27:33);m(-6,h);qt(-6,T,3,T);l(47,T);qt(56,T,56,h);A(G);i%3?0:T<w?(A(G,33,T-15,10),fc(31,T-7,4,9)):(A(7,25,mavar,9),A(G,25,mavar,5),fc(24,mavar,2,h),DD=B&y>mavar-9?1:DD);ta(S-u,0)}A(6,u,y-9,11);A(5,M=u+X*.7,Q=y-9+Y/5,8);A(8,M,Q,5);fx(I+'c',5,15)}DD=y>h?1:DD",u);onkeydown=onkeyup=function(e){E=e.type[5]?4:0;e=e.keyCode;J=e^38?J:E;X=e^37?e^39?X:E:-E}
+ // var a = $('c');
+/*a.style.width=(a.width=1e3)+"px";a.style.height=(a.height=500)+"px";for(p in c){c[p[0]+(p[6]||"")]=c[p]}J=K=C=B=0;u=50;D=250;E=F=G=H=1;I=250;setInterval(function(){L=300;M=500;N=400;with(c){A=function(S,x,y,T){T&&a(x,y,T,0,7,0);fillStyle=S.P?S:"#"+"ceff99aaffff333f99ff7".substr(S*3,3);fill();ba()};A(0,0,0,10000);A(6,800,300,140);O=G*u%400;l(0-O,N+100);l(0-O,N);for(i=0;i<7;i++){qt(i*200+100-O,i%2?L:M,i*200+200-O,N)}l(i*200-O,N+100);ca();fillStyle="#5c1";fill();ba();t=(G*(u+E)+I)%200/200;U=1-t;K2=U*U*N+2*t*U*((G*(u+E)+I)%400>200?L:M)+t*t*N;D+=F;if(D>=K){if(K2<K){if(F>0&&(K2-K)<0&&!J){E=E/3;K2=K}E-=E<2?0:0.1}else{E+=0.1*H*H}J=1;D=K;if(K2<K&&F>(K2-K)){F=(K2-K)}}else{J=0}F+=0.4*H;K=K2;A(3-H,I,D-10,10);A(3,I+3,D-12,4);A(4,I+4,D-12,1);Q=200+Math.pow(B,1.3)-u;R=50+Math.sin(B/2)*2;A(1,Q,R,30);A(3,Q+20,R+5,7);A(4,Q+22,R+7,2);A(6,0,0,0);fx(++B+" ☆",5,10);fx((C<B?C=B:C)+" ★",40,10);if(Q>4*I){alert(B);E=F=u=B=K=2}}u+=E},30);onkeydown=onkeyup=function(b){H=b.type[5]?2:1};
+*/    //c=$('kona');h=t=150;L=w=c.width=800;u=DD=50;H=[];R=Math.random;for(mavar in C=c.getContext('2d'))C[mavar[J=X=Y=0]+(mavar[6]||'')]=C[mavar];timerkona = setInterval("if(DD)for(x=405,i=y=I=0;i<1e4;)L=H[i++]=i<9|L<w&R()<.3?w:R()*u+80|0;mavar=++t%99-u;mavar=mavar*mavar/8+20;y+=Y;x+=y-H[(x+X)/u|0]>9?0:X;j=H[o=x/u|0];Y=y<j|Y<0?Y+1:(y=j,J?-10:0);with(C){A=function(c,x,y,r){r&&arc(x,y,r,0,7,0);fillStyle=c.P?c:'#'+'ceff99ff78f86eeaaffffd45333'.substr(c*3,3); f(); ba()};for(DD=Z=0;Z<21;Z++){Z<7&&A(Z%6,w/2,235,Z?250-15*Z:w);i=o-5+Z;S=x-i*u;B=S>9&S<41;ta(u-S,0);G=cL(0,T=H[i],0,T+9);T%6||(A(2,25,T-7,5),y^j||B&&(H[i]-=.1,I++));G.P=G.addColorStop;G.P(0,i%7?'#7e3':(i^o||y^T||(y=H[i]+=mavar/99),'#c7a'));G.P(1,'#ca6');i%4&&A(6,t/2%200,9,i%2?27:33);m(-6,h);qt(-6,T,3,T);l(47,T);qt(56,T,56,h);A(G);i%3?0:T<w?(A(G,33,T-15,10),fc(31,T-7,4,9)):(A(7,25,mavar,9),A(G,25,mavar,5),fc(24,mavar,2,h),DD=B&y>mavar-9?1:DD);ta(S-u,0)}A(6,u,y-9,11);A(5,M=u+X*.7,Q=y-9+Y/5,8);A(8,M,Q,5);fx(I+'c',5,15)}DD=y>h?1:DD",u);onkeydown=onkeyup=function(e){E=e.type[5]?4:0;e=e.keyCode;J=e^38?J:E;X=e^37?e^39?X:E:-E}
   $('page').scrollTop = 0;
   kona = 1;
 }

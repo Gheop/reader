@@ -69,7 +69,8 @@ echo '<ul id="menu">
   </li>
 </ul>
 <div id="page">
-</div>';
+</div>
+<div id="progbar"></div>';
 //<script type="text/javascript" nonce="EDNnf03nceIOfn39fn3e9h3sdfa">i();</script>';
 } 
 else {

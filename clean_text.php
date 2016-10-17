@@ -1,11 +1,14 @@
 <?php
 function imgbase64($f) {
- // echo "<h1>$f[1]</h1>";
-  //transforme les //image.com en //image.com
   $f[1] = preg_replace('/^\/\//s','//',$f[1]);
+  $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
+  $extension_valides = array('jpg','png','gif','jpeg','bmp');
+
+  if (in_array($extension_fichier, $extension_valides))
+      {
   $data = file_get_contents($f[1]) ;
   if(!$data) return '';
-  $tmpfile='tmp/'.md5($data);
+  $tmpfile='tmp/'.md5($data).'.'.$extension_fichier;
   file_put_contents($tmpfile, $data);
   $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
   if($type == "inode/x-empty") return "";
@@ -13,15 +16,16 @@ function imgbase64($f) {
   else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
   else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
   else return "IMAGE UNKNOW $type $f[1]";
-//  $base64 = 'data: '.$type.';base64,'. base64_encode(file_get_contents($tmpfile));
   $base64 = "//reader.gheop.com/$tmpfile";
   list($width, $height, $t, $attr) = getimagesize("$tmpfile");
-  //unlink($tmpfile);
   if($width == 1 && $height == 1) {
   	unlink($tmpfile);
   	return '';
   }
   return '<img src="'.$base64.'" '.$attr.' />';
+
+      }
+  else return 'Extension unknow';
 }
 
 function clean_txt($v) {
@@ -34,6 +38,10 @@ function clean_txt($v) {
   $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
+  $p[]='/<article *?.*?>/s';
+  $p[]='/<\/article>/s';
+  $p[]='/<section *?.*?>/s';
+  $p[]='/<\/section>/s';
   $p[]='/<table *?.*?>/s';
   $p[]='/<\/table *?>/s';
   $p[]='/<td *?.*?>/s';
