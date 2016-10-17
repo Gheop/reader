@@ -144,6 +144,9 @@ b,strong,legend{
     left:4px;
     width:20vw;
     overflow:auto;
+    /*user-select: none;*/
+    -moz-user-select: none;
+    -webkit-user-select: none;
 }
 
 
@@ -237,10 +240,10 @@ p {
 
 @keyframes blink {  
     0% { opacity:0.5;
-        color:white;
+        color:#eee;
         }
     50% {opacity: 0.75;
-    	color:#eee;}
+    	color:#aaa;}
     100% { opacity:1;
         color:black;
         }
@@ -398,7 +401,7 @@ p {
   }
 }
 .blink {
-/*	transition:all 0.5s ease-in-out; 
+/*transition:all 0.5s ease-in-out; 
     animation: blink 1.5s linear 1;*/
   animation-name: shake-base;
   animation-duration: 100ms;
@@ -531,6 +534,18 @@ input, textarea,button {
     background: #444;
     color: white;
 }
+
+#progbar {
+/*background: #aaa;*/
+    position: absolute;
+    height:4px;
+    bottom:0px;
+    margin:0;
+    left:0;
+    right: 0;
+    padding:0;
+    overflow:auto;
+}
 /*he gros, c'est quoi cette feuille de style pourrage hein ? */
 
 
@@ -553,3 +568,13 @@ input, textarea,button {
 }
 
 
+::-moz-selection { 
+                   color: white;
+                   background: #555555;
+}
+/*
+::selection {
+    color: white;
+    background: #eee;
+}
+*/
