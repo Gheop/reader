@@ -1,5 +1,6 @@
 <?php
 include('conf.php');
+if(!isset($_SESSION['user_id'])) exit;
 if(isset($_GET['s'])) $_POST['s'] = $_GET['s'];
 if(!isset($_POST['s'])) exit;
 $search_string = $mysqli->real_escape_string($_POST['s']);
