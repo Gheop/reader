@@ -12,6 +12,7 @@ var d;
 //var f;
 var D = document;
 var M = []; //new Array();
+var M = [];
 var varscroll = 0;
 var loadinprogress = 0;
 var zhr;
@@ -27,11 +28,11 @@ function $(i) {
 //favico.rel = "shortcut icon";
 $('favico').href = "//reader.gheop.com/favicon.gif";
 //D.head.appendChild(favico);
-
+/*
 window.onload = function() {
   i();
 }
-
+*/
 function getSelectedText() {
   if (typeof window.getSelection !== 'undefined') {
     return window.getSelection().trim();
@@ -50,9 +51,9 @@ function search(t) {
     xhr.open("POST", '//reader.gheop.com/search.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1&s=' + t);
-    requestTimer = setTimeout(function() {
+    requestTimer = setTimeout((function() {
       if (xhr) xhr.abort();
-    }, 4000);
+    }), 4000);
     xhr = null;
     $('s').blur();
   }
@@ -134,9 +135,9 @@ function markallread(i) {
   xhr.open("POST", 'markallread.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1&f=' + i);
-  requestTimer = setTimeout(function() {
+  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 4000);
+  }), 4000);
   xhr = null;
 }
 
@@ -147,9 +148,9 @@ function view(i) {
   zhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   zhr.send((i == 'all') ? 'zhr=1' : 'zhr=1&id=' + i);
   //    requestTimer = setTimeout(function() {if(zhr) zhr.abort();}, 8000);
- requestTimer = setTimeout(function() {
+ requestTimer = setTimeout((function() {
     if (zhr) zhr.abort();
-  }, 8000);
+  }), 8000);
   $('f' + id).classList.remove('show');
   id = i;
   $('f' + id).classList.add('show');
@@ -174,9 +175,9 @@ function addflux() {
   xhr.open("POST", '//reader.gheop.com/add_flux.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1&link=' + val);
-  requestTimer = setTimeout(function() {
+  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 10000);
+  }), 10000);
   val = xhr = null;
 }
 
@@ -189,9 +190,9 @@ function up() {
     xhr.open("POST", 'up.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1');
-    requestTimer = setTimeout(function() {
+    requestTimer = setTimeout((function() {
       if (xhr) xhr.abort();
-    }, 10000);
+    }), 10000);
     xhr = null;
     return false;
 }
@@ -203,15 +204,20 @@ function unsubscribe(t, f) {
     xhr.open("POST", 'unsubscribe_flux.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1&link=' + f);
-    requestTimer = setTimeout(function() {
+    requestTimer = setTimeout((function() {
       if (xhr) xhr.abort();
-    }, 4000);
+    }), 4000);
     xhr = null;
   }
   r = null;
   return false;
 }
 
+function editFluxName(idFlux) {
+  $('f'+idFlux).innerHTML = '<input id="focus'+idFlux+'" type="text" value="'+M[idFlux].t+'"/>';
+  $('focus'+idFlux).focus();
+
+}
 function getHTTPObject(action) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
@@ -222,15 +228,17 @@ function getHTTPObject(action) {
         if (!xhr.responseText) return false;
         page += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
         var f = JSON.parse(xhr.responseText);
-        //log("JSON du menu : "+f);
+       // log("JSON du menu : "+f);
         for (var k = 0, mlen = f.f.length; k < mlen; k++) {
-          M[f.f[k].i] = [];
-          M[f.f[k].i].d = f.f[k].d;
-          M[f.f[k].i].t = f.f[k].t;
-          M[f.f[k].i].n = f.f[k].n;
-          M[f.f[k].i].i = f.f[k].i;
+          i = f.f[k].i;
+
+          M[i] = [];
+          M[i].d = f.f[k].d;
+          M[i].t = f.f[k].t;
+          M[i].n = f.f[k].n;
+          M[i].i = f.f[k].i;
           if (f.f[k].n > 0) {
-            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></li>\n';
+            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></li>\n';
             nb_title += f.f[k].n || 0;
           } else page += '\t<li href="' + f.f[k].l + '" id="f' + f.f[k].i + '" class="flux" onclick="view(' + f.f[k].i + ');" title="' + f.f[k].d + '">' + f.f[k].t + '</li>\n';
         }
@@ -262,8 +270,18 @@ function getHTTPObject(action) {
 
 
           for (var z = 0, len = d.i.length; z < len; z++) {
+            i = d.i[z].i;
+            // V[i].r = d.i[z].r;
+            // V[i].p = d.i[z].p;
+            // V[i].l = d.i[z].l;
+            // V[i].t = d.i[z].t;
+            // V[i].o = d.i[z].o;
+            // V[i].n = d.i[z].n;
+            // V[i].a = d.i[z].a;
+            // V[i].d = d.i[z].d;
+
             loadmore++;
-            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
+            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
           }
         }
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
@@ -348,9 +366,9 @@ function unread(k) {
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1&id=' + d.i[k].i);
   //    requestTimer = setTimeout(function() {xhr.abort();}, 4000);
- requestTimer = setTimeout(function() {
+ requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 4000); //a voir si ça marche
+  }), 4000); //a voir si ça marche
   xhr = null;
   $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
   readItems--;
@@ -381,9 +399,9 @@ function read(k) {
   xhr.open("POST", 'read.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1&id=' + d.i[k].i);
-  requestTimer = setTimeout(function() {
+  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 4000);
+  }), 4000);
   D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
   if (nb_title < 0) nb_title = 0;
   $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
@@ -403,9 +421,9 @@ function menu() {
   xhr.open("POST", '//reader.gheop.com/menu.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1');
-  requestTimer = setTimeout(function() {
+  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 4000);
+  }), 4000);
   xhr = null;
 }
 
@@ -536,9 +554,9 @@ function more() {
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   if (id && id !== 'all') xhr.send('xhr=1&nb=10&id=' + id);
   else xhr.send('xhr=1&nb=10');
-  requestTimer = setTimeout(function() {
+  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
-  }, 4000);
+  }), 4000);
   xhr = null;
 }
 
@@ -549,3 +567,4 @@ function verif(k) {
 function log(t) {
   if (typeof console !== 'undefined') console.log(t);
 }
+

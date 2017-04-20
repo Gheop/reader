@@ -31,6 +31,7 @@ from reader_flux F, reader_user_flux UF where F.id=UF.id_flux and UF.id_user='.$
 //if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 $d = $r->fetch_row();
 //echo microtime(TRUE) - $start_time;
+header('Content-Type: application/json');
 echo $d[0];
 
 //echo (!$d[0])?"{f:''}":$d[0];

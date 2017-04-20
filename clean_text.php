@@ -22,7 +22,7 @@ function imgbase64($f) {
   	unlink($tmpfile);
   	return '';
   }
-  return '<img src="'.$base64.'" '.$attr.' />';
+  return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\'//reader.gheop.com/imgError.png\';"/>';
 
       }
   else return 'Extension unknow';
@@ -38,6 +38,8 @@ function clean_txt($v) {
   $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
+  $p[]='/<i *?.*?>/s';
+  $p[]='/<\/i>/s';
   $p[]='/<article *?.*?>/s';
   $p[]='/<\/article>/s';
   $p[]='/<section *?.*?>/s';

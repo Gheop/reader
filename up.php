@@ -99,6 +99,9 @@ for($j=0;$j<$i;$j++) {
 		continue;
 	}
 	echo "<h1>$title</h1>";
+	$linkmaster = null;
+	if($rss->channel->link) $linkmaster = $rss->channel->link;
+	elseif($rss->link[0]['href']) $linkmaster = $rss->link[0]['href'];
 
 	if(isset($rss->channel->item)) $flux = $rss->channel->item;
 	else if(isset($rss->item)) $flux=$rss->item;
@@ -118,6 +121,20 @@ for($j=0;$j<$i;$j++) {
 			}
 		}
 		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
+		//le lien n'est pas complet !
+		if(isset($link) && !preg_match('/^https?:\/\//',$link)) {
+			//echo "|$link|".substr($link,0,1)."|";
+			if(substr($link,0,1) == '/')  {
+//				echo 'IN<br />';
+				$pu = parse_url($linkmaster);
+				$link = '//'.$pu['host'].$link;
+				if($pu['host']) $link = $pu['scheme'].':'.$link;
+			} else {
+				$link = $linkmaster.'/'.$link;
+			}
+		}
+		// print $link;
+		// die;
 		if(!isset($link)|| !$link || $link=='') {
 			print "Aucun lien trouvé.<br />";
 			if($DEBUG) echo '<pre>';
@@ -136,8 +153,8 @@ for($j=0;$j<$i;$j++) {
 		$a = array(')','(','"','\\');
 		$b = array('','','','\\\\');
 		$link = str_replace($a, $b, $link);
-
-		$v = $mysqli->query("select id from reader_item where id_flux=".$dd[$j]." and link='".$mysqli->real_escape_string($link)."';") or die($mysqli->error);
+		$link_without_security = preg_replace('/^https?/','' , $link);
+		$v = $mysqli->query("select id from reader_item where id_flux=".$dd[$j]." and link like '%".$mysqli->real_escape_string($link_without_security)."';") or die($mysqli->error);
 		if (!$v->num_rows) {
 			$title = null;
 			if($item->title) $title=$item->title;
@@ -162,6 +179,14 @@ for($j=0;$j<$i;$j++) {
 			$image=null;
 			if(isset($item->image)) $image=$item->image;
 			$content = null;
+			if(isset($item->enclosure)) {
+				echo '<pre><h1>';
+	print_r($item->enclosure);
+	echo $item->enclosure['url'];
+	echo '</h1></pre>';
+//				die ("FUCK OFF!");
+
+			}
 			if(isset($item->description)) $content = $item->description;
 			else if(isset($item->content)) $content = $item->content;
 			else if(isset($item->summary)) $content = $item->summary;
@@ -193,7 +218,7 @@ for($j=0;$j<$i;$j++) {
 
 			if(isset($item->author->name)) $author = $item->author->name;
 			else if(isset($item->author)) $author = $item->author;
-			else $author ='Unknow';
+			else $author ='';
 			/* echo "&nbsp;&nbsp;id          : $dd[$j]<br />"; */
 			/* echo "&nbsp;&nbsp;date        : $iDate<br />"; */
 			/* echo "&nbsp;&nbsp;guid        : $guid<br />"; */

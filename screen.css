@@ -47,18 +47,18 @@
 
 }
 */
-@keyframes swing { 
-    20% { transform: rotate(15deg); } 
-    40% { transform: rotate(-10deg); } 
-    60% { transform: rotate(5deg); } 
-    80% { transform: rotate(-5deg); } 
-    100% { transform: rotate(0deg); } 
-} 
-.swing { 
-    animation-duration: 1s; 
-    animation-fill-mode: both; 
-    transform-origin: top center; 
-    animation-name: swing; 
+@keyframes swing {
+    20% { transform: rotate(15deg); }
+    40% { transform: rotate(-10deg); }
+    60% { transform: rotate(5deg); }
+    80% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+.swing {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    transform-origin: top center;
+    animation-name: swing;
 }
 
 @keyframes pulse {
@@ -79,7 +79,7 @@
 }
 
 .pulse {
-      animation-duration: 1s; 
+      animation-duration: 1s;
   -webkit-animation-name: pulse;
   animation-name: pulse;
 }
@@ -93,8 +93,13 @@ ul{
     list-style: none;
 }
 
-body { 
-        font: normal 100%/1.15 Awesome; 
+li > input {
+  border: none;
+  background: transparent;
+  font-weight: bold;
+}
+body {
+        font: normal 100%/1.15 Awesome;
     font-feature-settings: "kern";
 	word-wrap: break-word;
 	color: #444444;
@@ -134,7 +139,7 @@ b,strong,legend{
     transition: color 1s linear;
 }
 
-#menu { 
+#menu {
     padding:0px;
     position: absolute;
     margin:0;
@@ -150,7 +155,7 @@ b,strong,legend{
 }
 
 
-#page { 
+#page {
     border-top-left-radius: 1em;
     border-bottom-left-radius: 1em;
     background: #eee;
@@ -164,7 +169,7 @@ b,strong,legend{
     overflow:auto;
 }
 
-.light { 
+.light {
     background:#eee;
     border:#eee 1px solid;
     border-top-left-radius: 4px;
@@ -234,11 +239,11 @@ b,strong,legend{
 }
 
 p {
-    width: 100%; 
+    width: 100%;
     text-align:center;
 }
 
-@keyframes blink {  
+@keyframes blink {
     0% { opacity:0.5;
         color:#eee;
         }
@@ -401,20 +406,20 @@ p {
   }
 }
 .blink {
-/*transition:all 0.5s ease-in-out; 
+/*transition:all 0.5s ease-in-out;
     animation: blink 1.5s linear 1;*/
   animation-name: shake-base;
   animation-duration: 100ms;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
   animation-delay: 0s;
-} 
+}
 .nb_flux {
 	font-size: .8em;
 vertical-align: super
 }
 .fluxnew {
-    padding-left:2px; 	
+    padding-left:2px;
     cursor: pointer;
     font-weight: bold;
 }
@@ -514,7 +519,7 @@ input, textarea,button {
    background:white url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAARCAYAAADdRIy+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAAd0SU1FB9kCBxQkAPQ1ZpQAAAGrSURBVDjLjdRNiE5xFAbw372v14zvkEGsjLD20UghKTay1uykyEIWSpY2Stmp2dhMoWQ1USYbScrKhpKyGkVDNDaGfM21ed5ct/cOp/7dc+89/+c8z/k/9xYoUPkTu7EXm7EQM3iO+3jfp/6v6NTyJbiEY1iE13iXfB+O4BdeoAxo0Q+0yLqGCRxFt1GzChfDctR/xDncxY5ak7KW9+I8JjE8H9iagJ36R9Nek5u43FZUYicGcCv3ZQtYhTk8xFYsbgPcgGnM1jb1A+vFMwxifRtgmdOba1FR1WrhR8MhRRPwA9ZFdtlgVo9ewy34mn0a9inK+KrC4TA9EZvUZe7BweQHAvipoaKABXiVNYoHmeV1PMZbbMcmnIlHh/JuPHabCc7PurS1MfU4VmN5vozjYSdgE7iBFdlzG/u1zGlbvoaleIKnkTaEQ9iIjznhQVyNoiuYwli/wXdwEiOxU5W5vsQdPMLpzLMbT47F7NO4UPRhW9V+FgP4jO+NxiM4G6azebYMk50W+WWG/C12KRpefBO2u7AyDbuY6sxj5uYqatcCX3AvhzgcX479BrxnZh85IOwcAAAAAElFTkSuQmCC") no-repeat scroll 0.2em center;
    padding-left:22px;
    height:1.9em;
-} 
+}
 
 /* marrant mais fait tourner l'input aussi
 #bs:hover {
@@ -560,15 +565,17 @@ input, textarea,button {
 #page {
 	left:0vw;
 }
+.some_selector { padding: 20px;
 }
 @media screen and (max-width: 1280px) {
 #g1 {
 		display: none;
 	}
+  .some_selector { padding: 20px;
 }
 
 
-::-moz-selection { 
+::-moz-selection {
                    color: white;
                    background: #555555;
 }
