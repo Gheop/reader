@@ -265,7 +265,7 @@ function getHTTPObject(action) {
         varscroll = 0;
         loadmore = 0;
         if (xhr.responseText) {
-          //                    log("JSON de view : "+xhr.responseText);
+            //                              log("JSON de view : "+xhr.responseText);
           d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
 
 
