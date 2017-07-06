@@ -38,7 +38,8 @@ function clean_txt($v) {
   $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
-  $p[]='/<i *?.*?>/s';
+  $p[]='/<i>/s';
+  $p[]='/<i +.*?>/s';
   $p[]='/<\/i>/s';
   $p[]='/<article *?.*?>/s';
   $p[]='/<\/article>/s';
