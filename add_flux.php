@@ -3,11 +3,7 @@ error_reporting(-1);
 include('/www/conf.php');
 $debug = false;
 
-#### AFAIRE ####
-###
-###https://www.youtube.com/channel/XXXXXXXXXXXX  -> https://www.youtube.com/feeds/videos.xml?channel_id=XXXXXXXXXXXX
-### récupérer l'username et -> https://www.youtube.com/feeds/videos.xml?user=USERNAME
-##############
+
 
 
 function getContentUrl($url) {
@@ -46,6 +42,15 @@ function isRSSContent($content) {
 
 ### function récupérée bien dégueulasse, à nettoyer
 function searchRSSUrl($url) {
+	#### AFAIRE ####
+###
+###https://www.youtube.com/channel/XXXXXXXXXXXX  -> https://www.youtube.com/feeds/videos.xml?channel_id=XXXXXXXXXXXX
+### récupérer l'username et -> https://www.youtube.com/feeds/videos.xml?user=USERNAME
+##############
+	if(preg_match('/^.*\/\/www\.youtube\.com\/channel\/(.*)$/',$url, $m )) {
+		return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$m[1];
+	}
+	
 	$doc = new DOMDocument();
 	$doc->strictErrorChecking = FALSE;
 	libxml_use_internal_errors(true);
@@ -80,12 +85,25 @@ function getRSSLink($url) {
 		echo "<br />La page $url n'a pas de contenu.<br />";
 		return false;
 	}
-	try {
+	elseif (isRSSContent($content)) {
+		return $url;
+		# code...
+	}
+	elseif($url = searchRSSUrl($url)) {
+		//echo $url;
+		if(isRSSContent(getContentUrl($url)))
+			return $url;
+		else return false;
+	}
+	else {
+		return false;
+	}
+	/*try {
 		if(isRSSContent($content)) return $url;
 	}
 	catch(Exception $e){
 		return ($url = searchRSSUrl($url))?$url:false;
-	}
+	}*/
 	if(isset($rss->channel->item) and $rss->channel->item->count() > 0)
 		return $url;
 	else

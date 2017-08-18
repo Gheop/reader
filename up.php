@@ -39,9 +39,9 @@ while($d = $r->fetch_array()) {
 	curl_setopt_array($ch[$i],
 		Array(
 			CURLOPT_URL => $d[1],
-			CURLOPT_USERAGENT => 'GheopReader',
-			CURLOPT_TIMEOUT => 5,
-			CURLOPT_CONNECTTIMEOUT => 5,
+			#CURLOPT_USERAGENT => 'GheopReader',
+			CURLOPT_TIMEOUT => 15,
+			CURLOPT_CONNECTTIMEOUT => 15,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => 'UTF-8',
             CURLOPT_SSL_VERIFYPEER => FALSE,
@@ -60,14 +60,14 @@ do {
 	//usleep (1000);
 } while ($running > 0);
 
-$test = '';
+//$test = 'https://news.google.fr/news?cf=all&hl=fr&pz=1&ned=fr&topic=h&num=3&output=rss';
 for($j=0;$j<$i;$j++) {
 	//echo "<i>$dd[$j]</i><br />";
 	$tt = $mysqli->query("select link, title, rss from reader_flux where id=".$dd[$j].";") or die($mysqli->error);
 	$ttt = $tt->fetch_array();
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
-
+	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
 //echo "OK!<br />";
 	if (!$rss and $DEBUG) {
@@ -80,7 +80,7 @@ for($j=0;$j<$i;$j++) {
 		echo '</pre>';
 		libxml_clear_errors();
 	}
- //if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
+// if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
 	if($DEBUG) echo '<pre>';
 	if($DEBUG) print_r($rss);
 	if($DEBUG) echo '</pre>';

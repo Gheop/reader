@@ -1,17 +1,16 @@
-var kona = 0;
-var search_value = ''; //new String('');
-var search_active = 0;
-var search_focus = 0;
-var requestTimer = false;
-var loadmore;
-var nb_title = 0;
-var id = 'all';
-var unr = 0;
+var kona = 0,
+	search_value = '',
+	search_active = 0,
+	 search_focus = 0,
+	requestTimer = false,
+	loadmore,
+	nb_title = 0,
+	id = 'all',
+	unr = 0;
 //var bgsave;
 var d;
 //var f;
 var D = document;
-var M = []; //new Array();
 var M = [];
 var varscroll = 0;
 var loadinprogress = 0;
@@ -20,6 +19,7 @@ var totalItems = 0;
 var readItems =0;
 
 function $(i) {
+//	return D.querySelector('#'+i);
   return D.getElementById(i);
 }
 //var favico = D.createElement("link");
