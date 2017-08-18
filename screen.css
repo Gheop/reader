@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Awesome';
-    src: local("FontAwesome"), local("fontawesome-webfont"),url('fonts/fontawesome-webfont.eot');
+    src: local("FontAwesome"), local("fontawesome-webfont"),url('fonts/fontawesome-webfont.woff2') format("woff2");
     src: local("FontAwesome"), local("fontawesome-webfont"),url('fonts/fontawesome-webfont.eot?#iefix') format('embedded-opentype'),
          url('fonts/fontawesome-webfont.ttf') format('truetype');
     font-weight: normal;

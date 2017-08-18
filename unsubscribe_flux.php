@@ -1,16 +1,19 @@
 <?php
 include('/www/conf.php');
-if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
+if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) { exit;}
 //$_POST['link'] = 45;
 if(!isset($_POST['link'])) {
-  print "Error : Pas de flux trouvé !";
-  exit;
+ 
+  if(!isset($_GET['link'])) {
+    print "Error : Pas de flux trouvé !"; 
+    exit;
+  }
+  else $_POST['link'] = $_GET['link'];
 }
-else {
+
   $stmt = $mysqli->prepare("delete FROM reader_user_flux where id_flux=$_POST[link] and id_user=$_SESSION[user_id];") or die($mysqli->error); 
   $stmt->execute() or die("error");
   $stmt->close();
-  
   $stmt = $mysqli->prepare("SELECT * FROM reader_user_flux where id_flux=$_POST[link];");
   $stmt->execute();
   $stmt->store_result();
@@ -21,5 +24,5 @@ else {
   $r->close();
   $stmt->close();
   $mysqli->close();
-}
+
 ?>
