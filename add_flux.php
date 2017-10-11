@@ -40,9 +40,9 @@ function isRSSContent($content) {
 	}
 }
 
-### function récupérée bien dégueulasse, à nettoyer
-function searchRSSUrl($url) {
-	#### AFAIRE ####
+function searchRSSUrlSpecialSite($url) {
+	//youtube
+		#### AFAIRE ####
 ###
 ###https://www.youtube.com/channel/XXXXXXXXXXXX  -> https://www.youtube.com/feeds/videos.xml?channel_id=XXXXXXXXXXXX
 ### récupérer l'username et -> https://www.youtube.com/feeds/videos.xml?user=USERNAME
@@ -50,6 +50,25 @@ function searchRSSUrl($url) {
 	if(preg_match('/^.*\/\/www\.youtube\.com\/channel\/(.*)$/',$url, $m )) {
 		return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$m[1];
 	}
+
+
+/*
+ * dailymotion 
+ */
+	if(preg_match('/^.*\/\/www\.dailymotion\.com\/video\/(.*)$/',$url, $m )) {
+		//récupérer le nom du l'user/channel, pas fait
+		echo 'cest une video, pas géré';
+		return false;
+	}
+	if(preg_match('/^.*\/\/www\.dailymotion\.com\/([^\/].*)$/',$url, $m )) {
+		return 'http://www.dailymotion.com/rss/user/'.$m[1];
+	}
+	return false;
+}
+### function récupérée bien dégueulasse, à nettoyer
+function searchRSSUrl($url) {
+
+	if($url = searchRSSUrlSpecialSite($url)) return $url;
 	
 	$doc = new DOMDocument();
 	$doc->strictErrorChecking = FALSE;
@@ -153,6 +172,12 @@ else {
 	exit;
 }
 
+if(preg_match('/^[@#](.*)$/',$rsslink,$m)) {
+ //echo "$m[1]"; exit;
+ $rsslink = 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[1];
+ 
+}
+
 if(!$rsslink = validate_url($rsslink)) {
 	print "Ce lien n'est pas valide.";
 	exit;
@@ -222,6 +247,8 @@ if($rss = @simplexml_load_string($page)) {
 					echo 'Vous êtes maintenant inscrit à ce flux.<br />Vous allez être rediriger sur le site d\'origine dans 5 secondes.<br /> Sinon, cliquer <a href="'.$link.'">ici</a>.';
 				} else {
 					echo 'Vous êtes maintenant inscrit à ce flux.';
+					$previous = "javascript:history.go(-1)";
+					echo '<a href="'.$previous.'">Back</a>';
 				}
 				exit;
 			}
@@ -232,6 +259,8 @@ if($rss = @simplexml_load_string($page)) {
 					echo 'Vous êtes déjà inscrit à ce flux.<br />Vous allez être rediriger sur le site d\'origine dans 5 secondes.<br /> Sinon, cliquer <a href="'.$link.'">ici</a>.';
 				} else {
 					echo 'Vous êtes déjà inscrit à ce flux.';
+					$previous = "javascript:history.go(-1)";
+					echo '<a href="'.$previous.'">Back</a>';
 				} 
 				exit;
 			}

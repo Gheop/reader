@@ -24,6 +24,23 @@ function get_title() {
 
 }
 
+function complete_link($link, $linkmaster) {
+	if(isset($link) && !preg_match('/^https?:\/\//',$link)) {
+		if(substr($link,0,1) == '/')  {
+			$pu = parse_url($linkmaster);
+			if(!isset($pu['scheme'])) $pu['scheme'] = 'https';
+			if(substr($link,1,1) == '/') {
+				$link = $pu['scheme'].':'.$link;
+			} else {
+				$link = $pu['scheme'].'://'.$pu['host'].$link;
+			}
+		} else {
+			$link = $linkmaster.'/'.$link;
+		}
+	}
+return $link;
+}
+
 function get_flux($r) {
 
 }
@@ -67,7 +84,7 @@ for($j=0;$j<$i;$j++) {
 	$ttt = $tt->fetch_array();
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
-	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
+/*	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));*/
 	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
 //echo "OK!<br />";
 	if (!$rss and $DEBUG) {
@@ -81,9 +98,9 @@ for($j=0;$j<$i;$j++) {
 		libxml_clear_errors();
 	}
 // if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
-	if($DEBUG) echo '<pre>';
+/*	if($DEBUG) echo '<pre>';
 	if($DEBUG) print_r($rss);
-	if($DEBUG) echo '</pre>';
+	if($DEBUG) echo '</pre>';*/
 	if(empty($rss)) {
 		echo 'Flux vide!<br />';
 
@@ -122,17 +139,8 @@ for($j=0;$j<$i;$j++) {
 		}
 		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
 		//le lien n'est pas complet !
-		if(isset($link) && !preg_match('/^https?:\/\//',$link)) {
-			//echo "|$link|".substr($link,0,1)."|";
-			if(substr($link,0,1) == '/')  {
-//				echo 'IN<br />';
-				$pu = parse_url($linkmaster);
-				$link = '//'.$pu['host'].$link;
-				if($pu['host']) $link = $pu['scheme'].':'.$link;
-			} else {
-				$link = $linkmaster.'/'.$link;
-			}
-		}
+		$link = complete_link($link, $linkmaster);
+		
 		// print $link;
 		// die;
 		if(!isset($link)|| !$link || $link=='') {
@@ -179,14 +187,14 @@ for($j=0;$j<$i;$j++) {
 			$image=null;
 			if(isset($item->image)) $image=$item->image;
 			$content = null;
-			if(isset($item->enclosure)) {
+			/*if(isset($item->enclosure)) {
 				echo '<pre><h1>';
 	print_r($item->enclosure);
 	echo $item->enclosure['url'];
 	echo '</h1></pre>';
 //				die ("FUCK OFF!");
 
-			}
+			}*/
 			if(isset($item->description)) $content = $item->description;
 			else if(isset($item->content)) $content = $item->content;
 			else if(isset($item->summary)) $content = $item->summary;
@@ -213,7 +221,7 @@ for($j=0;$j<$i;$j++) {
 				echo '<br /><br />';
 			}
 
-			print "CONTENT : |$content|";
+			//print "CONTENT : |$content|";
 			$author = null;
 
 			if(isset($item->author->name)) $author = $item->author->name;
@@ -225,11 +233,15 @@ for($j=0;$j<$i;$j++) {
 			/* echo "&nbsp;&nbsp;title       : $title<br />"; */
 			/* echo "&nbsp;&nbsp;author      : $author<br />"; */
 			/* echo "&nbsp;&nbsp;link        : $link<br />"; */
-			/* echo "&nbsp;&nbsp;content     : $content<br /><br />"; */
+			 //echo "&nbsp;&nbsp;content     : $content<br /><br />"; 
+
 			$title = clean_txt($title);
 			$content = clean_txt($content);
+			//echo "&nbsp;&nbsp;content     : $content<br /><br />"; 
 			$author = clean_txt($author);
 			print "MAJ<br />";
+/*			echo "insert into reader_item values ('', $dd[$j], '".date("Y-m-d H:i:s",$iDate)."', '".$mysqli->real_escape_string($guid)."', '".$mysqli->real_escape_string($title)."', '".$mysqli->real_escape_string($author)."', '".$mysqli->real_escape_string($link)."', '".$mysqli->real_escape_string($content);
+			echo "<br /><br />";*/
 			$mysqli->query("insert into reader_item values ('', $dd[$j], '".date("Y-m-d H:i:s",$iDate)."', '".$mysqli->real_escape_string($guid)."', '".$mysqli->real_escape_string($title)."', '".$mysqli->real_escape_string($author)."', '".$mysqli->real_escape_string($link)."', '".$mysqli->real_escape_string($content)."');") or die($mysqli->error);
 		}
 		$mysqli->query("update reader_flux set `update`=CURRENT_TIMESTAMP() where id=".$dd[$j].";") or die($mysqli->error);
