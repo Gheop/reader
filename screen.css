@@ -8,7 +8,7 @@
 
 }
 
-
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700);
 /*@font-face {
   font-family: 'Christmas';
     src: url('fonts/Christmas.ttf');
@@ -98,8 +98,15 @@ li > input {
   background: transparent;
   font-weight: bold;
 }
+.icon{
+    font: normal 100%/1.15 Awesome;
+}
 body {
-        font: normal 100%/1.15 Awesome;
+font-family: 'Open Sans', sans-serif;
+/*  font: normal 100%/1.15 Awesome;*/
+  line-height: 1.3em;
+  font-weight: 400;
+
     font-feature-settings: "kern";
 	word-wrap: break-word;
 	color: #444444;
@@ -219,20 +226,28 @@ b,strong,legend{
 .loved:before{content:""}
 .print:before{content:""}
 .title {
-    font-size: 1.5em;
+    font-size: 1.2em;
+    font-weight: 600;
     padding-left: 10px;
 }
 
 .date {
     float:right;
     padding-right:10px;
+    font-weight: 600;
+    font-size: 0.8em;
+
 }
+
 
 .author {
     font-size:0.8em;
     padding-left: 10px;
+    font-style: italic;
 }
-
+.author a {
+  font-weight:600;
+}
 .descr{
     margin-top:10px;
     padding-left: 10px;

@@ -18,6 +18,30 @@ var zhr;
 var totalItems = 0;
 var readItems =0;
 
+var inactivityTime = function () {
+    var t;
+    window.onload = resetTimer;
+    // DOM Events
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+		document.onload = resetTimer;
+document.onmousemove = resetTimer;
+document.onmousedown = resetTimer; // touchscreen presses
+document.ontouchstart = resetTimer;
+document.onclick = resetTimer;     // touchpad clicks
+document.onscroll = resetTimer;    // scrolling with arrow keys
+document.onkeypress = resetTimer;
+    function rearm() {
+			document.location.reload(true);
+    }
+
+    function resetTimer() {
+        clearTimeout(t);
+        t = setTimeout(rearm, 3000)
+        // 1000 milisec = 1 sec
+    }
+};
+
 function $(i) {
 //	return D.querySelector('#'+i);
   return D.getElementById(i);
@@ -121,13 +145,6 @@ function goNextPage() {
 
 function delError() {
   $('error').style.display = "none";
-}
-
-function affError(text,n) {
-  n = typeof n !== 'undefined' ? n : 4;
-  $('error').innerHTML = text;
-  $('error').style.display = 'block';
-  setTimeout(delError, n*1000);
 }
 
 function markallread(i) {
@@ -238,7 +255,7 @@ function getHTTPObject(action) {
           M[i].n = f.f[k].n;
           M[i].i = f.f[k].i;
           if (f.f[k].n > 0) {
-            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></li>\n';
+            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></span></li>\n';
             nb_title += f.f[k].n || 0;
           } else page += '\t<li href="' + f.f[k].l + '" id="f' + f.f[k].i + '" class="flux" onclick="view(' + f.f[k].i + ');" title="' + f.f[k].d + '">' + f.f[k].t + '</li>\n';
         }
@@ -281,7 +298,8 @@ function getHTTPObject(action) {
             // V[i].d = d.i[z].d;
 
             loadmore++;
-            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
+            //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
+            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action icon"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
           }
         }
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
@@ -302,7 +320,7 @@ function getHTTPObject(action) {
           d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
           var n = d.i.length - 1;
           loadmore++;
-          page += '<div id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="nocolor lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></div>';
+          page += '<div id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action icon"><a class="nocolor lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></div>';
           n = null;
         }
         page += '<div id="addblank">&nbsp;</div>';
@@ -321,14 +339,14 @@ function getHTTPObject(action) {
         id = 'search';
         $('f' + id).classList.add('show');
         if (!xhr.responseText) {
-          $('page').innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="nocolor search" onclick="return true;" title="Lu"></a><span class="tags"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          $('page').innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="nocolor search icon" onclick="return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
           return false;
         }
         d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
         loadmore = 0;
         for (var y = 0, tlen = d.i.length; y < tlen; y++) {
           loadmore++;
-          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="nocolor search" onclick="verif(' + y + ');return true;" title="Lu"></a><span class="tags"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="nocolor search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
           //voir pour foutre les tags en ul,li
         }
 
@@ -388,10 +406,10 @@ function read(k) {
   d.i[k].r = 0;
   M[d.i[k].f].n--;
   if (M[d.i[k].f].n > 0) {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span><a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a>';
+    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span><span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>';
     light('f' + d.i[k].f);
   } else {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a>';
+    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a></span>';
     if (id == d.i[k].f) $('f' + d.i[k].f).className = "flux show";
     else $('f' + d.i[k].f).className = "flux";
   }
@@ -568,3 +586,37 @@ function log(t) {
   if (typeof console !== 'undefined') console.log(t);
 }
 
+
+function affError(text,n) {
+  n = typeof n !== 'undefined' ? n : 4;
+  var alert = 0;
+  if('Notification' in window){
+        Notification.requestPermission(function(permission){
+            if (permission === 'granted') {
+                var notification = new Notification('Gheop Reader',{
+                    body : text,
+                    icon : 'alert.png'
+                });
+                alert = 1;
+                setTimeout(function(){ notification.close() }, n*1000);
+            }
+            else {
+              $('error').innerHTML = text;
+              $('error').style.display = 'block';
+              setTimeout(delError, n*1000);
+            }
+            /*else if (permission === 'denied') {
+                alert("Vous n'avez pas accepté les notifications, votre navigation peut en être affecté.");
+            }
+            else {
+                alert("Veuillez accepter les notifications");
+            }*/
+        });
+    }
+    else {
+              $('error').innerHTML = text;
+              $('error').style.display = 'block';
+              setTimeout(delError, n*1000);
+            }
+
+}

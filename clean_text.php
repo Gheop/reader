@@ -41,6 +41,8 @@ function clean_txt($v) {
   $p[]='/<i>/s';
   $p[]='/<i +.*?>/s';
   $p[]='/<\/i>/s';
+    $p[]='/<b\s+.*?>/s';
+  $p[]='/<\/b\s+>/s';
   $p[]='/<article *?.*?>/s';
   $p[]='/<\/article>/s';
   $p[]='/<section *?.*?>/s';
@@ -62,28 +64,32 @@ function clean_txt($v) {
   $p[]='/<img .*?src="\/\/.*?\.fsdn\.com\/.*?".*?>/';
   $p[]='/<div.*?>/s';
   $p[]='/<\/div>/s';
-  /* $p[]='/<span.*?>/s';
-  $p[]='/<\/span>/s';*/
-  $p[]='/<p *?.*?>/s';
-  $p[]='/<\/p>/s';
+  $p[]='/<span.*?>/s';
+  $p[]='/<\/span>/s';
+/*  $p[]='/<p\s*?.*?>/s';
+  $p[]='/<\/p>/s';*/
+/*  $p[]='/<font\s*?.*?>/s';
+  $p[]='/<\/font\s*?>/s';*/
   /* $p[] = '/(class|id|style|align)=".*?"/s';*/
   $p[] = '/(id|style|align)=".*?"/s';
   $p[] = '/ onmouseover=("|\').*?("|\')/s';
+  $p[] = '/ style=("|\').*?("|\')/s';
   $p[] = '/ onclick=("|\').*?("|\')/s';
   $p[]='/<\s*script.*?<\/script>/s';
   $p[]='/<\s*style.*?<\/style>/s';
 
-
   $v = preg_replace($p,'', $v);
-  $v = $purifier->purify($v);
+  //$v = $purifier->purify($v);
+  
 
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
   $v = preg_replace('#<span class="youtube-embed">([^<]*)</span>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
-  $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*>#Ssi', "imgbase64", $v);
+  $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
 
-  $p[]='/<span.*?>/s';
-  $p[]='/<\/span>/s';
-  $v = preg_replace($p,'', $v);
+/*  $q =array();
+  $q[]='/<span.*?>/s';
+  $q[]='/<\/span>/s';
+  $v = preg_replace($q,'<br />', $v);*/
   $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'");//,"\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
   $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'');//"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
 //  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'","\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");

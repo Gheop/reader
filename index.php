@@ -41,7 +41,7 @@ if(!isset($_SESSION['pseudo'])) {
 if(!isset($_SESSION['pseudo'])) {
   echo '<a href="//gheop.com/register?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
 else {
-  echo $_SESSION['pseudo'],' <a id="disconnect" href="?a=destroy" title="Se déconnecter"></a>';}
+  echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';}
 ?>
 </div>
     <h1 id="g" class="pulse"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
@@ -59,12 +59,13 @@ echo '
 <?php
 echo '<ul id="menu">
   <li id="fall" class="fluxnew" onclick="view(\'all\')" title="Tout voir">All&nbsp;&nbsp;&nbsp;
-    <a title="Ajouter un flux" onclick="addflux();"></a>&nbsp;&nbsp;&nbsp;
+    <span class="icon"><a title="Ajouter un flux" onclick="addflux();"></a>&nbsp;&nbsp;&nbsp;
     <a title="Importer des flux"></a>&nbsp;&nbsp;&nbsp;
     <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp;
     <a onclick="navigator.registerContentHandler(\'application/atom+xml\', \'//reader.gheop.com/add_flux.php?f=%s\',  \'Gheop Reader\');return false;" title="Enregistrer comme lecteur de flux du navigateur"></a>&nbsp;&nbsp;&nbsp;
     <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp;
     <a id="up" onclick="up();" title="Mettre à jour les flux"></a>
+    </span>
   </li>
 </ul>
 <div id="page">
