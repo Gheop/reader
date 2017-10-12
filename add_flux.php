@@ -1,6 +1,8 @@
 <?php
 error_reporting(-1);
 include('/www/conf.php');
+include('scraping/simple_html_dom.php');
+
 $debug = false;
 
 
@@ -41,33 +43,50 @@ function isRSSContent($content) {
 }
 
 function searchRSSUrlSpecialSite($url) {
-	//youtube
-		#### AFAIRE ####
-###
-###https://www.youtube.com/channel/XXXXXXXXXXXX  -> https://www.youtube.com/feeds/videos.xml?channel_id=XXXXXXXXXXXX
-### récupérer l'username et -> https://www.youtube.com/feeds/videos.xml?user=USERNAME
-##############
+
+/* 
+ * youtube
+ */
 	if(preg_match('/^.*\/\/www\.youtube\.com\/channel\/(.*)$/',$url, $m )) {
 		return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$m[1];
 	}
-
-
+	//https://youtu.be/rc1sgNsl6NI?t=2s
+	//https://www.youtube.com/embed/rc1sgNsl6NI
+	else if(preg_match('/^.*\/\/(www\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
+		$html = file_get_html('https://www.youtube.com/watch?v='.$m[4]);
+		foreach($html->find('meta[itemprop=channelId]') as $element) {
+			$url = $element->content;
+			return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$url;
+		}
+		return false;
+	}
 /*
  * dailymotion 
  */
-	if(preg_match('/^.*\/\/www\.dailymotion\.com\/video\/(.*)$/',$url, $m )) {
-		//récupérer le nom du l'user/channel, pas fait
-		echo 'cest une video, pas géré';
+	else if(preg_match('/^.*dai\.ly\/(.*)$/', $url, $m)) {
+		$url = 'http://www.dailymotion.com/video/'.$m[1];
+		return searchRSSUrlSpecialSite($url);
+	}
+	else if(preg_match('/^.*\/\/(www\.)?dailymotion\.com\/(embed\/)?video\/([^\?]*)(.*)?$/',$url, $m )) {
+		if($html = file_get_html('http://www.dailymotion.com/video/'.$m[3])) {
+		foreach($html->find('meta[property=video:director]') as $element) {
+			$url = $element->content;
+			return searchRSSUrlSpecialSite($url);
+		}
+	}
 		return false;
 	}
-	if(preg_match('/^.*\/\/www\.dailymotion\.com\/([^\/].*)$/',$url, $m )) {
+	else if(preg_match('/^.*\/\/www\.dailymotion\.com\/([^\/\?].*)$/',$url, $m )) {
 		return 'http://www.dailymotion.com/rss/user/'.$m[1];
 	}
 	return false;
 }
+
+
 ### function récupérée bien dégueulasse, à nettoyer
 function searchRSSUrl($url) {
 
+	//à passer à la fin qd la suite sera finie.
 	if($url = searchRSSUrlSpecialSite($url)) return $url;
 	
 	$doc = new DOMDocument();
