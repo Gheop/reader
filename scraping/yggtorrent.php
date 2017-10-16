@@ -10,6 +10,38 @@ $uri = [
 	'presse' => '/torrents/ebook/2156-presse'
 ];
 
+function getCloudFlareFile($url) {
+require_once 'libraries/httpProxyClass.php';
+require_once 'libraries/cloudflareClass.php';
+
+$httpProxy   = new httpProxy();
+$httpProxyUA = 'proxyFactory';
+
+$requestLink = $url;
+$requestPage = json_decode($httpProxy->performRequest($requestLink));
+
+// if page is protected by cloudflare
+if($requestPage->status->http_code == 503) {
+	// Make this the same user agent you use for other cURL requests in your app
+	cloudflare::useUserAgent($httpProxyUA);
+	
+	// attempt to get clearance cookie	
+	if($clearanceCookie = cloudflare::bypass($requestLink)) {
+		// use clearance cookie to bypass page
+		$requestPage = $httpProxy->performRequest($requestLink, 'GET', null, array(
+			'cookies' => $clearanceCookie
+		));
+		// return real page content for site
+		$requestPage = json_decode($requestPage);
+		return $requestPage;
+	//	echo $requestPage->content;
+	} else {
+		// could not fetch clearance cookie
+		echo 'Could not fetch CloudFlare clearance cookie (most likely due to excessive requests)';
+	}	
+}
+
+}
 function _get_URI() {
 	return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 }
@@ -41,8 +73,11 @@ echo "    <title>$site_name - ".ucfirst($_POST['f'])."</title>
 $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
-$html = file_get_html($url);
-
+//$html = file_get_html($url);
+/*echo '<pre>';
+var_dump(getCloudFlareFile($url)->content);
+die;*/
+$html = str_get_html(getCloudFlareFile($url)->content);
 $i = 0;
 foreach($html->find('td a[class=torrent-name]') as $element) {
 	if($i++ >= 20 ) break;
@@ -51,7 +86,8 @@ foreach($html->find('td a[class=torrent-name]') as $element) {
 	echo "</pre><br /><br /><br /><br /><br /><br /><br /><hr />";
 	die;
 */
-	$detail = file_get_html(file_url($element->href));
+//	$detail = file_get_html(file_url($element->href));
+	$detail = str_get_html(getCloudFlareFile(file_url($element->href))->content);
 /*	echo '<pre>';
 	var_dump($detail);
 	echo '</pre>';

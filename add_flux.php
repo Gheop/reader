@@ -52,7 +52,7 @@ function searchRSSUrlSpecialSite($url) {
 	}
 	//https://youtu.be/rc1sgNsl6NI?t=2s
 	//https://www.youtube.com/embed/rc1sgNsl6NI
-	else if(preg_match('/^.*\/\/(www\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
+	else if(preg_match('/^.*\/\/(www\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
 		$html = file_get_html('https://www.youtube.com/watch?v='.$m[4]);
 		foreach($html->find('meta[itemprop=channelId]') as $element) {
 			$url = $element->content;
