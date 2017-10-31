@@ -6,17 +6,15 @@ requestTimer = false,
 loadmore,
 nb_title = 0,
 id = 'all',
-unr = 0;
-//var bgsave;
-var d;
-//var f;
-var D = document;
-var M = [];
-var varscroll = 0;
-var loadinprogress = 0;
-var zhr;
-var totalItems = 0;
-var readItems =0;
+unr = 0,
+d,
+D = document,
+M = [],
+varscroll = 0,
+loadinprogress = 0,
+zhr,
+totalItems = 0,
+readItems =0;
 
 var inactivityTime = function () {
   var t;
@@ -35,27 +33,17 @@ var inactivityTime = function () {
   }
   function resetTimer() {
     clearTimeout(t);
-    t = setTimeout(rearm, 300000)
+    t = setTimeout(rearm, 300000);
         // 1000 milisec = 1 sec
   }
 };
 
 function $(i) {
-//	return D.querySelector('#'+i);
   return D.getElementById(i);
- // inactivityTime();
 }
-//var favico = D.createElement("link");
-//favico.id="favico";
-//favico.type = "image/gif";
-//favico.rel = "shortcut icon";
+
 $('favico').href = "//reader.gheop.com/favicon.gif";
-//D.head.appendChild(favico);
-/*
-window.onload = function() {
-  i();
-}
-*/
+
 function getSelectedText() {
   if (typeof window.getSelection !== 'undefined') {
     return window.getSelection().trim();
@@ -63,7 +51,9 @@ function getSelectedText() {
   else if (typeof document.selection !== 'undefined') {
     return document.selection.createRange().text.trim();
   }
-  else return undefined;
+  else {
+    return undefined;
+  }
 }
 
 function search(t) {
@@ -75,7 +65,9 @@ function search(t) {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1&s=' + t);
     requestTimer = setTimeout((function() {
-      if (xhr) xhr.abort();
+      if (xhr) {
+        xhr.abort();
+      }
     }), 4000);
     xhr = null;
     $('s').blur();
@@ -230,8 +222,11 @@ function unsubscribe(t, f) {
 }
 
 function editFluxName(idFlux) {
-  $('f'+idFlux).innerHTML = '<input id="focus'+idFlux+'" type="text" value="'+M[idFlux].t+'"/>';
+  $('f'+idFlux).innerHTML = "<input id=\"focus"+idFlux+"\" type=\"text\" value=\""+M[idFlux].t+"\" />";
   $('focus'+idFlux).focus();
+
+}
+function addMenu() {
 
 }
 function getHTTPObject(action) {
@@ -247,12 +242,12 @@ function getHTTPObject(action) {
        // log("JSON du menu : "+f);
         for (var k = 0, mlen = f.f.length; k < mlen; k++) {
           i = f.f[k].i;
-
+/*
           M[i] = [];
           M[i].d = f.f[k].d;
           M[i].t = f.f[k].t;
           M[i].n = f.f[k].n;
-          M[i].i = f.f[k].i;
+          M[i].i = f.f[k].i;*/
           if (f.f[k].n > 0) {
             page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></span></li>\n';
             nb_title += f.f[k].n || 0;
@@ -284,18 +279,30 @@ function getHTTPObject(action) {
             //                              log("JSON de view : "+xhr.responseText);
           d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
 
-
+/*            object.create(menu);*/
           for (var z = 0, len = d.i.length; z < len; z++) {
             i = d.i[z].i;
-            // V[i].r = d.i[z].r;
-            // V[i].p = d.i[z].p;
-            // V[i].l = d.i[z].l;
-            // V[i].t = d.i[z].t;
-            // V[i].o = d.i[z].o;
-            // V[i].n = d.i[z].n;
-            // V[i].a = d.i[z].a;
-            // V[i].d = d.i[z].d;
-
+            f = d.i[z].f;
+            console.log(f);
+          if(!M[f]) {
+            M[f] = [];
+            M[f].d = d.i[z].e;
+            M[f].l = d.i[z].o;
+            M[f].t = d.i[z].n;
+            M[f].n = 1;
+            M[f].i = d.i[z].f;
+          } else {
+            M[f].n+=1;
+          }
+          /*  menu[i].d = d.i[z].e;
+            menu[i].i = d.i[z].f;
+            menu[i].l = d.i[z].e;
+            menu[i].n = d.i[z].e;
+            menu[i].t = d.i[z].e;*/
+/*          f.f[k].d = d.i[z].e;
+          f.f[k].t = d.i[z].e;
+          f.f[k].n = d.i[z].e;
+          f.f[k].i = d.i[z].f;*/
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
             page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action icon"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  </span></div>\n</div>\n';
