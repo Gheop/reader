@@ -50,8 +50,15 @@ function searchRSSUrlSpecialSite($url) {
 	if(preg_match('/^.*\/\/www\.youtube\.com\/channel\/(.*)$/',$url, $m )) {
 		return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$m[1];
 	}
-	//https://youtu.be/rc1sgNsl6NI?t=2s
-	//https://www.youtube.com/embed/rc1sgNsl6NI
+	else if(preg_match('/^.*\/\/www\.youtube\.com\/user\/([^\?\&\/]*)(.*)$/',$url, $m )) { 
+		$html = file_get_html($url);
+
+		foreach($html->find('meta[itemprop=channelId]') as $element) {
+			$url = $element->content;
+			return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$url;
+		}
+		return false;
+	}	
 	else if(preg_match('/^.*\/\/(www\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
 		$html = file_get_html('https://www.youtube.com/watch?v='.$m[4]);
 		foreach($html->find('meta[itemprop=channelId]') as $element) {
