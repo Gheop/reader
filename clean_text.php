@@ -29,10 +29,10 @@ function imgbase64($f) {
 }
 
 function clean_txt($v) {
-  require_once 'HTMLPurifier/HTMLPurifier.auto.php';
-  $config = HTMLPurifier_Config::createDefault();
+//  require_once 'HTMLPurifier/HTMLPurifier.auto.php';
+//  $config = HTMLPurifier_Config::createDefault();
 //$config->set('Filter.YouTube', true); //don't work, je l'utilise mal ?
-  $purifier = new HTMLPurifier($config);
+//  $purifier = new HTMLPurifier($config);
   $v = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $v);
   $p = array();
   $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
