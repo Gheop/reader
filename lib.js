@@ -406,10 +406,11 @@ function read(k) {
   d.i[k].r = 0;
   M[d.i[k].f].n--;
   if (M[d.i[k].f].n > 0) {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span><span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>';
+    //'<span class="nb_flux"> ' + M[d.i[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d.i[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>
+    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux"> ' + M[d.i[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d.i[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>';
     light('f' + d.i[k].f);
   } else {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a></span>';
+    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a></span>';
     if (id == d.i[k].f) $('f' + d.i[k].f).className = "flux show";
     else $('f' + d.i[k].f).className = "flux";
   }

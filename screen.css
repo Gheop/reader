@@ -421,14 +421,14 @@ p {
   }
 }
 .blink {
-/*transition:all 0.5s ease-in-out;
-    animation: blink 1.5s linear 1;*/
-  animation-name: shake-base;
+transition:all 0.5s ease-in-out;
+    animation: blink 1.5s linear 1;
+/*  animation-name: shake-base;
   animation-duration: 100ms;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
   animation-delay: 0s;
-}
+*/}
 .nb_flux {
 	font-size: .8em;
 vertical-align: super
@@ -445,16 +445,16 @@ vertical-align: super
     transition: opacity 0.5s ease-in-out;
 }
 
-.fluxnew a {
+.fluxnew a, .flux a {
     text-shadow:none;
     display:none;
 }
 
-.fluxnew:hover a {
+.fluxnew:hover a, .flux:hover a {
     display:inline;
     color:#444;
 }
-.fluxnew a:hover {
+.fluxnew a:hover, .flux a:hover {
     color:red;
 }
 

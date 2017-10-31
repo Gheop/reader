@@ -16,9 +16,13 @@ include('/www/conf.php');
 <link id="favico" href="//reader.gheop.com/favicon.gif" rel="shortcut icon" type="image/gif" />
 <!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
 <link rel="apple-touch-icon" href="favicon.gif"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<!--, user-scalable=no"> -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<!-- Instruct Internet Explorer to use its latest rendering engine -->
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
 </head>
 <body>
 <?php
@@ -39,7 +43,7 @@ if(!isset($_SESSION['pseudo'])) {
 <div id="register">
 <?php
 if(!isset($_SESSION['pseudo'])) {
-  echo '<a href="//gheop.com/register?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
+  echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
 else {
   echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';}
 ?>
@@ -77,9 +81,8 @@ else {
   echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2><fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
 }
 ?>
-  </body>
-</html>
-<script rel="preload" src="//reader.gheop.com/lib.js" type="text/javascript"></script>
+
+  <script rel="preload" src="//reader.gheop.com/lib.js" type="text/javascript"></script>
 
 <!-- Piwik -->
 <script type="text/javascript">
@@ -97,3 +100,5 @@ else {
   })();
 </script>
 <!-- End Piwik Code -->
+  </body>
+</html>

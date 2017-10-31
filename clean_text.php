@@ -22,7 +22,7 @@ function imgbase64($f) {
   	unlink($tmpfile);
   	return '';
   }
-  return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\'//reader.gheop.com/imgError.png\';"/>';
+  return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"/>';
 
       }
   else return 'Extension unknow';
@@ -33,9 +33,11 @@ function clean_txt($v) {
   $config = HTMLPurifier_Config::createDefault();
 //$config->set('Filter.YouTube', true); //don't work, je l'utilise mal ?
   $purifier = new HTMLPurifier($config);
-
+  $v = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $v);
   $p = array();
   $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
+  $p[] = '/<img .*?src=".*\/\/www.gstatic.com\/images\/icons\/.*?".*?>/s';
+  $p[] = '/<img .*?src=".*\/\/a.fsdn.com\/sd\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
   $p[]='/<i>/s';
@@ -90,8 +92,8 @@ function clean_txt($v) {
   $q[]='/<span.*?>/s';
   $q[]='/<\/span>/s';
   $v = preg_replace($q,'<br />', $v);*/
-  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'");//,"\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
-  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'');//"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
+  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','<p>','<\p>','<b>','</b>', '{', '}',"'");//,"\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
+  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','<br />','','','', '{', '}','\'');//"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
 //  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'","\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
 //  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'',"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
   $v = str_replace($a, $b, $v);

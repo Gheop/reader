@@ -56,7 +56,7 @@ while($d = $r->fetch_array()) {
 	curl_setopt_array($ch[$i],
 		Array(
 			CURLOPT_URL => $d[1],
-			#CURLOPT_USERAGENT => 'GheopReader',
+			CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_CONNECTTIMEOUT => 30,
 			CURLOPT_RETURNTRANSFER => TRUE,
@@ -84,7 +84,7 @@ for($j=0;$j<$i;$j++) {
 	$ttt = $tt->fetch_array();
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
-/*	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));*/
+	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
 //echo "OK!<br />";
 	if (!$rss and $DEBUG) {

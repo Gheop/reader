@@ -73,11 +73,9 @@ echo "    <title>$site_name - ".ucfirst($_POST['f'])."</title>
 $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
-//$html = file_get_html($url);
-/*echo '<pre>';
-var_dump(getCloudFlareFile($url)->content);
-die;*/
-$html = str_get_html(getCloudFlareFile($url)->content);
+
+$html = file_get_html($url);
+//$html = str_get_html(getCloudFlareFile($url)->content);
 $i = 0;
 foreach($html->find('td a[class=torrent-name]') as $element) {
 	if($i++ >= 20 ) break;
@@ -86,8 +84,8 @@ foreach($html->find('td a[class=torrent-name]') as $element) {
 	echo "</pre><br /><br /><br /><br /><br /><br /><br /><hr />";
 	die;
 */
-//	$detail = file_get_html(file_url($element->href));
-	$detail = str_get_html(getCloudFlareFile(file_url($element->href))->content);
+	$detail = file_get_html(file_url($element->href));
+//	$detail = str_get_html(getCloudFlareFile(file_url($element->href))->content);
 /*	echo '<pre>';
 	var_dump($detail);
 	echo '</pre>';
