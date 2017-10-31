@@ -1,12 +1,12 @@
 var kona = 0,
-	search_value = '',
-	search_active = 0,
-	 search_focus = 0,
-	requestTimer = false,
-	loadmore,
-	nb_title = 0,
-	id = 'all',
-	unr = 0;
+search_value = '',
+search_active = 0,
+search_focus = 0,
+requestTimer = false,
+loadmore,
+nb_title = 0,
+id = 'all',
+unr = 0;
 //var bgsave;
 var d;
 //var f;
@@ -19,32 +19,31 @@ var totalItems = 0;
 var readItems =0;
 
 var inactivityTime = function () {
-    var t;
-    window.onload = resetTimer;
-    // DOM Events
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-		document.onload = resetTimer;
-document.onmousemove = resetTimer;
-document.onmousedown = resetTimer; // touchscreen presses
-document.ontouchstart = resetTimer;
-document.onclick = resetTimer;     // touchpad clicks
-document.onscroll = resetTimer;    // scrolling with arrow keys
-document.onkeypress = resetTimer;
-    function rearm() {
-			document.location.reload(true);
-    }
-
-    function resetTimer() {
-        clearTimeout(t);
-        t = setTimeout(rearm, 3000)
+  var t;
+  window.onload = resetTimer;
+  document.onmousemove = resetTimer;
+  document.onkeypress = resetTimer;
+  document.onload = resetTimer;
+  document.onmousemove = resetTimer;
+  document.onmousedown = resetTimer; // touchscreen presses
+  document.ontouchstart = resetTimer;
+  document.onclick = resetTimer;     // touchpad clicks
+  document.onscroll = resetTimer;    // scrolling with arrow keys
+  document.onkeypress = resetTimer;
+  function rearm() {
+    document.location.reload(true);
+  }
+  function resetTimer() {
+    clearTimeout(t);
+    t = setTimeout(rearm, 300000)
         // 1000 milisec = 1 sec
-    }
+  }
 };
 
 function $(i) {
 //	return D.querySelector('#'+i);
   return D.getElementById(i);
+ // inactivityTime();
 }
 //var favico = D.createElement("link");
 //favico.id="favico";
@@ -474,6 +473,7 @@ function konamistop() {
 function i() {
   view('all');
   menu();
+  inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;
     log("Focus sur l'input de recherche.");
