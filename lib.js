@@ -242,12 +242,12 @@ function getHTTPObject(action) {
        // log("JSON du menu : "+f);
         for (var k = 0, mlen = f.f.length; k < mlen; k++) {
           i = f.f[k].i;
-/*
+
           M[i] = [];
           M[i].d = f.f[k].d;
           M[i].t = f.f[k].t;
           M[i].n = f.f[k].n;
-          M[i].i = f.f[k].i;*/
+          M[i].i = f.f[k].i;
           if (f.f[k].n > 0) {
             page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></span></li>\n';
             nb_title += f.f[k].n || 0;
@@ -282,18 +282,18 @@ function getHTTPObject(action) {
 /*            object.create(menu);*/
           for (var z = 0, len = d.i.length; z < len; z++) {
             i = d.i[z].i;
-            f = d.i[z].f;
-            console.log(f);
-          if(!M[f]) {
-            M[f] = [];
-            M[f].d = d.i[z].e;
-            M[f].l = d.i[z].o;
-            M[f].t = d.i[z].n;
-            M[f].n = 1;
-            M[f].i = d.i[z].f;
-          } else {
-            M[f].n+=1;
-          }
+          //   f = d.i[z].f;
+          //   console.log(f);
+          // if(!M[f]) {
+          //   M[f] = [];
+          //   M[f].d = d.i[z].e;
+          //   M[f].l = d.i[z].o;
+          //   M[f].t = d.i[z].n;
+          //   M[f].n = 1;
+          //   M[f].i = d.i[z].f;
+          // } else {
+          //   M[f].n+=1;
+          // }
           /*  menu[i].d = d.i[z].e;
             menu[i].i = d.i[z].f;
             menu[i].l = d.i[z].e;
