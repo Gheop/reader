@@ -49,6 +49,7 @@ $r = get_links($mysqli, $extra);
 $mh = curl_multi_init();
 $ch = array();
 $dd = array();
+$urlorigin = array();
 $query = '';
 $i = 0;
 while($d = $r->fetch_array()) {
@@ -62,11 +63,14 @@ while($d = $r->fetch_array()) {
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => 'UTF-8',
             CURLOPT_SSL_VERIFYPEER => FALSE,
-            CURLOPT_SSL_VERIFYHOST => FALSE
+            CURLOPT_SSL_VERIFYHOST => FALSE,
+            CURLOPT_FOLLOWLOCATION => TRUE,
+            CURLOPT_MAXREDIRS => 3
 			)
 		);
 	curl_multi_add_handle($mh, $ch[$i]);
 	$dd[$i] = $d[0];
+	$urlorigin[$i] = $d[1];
 	$i++;
 }
 
@@ -84,8 +88,14 @@ for($j=0;$j<$i;$j++) {
 	$ttt = $tt->fetch_array();
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
-	if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
+	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
+	$redirectURL = curl_getinfo($ch[$j],CURLINFO_EFFECTIVE_URL );
+/*	echo '<h1>'.$urlorigin[$j].'</h1>';
+	echo '<h1>'.$redirectURL.'</h1>';*/
+	if($urlorigin[$j] != $redirectURL) {
+		$mysqli->query("update reader_flux set rss='$redirectURL' where id=$dd[$j];") or die($mysqli->error);
+	}
 //echo "OK!<br />";
 	if (!$rss and $DEBUG) {
 		foreach (libxml_get_errors() as $error) {
@@ -97,7 +107,7 @@ for($j=0;$j<$i;$j++) {
 		echo '</pre>';
 		libxml_clear_errors();
 	}
-// if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
+ //if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
 /*	if($DEBUG) echo '<pre>';
 	if($DEBUG) print_r($rss);
 	if($DEBUG) echo '</pre>';*/
