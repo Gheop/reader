@@ -1,5 +1,6 @@
 <?php 
 include('/www/conf.php');
+if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 //$mysqli->set_charset("utf8") or die("Erreur lors du chargement du jeu de caractères utf8 : %s\n", $mysqli->error);
 
 /* pour test
