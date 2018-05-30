@@ -32,9 +32,10 @@ if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Twitter spécif
 $url = $base_url.'/'.$_POST['f'];
 $html = file_get_html($url);
 /*echo '<pre>';
-print_r($html);
-echo '</pre>';*/
-foreach($html->find('p[class=ProfileHeaderCard-bio u-dir]') as $title_descr) {
+echo $html;
+echo '</pre>';
+die;*/
+foreach($html->find('title') as $title_descr) {
 $title_descr = $title_descr->plaintext;
 }
 
@@ -45,29 +46,45 @@ echo "    <title>$site_name - ".$_POST['f']."</title>
 echo "    <link>"._get_URI()."</link>
 ";
 $i = 0;
-$tweet_block = $html->find('div[class=tweet]');
+//$tweet_block = $html->find('table[class=tweet]');
+$tweet_block = $html->find('div[class="tweet"]');//>   <p class="TweetTextSize
 foreach($tweet_block as $tweet) {
 	
-	//var_dump($tweet);
-	//die;
-	if(isset($tweet->attr['data-retweet-id'])) continue;
+	//echo $tweet;
+/*	die;*/
+	//var_dump($tweet->attr);
+//	continue;
+
+	if(isset($tweet->attr['data-retweet-id'])) 
+	continue;
+
 	if($i++ > 19) break;
-	$mylink = 'https://twitter.com/'.$_POST['f'].'/statuses/'.$tweet->attr['data-tweet-id'];
+/*	$mylink = 'https://twitter.com'.$tweet->attr['href'];*/
 
     // get tweet text
     $tweetText = $tweet->find('p[class=TweetTextSize]', 0)->plaintext;
+//$tweetText = $tweet->find('div[class=dir-ltr]',0)->plaintext;
 
     $tweetText = str_replace('&nbsp;', '', $tweetText);
-
+    $tweetText2 = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $tweetText);
+    $tweetText2 = preg_replace('/\#([^\s]*)/','<a href="https://twitter.com/hashtag/$1">@$1</a>', $tweetText2);
     $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
     $tweetText = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
 //echo "<text>$tweetText</text>";
     //echo 'Tweet: ' . $tweetText . '<br/>';
 
     // get tweet stamp
+  /*  $tweetDate = $tweet->find('td[class=timestamp]', 0);
+    print_r($tweetDate->attr);
+    $date = date('r');*///,$tweetDate->attr['data-time']);
+       // get tweet stamp
     $tweetDate = $tweet->find('a[class=tweet-timestamp] span[class=_timestamp]', 0);
     //print_r($tweetDate);
     $date = date('r',$tweetDate->attr['data-time']);
+    $mylink = 'https://twitter.com'.$tweet->find('a[class=tweet-timestamp]',0)->attr['href'];
+    //->attr['href'];
+   // print_r($mylink->children[0]->attr['data-time']);
+   // die;
     echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($tweetText),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($tweetText2)?htmlspecialchars(stripslashes($tweetText2),ENT_QUOTES,'UTF-8'):""),"</description>
@@ -76,7 +93,7 @@ foreach($tweet_block as $tweet) {
 	      <guid>".(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
-
+//die;
 /*	var_dump($tweet);
 	die;*/
 

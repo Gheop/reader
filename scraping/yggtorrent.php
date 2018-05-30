@@ -90,7 +90,7 @@ foreach($html->find('td a[class=torrent-name]') as $element) {
 	var_dump($detail);
 	echo '</pre>';
 	die;*/
-	foreach ($detail->find('a[class=btn btn-success]') as $mylinktmp) {
+	foreach ($detail->find('a[class=btn btn-primary]') as $mylinktmp) {
 		$mylink = $mylinktmp->href;
 		break;
 		# code...

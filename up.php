@@ -89,7 +89,22 @@ for($j=0;$j<$i;$j++) {
 	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	if($DEBUG) libxml_use_internal_errors(true);
 	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
-	$rss = @simplexml_load_string(trim(curl_multi_getcontent($ch[$j])), 'SimpleXMLElement', LIBXML_NOCDATA);
+
+	$xml = trim(curl_multi_getcontent($ch[$j]));
+	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);
+	// $xml = tidy_repair_string($xml, array(
+	//     'output-xml' => true,
+	//     'input-xml' => true
+	// ));
+	$rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+	//$rss = $xml->asXML();
+	//print_r($rss);
+	//die;
+// 	$rss = new DomDocument();
+// 	$rss->recover=true;
+// 	$rss->loadXML(trim(curl_multi_getcontent($ch[$j])));
+// $rss = $rss->saveXML();
+
 	$redirectURL = curl_getinfo($ch[$j],CURLINFO_EFFECTIVE_URL );
 /*	echo '<h1>'.$urlorigin[$j].'</h1>';
 	echo '<h1>'.$redirectURL.'</h1>';*/
@@ -99,7 +114,7 @@ for($j=0;$j<$i;$j++) {
 //echo "OK!<br />";
 	if (!$rss and $DEBUG) {
 		foreach (libxml_get_errors() as $error) {
-			print $error;
+			var_dump( $error );
         // gérer les erreurs ici
 		}
 		echo '<pre>';
@@ -150,7 +165,7 @@ for($j=0;$j<$i;$j++) {
 		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
 		//le lien n'est pas complet !
 		$link = complete_link($link, $linkmaster);
-		
+
 		// print $link;
 		// die;
 		if(!isset($link)|| !$link || $link=='') {
@@ -208,17 +223,13 @@ for($j=0;$j<$i;$j++) {
 			if(isset($item->description)) $content = $item->description;
 			else if(isset($item->content)) $content = $item->content;
 			else if(isset($item->summary)) $content = $item->summary;
+			else if(isset($item->media)) var_dump($item->media);
 			else {
 				print "pas de content<br />";
-				if(preg_match('/^(\/\/)?(www.)?youtube.com\/watch\?v=(.*)/', $link, $m)) {
+				if(preg_match('/^(.*\/\/)?(www.)?youtube.com\/watch\?v=(.*)/', $link, $m)) {
 					echo "Lien youtube trouvé!<br />";
       		//$content = '<yt width="560" height="315" src="https://www.youtube.com/embed/'.$m[3].'" frameborder="0" allowfullscreen></yt>';
-					$content = '<span class="youtube-embed">'.$m[3].'</span>';
-				}
-				else if(preg_match('/^(\/\/)?(www.)?youtu.be\/(.*)\??.*/', $link, $m)) {
-					echo "Lien youtube trouvé!<br />";
-      		//$content = '<yt width="560" height="315" src="https://www.youtube.com/embed/'.$m[3].'" frameborder="0" allowfullscreen></yt>';
-					$content = '<span class="youtube-embed">'.$m[3].'</span>';
+					$content = '<yt>'.$m[3].'</yt>';
 				}
 				else if(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
 					echo "Image trouvée!<br />";
@@ -243,11 +254,11 @@ for($j=0;$j<$i;$j++) {
 			/* echo "&nbsp;&nbsp;title       : $title<br />"; */
 			/* echo "&nbsp;&nbsp;author      : $author<br />"; */
 			/* echo "&nbsp;&nbsp;link        : $link<br />"; */
-			 //echo "&nbsp;&nbsp;content     : $content<br /><br />"; 
+			 //echo "&nbsp;&nbsp;content     : $content<br /><br />";
 
 			$title = clean_txt($title);
 			$content = clean_txt($content);
-			//echo "&nbsp;&nbsp;content     : $content<br /><br />"; 
+			//echo "&nbsp;&nbsp;content     : $content<br /><br />";
 			$author = clean_txt($author);
 			print "MAJ<br />";
 /*			echo "insert into reader_item values ('', $dd[$j], '".date("Y-m-d H:i:s",$iDate)."', '".$mysqli->real_escape_string($guid)."', '".$mysqli->real_escape_string($title)."', '".$mysqli->real_escape_string($author)."', '".$mysqli->real_escape_string($link)."', '".$mysqli->real_escape_string($content);

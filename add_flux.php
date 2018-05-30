@@ -59,7 +59,8 @@ function searchRSSUrlSpecialSite($url) {
 		}
 		return false;
 	}	
-	else if(preg_match('/^.*\/\/(www\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
+	else if(preg_match('/^.*\/\/(www\.|m\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
+	//else if(preg_match('/^.*\/\/(www\.|m\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
 		$html = file_get_html('https://www.youtube.com/watch?v='.$m[4]);
 		foreach($html->find('meta[itemprop=channelId]') as $element) {
 			$url = $element->content;
@@ -85,6 +86,20 @@ function searchRSSUrlSpecialSite($url) {
 	}
 	else if(preg_match('/^.*\/\/www\.dailymotion\.com\/([^\/\?].*)$/',$url, $m )) {
 		return 'http://www.dailymotion.com/rss/user/'.$m[1];
+	}
+
+	/*
+	* twitter
+	*/
+	else if(preg_match('/^.*\/\/(www\.)?twitter\.com\/(.*)?\/?.*$/',$url, $m )) {
+		return 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[2];
+	}
+
+		/*
+	* reddit
+	*/
+	else if(preg_match('/^.*\/\/(www\.)?reddit\.com\/(.*)?$/',$url, $m )) {
+		return $m[0].'.rss';
 	}
 	return false;
 }
@@ -198,11 +213,18 @@ else {
 	exit;
 }
 
+$file = 'flux.txt';
+// Ouvre un fichier pour lire un contenu existant
+$current = file_get_contents($file);
+// Ajoute une personne
+$current .= "$rsslink\n";
+// Écrit le résultat dans le fichier
+file_put_contents($file, $current);
+
 if(preg_match('/^[@#](.*)$/',$rsslink,$m)) {
- //echo "$m[1]"; exit;
- $rsslink = 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[1];
- 
+ 	$rsslink = 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[1];
 }
+
 
 if(!$rsslink = validate_url($rsslink)) {
 	print "Ce lien n'est pas valide.";

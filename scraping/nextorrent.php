@@ -1,13 +1,13 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'http://www.nextorrent.ch';
+$base_url = 'http://www.nextorrent.pro';
 $uri = [
-	'films' => '/torrents/films',
-	'series' => '/torrents/series',
-	'musique' => '/torrents/musiques',
-	'ebook' => '/torrents/ebooks',
-	'logiciels' => '/torrents/logiciels',
-	'jeux' => '/torrents/jeux'
+	'films' => '/films',
+	'series' => '/series',
+	'musique' => '/musiques',
+	'ebook' => '/ebooks',
+	'logiciels' => '/logiciels',
+	'jeux' => '/jeux'
 ];
 
 /*function _is_curl() {
@@ -49,23 +49,26 @@ $html = str_get_html($html);
 var_dump($html);*/
 //die;
 $i = 0;
-foreach($html->find('td a') as $element) {
+foreach($html->find('h2[class=entry-title] a') as $element) {
 	if($i++ >= 20 ) break;
 	$htmlaa = array();
     // echo $element->class. ' - '. $element->title. ' - '. $element->href . '<br>';
-	$detail = file_get_html($base_url.$element->href);
+	$detail = file_get_html($element->href);
 
 
-	foreach($detail->find('div[class=btn-download] a') as $lien) {
-		$mylink = $lien->href;
-		break;
+	foreach($detail->find('a') as $lien) {
+		if(preg_match('/^.*\.torrent$/',$lien->href)) {
+			$mylink = $lien->href;
+			break;
+		}
 	}
-	foreach($detail->find('div[class=title] a') as $titre) {
+	foreach($detail->find('h2[class=entry-title]') as $titre) {
 		$mytitle = $titre->plaintext;
 		break;
 	}
-	foreach($detail->find('div[id=torrentsdesc]') as $info) {
+	foreach($detail->find('div[class=entry-content] p') as $info) {
 		$mydescription = $info->parent()->plaintext;
+		break;
 	}
 	$j = 0;
 	foreach($detail->find('table[class=table] td strong') as $info) {

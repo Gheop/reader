@@ -25,7 +25,7 @@ column_json(column_add(Column_create(\'i\',F.id),\'t\',F.title,
 \'n\',(select count(distinct(I.id)) - count(distinct(UI.id)) from reader_item I LEFT JOIN reader_user_item UI ON UI.id_item=I.id and UI.id_user='.$_SESSION['user_id'].' and UI.date > (now() - interval 15 day) 
 where I.id_flux=F.id and I.pubdate > (now()- interval 15 day)),
 \'d\',F.description,\'l\',F.link))),"]}") 
-from reader_flux F, reader_user_flux UF where F.id=UF.id_flux and UF.id_user='.$_SESSION['user_id'].' order by F.title asc') or die($mysqli->error);
+from reader_flux F, reader_user_flux UF where F.id=UF.id_flux and UF.id_user='.$_SESSION['user_id'].' order by F.title asc limit 1;') or die($mysqli->error);
 
 //$r = $mysqli->query('select menu from reader_tmp where id_user=1');
 //$r = $mysqli->query('SELECT CONCAT(\'{"f":[\',GROUP_CONCAT(CONCAT(\'{"i":\',F.id),CONCAT(\',"t":"\',REPLACE(F.title,\'"\',\'\\\"\'),\'"\'),CONCAT(\',"n":\',(select count(distinct(I.id)) - count(distinct(UI.id)) from reader_item I LEFT JOIN reader_user_item UI ON UI.id_item=I.id and UI.id_user='.$_SESSION['user_id'].' and UI.date > (now() - interval 15 day) where I.id_flux=F.id and I.pubdate > (now()- interval 15 day))),CONCAT(\',"d":"\',REPLACE(F.description,\'"\',\'\\\"\'),\'"\'),CONCAT(\',"l":"\',REPLACE(F.link,\'"\',\'\\\"\'),\'"}\')),"]}") from reader_flux F, reader_user_flux UF where UF.id_user='.$_SESSION['user_id'].' and F.id=UF.id_flux  order by F.title asc') or die($mysqli->error);
