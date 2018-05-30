@@ -8,14 +8,13 @@ nb_title = 0,
 id = 'all',
 unr = 0,
 d,
-D = document,
 M = [],
 varscroll = 0,
 loadinprogress = 0,
 zhr,
 totalItems = 0,
 readItems =0;
-
+const D = document;
 var inactivityTime = function () {
   var t;
   window.onload = resetTimer;
@@ -182,7 +181,7 @@ function addflux() {
   var xhr = getHTTPObject('addflux');
   xhr.open("POST", '//reader.gheop.com/add_flux.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&link=' + val);
+  xhr.send('xhr=1&link=' + encodeURIComponent(val));
   requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
   }), 10000);

@@ -1,31 +1,31 @@
 <?php
 function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','//',$f[1]);
-  $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
+ // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
+/*  $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
   $extension_valides = array('jpg','png','gif','jpeg','bmp');
-
-  if (in_array($extension_fichier, $extension_valides))
-      {
-  $data = file_get_contents($f[1]) ;
-  if(!$data) return '';
-  $tmpfile='tmp/'.md5($data).'.'.$extension_fichier;
-  file_put_contents($tmpfile, $data);
-  $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
-  if($type == "inode/x-empty") return "";
-  if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
-  else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
-  else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
-  else return "IMAGE UNKNOW $type $f[1]";
-  $base64 = "//reader.gheop.com/$tmpfile";
-  list($width, $height, $t, $attr) = getimagesize("$tmpfile");
-  if($width == 1 && $height == 1) {
-  	unlink($tmpfile);
-  	return '';
+*/
+/*  if (in_array($extension_fichier, $extension_valides))
+      {*/
+  if($data = file_get_contents($f[1])) {
+    //if(!$data) return '';
+    $tmpfile='tmp/'.md5($data).'.'.$extension_fichier;
+    file_put_contents($tmpfile, $data);
+    $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
+    if($type == "inode/x-empty") return "";
+    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
+    else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
+    else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
+    else return "IMAGE UNKNOW $type $f[1]";
+    $base64 = "//reader.gheop.com/$tmpfile";
+    list($width, $height, $t, $attr) = getimagesize("$tmpfile");
+    if($width == 1 && $height == 1) {
+  	 unlink($tmpfile);
+  	 return '';
+    }
+    return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"/>';
   }
-  return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"/>';
-
-      }
-  else return 'Extension unknow';
+  else return '<img src="'.$f[1].'" />';
 }
 
 function clean_txt($v) {
@@ -35,15 +35,15 @@ function clean_txt($v) {
 //  $purifier = new HTMLPurifier($config);
   $v = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $v);
   $p = array();
-  $p[] = '/<img .*?src="\/\/feeds\.feedburner\.com\/.*?".*?>/s';
-  $p[] = '/<img .*?src=".*\/\/www.gstatic.com\/images\/icons\/.*?".*?>/s';
-  $p[] = '/<img .*?src=".*\/\/a.fsdn.com\/sd\/.*?".*?>/s';
+  $p[] = '/<img .*?src="(http:)?\/\/feeds\.feedburner\.com\/.*?".*?>/s';
+  $p[] = '/<img .*?src=".*\/\/www\.gstatic\.com\/images\/icons\/.*?".*?>/s';
+  $p[] = '/<img .*?src=".*\/\/a\.fsdn\.com\/sd\/.*?".*?>/s';
   $p[]='/<a *?.*?>/s';
   $p[]='/<\/a>/s';
   $p[]='/<i>/s';
   $p[]='/<i +.*?>/s';
   $p[]='/<\/i>/s';
-    $p[]='/<b\s+.*?>/s';
+  $p[]='/<b\s+.*?>/s';
   $p[]='/<\/b\s+>/s';
   $p[]='/<article *?.*?>/s';
   $p[]='/<\/article>/s';
@@ -83,9 +83,9 @@ function clean_txt($v) {
   $v = preg_replace($p,'', $v);
   //$v = $purifier->purify($v);
   
-
+/*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
-  $v = preg_replace('#<span class="youtube-embed">([^<]*)</span>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
+  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
   $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
 
 /*  $q =array();
