@@ -9,5 +9,11 @@ scraping/cf-cookies/
 i/
 TESTS/
 \#*
+scraping/api.coinmarketcap.com
+scraping/coinhive.com.php
+scraping/dwarfpool.com.php
+scraping/sumokoin.hashvault.pro.php
+scraping/supportxmr.com.php
+
 
 
