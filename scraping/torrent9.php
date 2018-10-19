@@ -1,6 +1,6 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'http://www.torrent9.cc';
+$base_url = 'http://www.torrent9.blue';
 $uri = [
 	'films' => '/torrents_films.html',
 	'series' => '/torrents_series.html',

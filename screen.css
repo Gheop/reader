@@ -102,7 +102,8 @@ li > input {
     font: normal 100%/1.15 Awesome;
 }
 body {
-font-family: 'Open Sans', sans-serif;
+font-family:'Verdana', sans-serif;
+font-family:'Open Sans', sans-serif;
 /*  font: normal 100%/1.15 Awesome;*/
   line-height: 1.3em;
   font-weight: 400;

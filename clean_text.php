@@ -2,8 +2,8 @@
 function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','//',$f[1]);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
-/*  $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
-  $extension_valides = array('jpg','png','gif','jpeg','bmp');
+$extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
+/*  $extension_valides = array('jpg','png','gif','jpeg','bmp');
 */
 /*  if (in_array($extension_fichier, $extension_valides))
       {*/
@@ -11,18 +11,25 @@ function imgbase64($f) {
     //if(!$data) return '';
     $tmpfile='tmp/'.md5($data).'.'.$extension_fichier;
     file_put_contents($tmpfile, $data);
-    $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
-    if($type == "inode/x-empty") return "";
-    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
-    else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
-    else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
-    else return "IMAGE UNKNOW $type $f[1]";
-    $base64 = "//reader.gheop.com/$tmpfile";
     list($width, $height, $t, $attr) = getimagesize("$tmpfile");
     if($width == 1 && $height == 1) {
   	 unlink($tmpfile);
   	 return '';
     }
+    if($width > 1680) {
+  	 exec('convert -resize 1680x '.$tmpfile.' '.$tmpfile);
+    }
+    if($height > 1024) {
+  	 exec('convert -resize x1024 '.$tmpfile.' '.$tmpfile);
+    }
+    $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
+    if($type == "inode/x-empty") return "";
+    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
+    else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
+    else if($type == "image/gif" && `which giflossy`) ;//exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
+    else return "IMAGE UNKNOW $type $f[1]";
+    $base64 = "//reader.gheop.com/$tmpfile";
+    
     return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"/>';
   }
   else return '<img src="'.$f[1].'" />';
