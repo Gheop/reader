@@ -31,7 +31,7 @@ echo '    <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml"
 ';
 
 echo "    <title>$site_name</title>
-    <description>Les derniers GIF de $site_name</description>
+    <description>L’instant GIF des développeurs</description>
 ";
 echo "    <link>".$base_url."</link>
 ";
