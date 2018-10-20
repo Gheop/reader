@@ -49,13 +49,13 @@ $i = 0;
 //$tweet_block = $html->find('table[class=tweet]');
 $tweet_block = $html->find('div[class="tweet"]');//>   <p class="TweetTextSize
 foreach($tweet_block as $tweet) {
-	
+
 	//echo $tweet;
-/*	die;*/
+	//die;
 	//var_dump($tweet->attr);
 //	continue;
 
-	if(isset($tweet->attr['data-retweet-id'])) 
+	if(isset($tweet->attr['data-retweet-id']))
 	continue;
 
 	if($i++ > 19) break;
@@ -63,17 +63,28 @@ foreach($tweet_block as $tweet) {
 
     // get tweet text
     $tweetText = $tweet->find('p[class=TweetTextSize]', 0)->plaintext;
+    //echo $tweetText;
+
+    //echo '<br /><br />';
+
+  //  }
 //$tweetText = $tweet->find('div[class=dir-ltr]',0)->plaintext;
 
     $tweetText = str_replace('&nbsp;', '', $tweetText);
     $tweetText2 = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $tweetText);
     $tweetText2 = preg_replace('/\#([^\s]*)/','<a href="https://twitter.com/hashtag/$1">@$1</a>', $tweetText2);
-    $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
+   // $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
+    $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
     $tweetText = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
+    $tweetPic = $tweet->find('div[class=AdaptiveMedia-photoContainer js-adaptive-photo]', 0);
+    //echo $tweetPic->attr["data-image-url"];
+    // die;
+//    if($tweetPic) {->attr["data-image-url"]
+    $tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
 //echo "<text>$tweetText</text>";
     //echo 'Tweet: ' . $tweetText . '<br/>';
 
-    // get tweet stamp
+	    // get tweet stamp
   /*  $tweetDate = $tweet->find('td[class=timestamp]', 0);
     print_r($tweetDate->attr);
     $date = date('r');*///,$tweetDate->attr['data-time']);
@@ -98,14 +109,14 @@ foreach($tweet_block as $tweet) {
 	die;*/
 
 
-$tweet->clear(); 
+$tweet->clear();
 unset($tweet);
 
 }
 /*//TweetTextSize
 foreach($html->find('div[class=tweet original-tweet]') as $element) {
 	$mylink = 'https://twitter.com/'.$_POST['f'].'/statuses/'.$element->attr['data-tweet-id'];
-	echo 
+	echo
 	//echo $element->innerhtml;
 	$description = $element->find('p[class=TweetTextSize]');
 	echo '<br />';
@@ -144,7 +155,7 @@ foreach($html->find('div[class=tweet original-tweet]') as $element) {
 	      <guid>".(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
-$element->clear(); 
+$element->clear();
 unset($element);
 }*/
 

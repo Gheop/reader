@@ -27,10 +27,10 @@ $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
     if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
     else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
     else if($type == "image/gif" && `which giflossy`) ;//exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
-    else return "IMAGE UNKNOW $type $f[1]";
+    else return '<img src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
     $base64 = "//reader.gheop.com/$tmpfile";
-    
-    return '<img src="'.$base64.'" '.$attr.' onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"/>';
+
+    return '<img src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
   }
   else return '<img src="'.$f[1].'" />';
 }
@@ -89,7 +89,7 @@ function clean_txt($v) {
 
   $v = preg_replace($p,'', $v);
   //$v = $purifier->purify($v);
-  
+
 /*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
   $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
