@@ -80,7 +80,8 @@ foreach($tweet_block as $tweet) {
     //echo $tweetPic->attr["data-image-url"];
     // die;
 //    if($tweetPic) {->attr["data-image-url"]
-    $tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
+    if($tweetPic->attr["data-image-url"] && $tweetPic->attr["data-image-url"] != '/')
+    	$tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
 //echo "<text>$tweetText</text>";
     //echo 'Tweet: ' . $tweetText . '<br/>';
 
