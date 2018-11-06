@@ -78,11 +78,6 @@
   }
 }
 
-.pulse {
-      animation-duration: 1s;
-  -webkit-animation-name: pulse;
-  animation-name: pulse;
-}
 .tags {
     padding-right: 10px;
     float: right;
@@ -134,6 +129,9 @@ b,strong,legend{
     margin:0 6px;
     font:2.5em Gheop;
     text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
+    animation-duration: 1s;
+  -webkit-animation-name: pulse;
+  animation-name: pulse;
 }
 #g a:hover{
   /*    color:red;*/
@@ -161,10 +159,11 @@ b,strong,legend{
     /*user-select: none;*/
     -moz-user-select: none;
     -webkit-user-select: none;
+
 }
 
 
-#page {
+main {
     border-top-left-radius: 1em;
     border-bottom-left-radius: 1em;
     background: #eee;
@@ -209,6 +208,7 @@ b,strong,legend{
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
     color:white;
+    font: normal 100%/1.15 Awesome;
 }
 .item1 {
     box-shadow: 8px 8px 12px #444;
@@ -558,8 +558,7 @@ input, textarea,button {
     color: white;
 }
 
-#progbar {
-/*background: #aaa;*/
+footer {
     position: absolute;
     height:4px;
     bottom:0px;
@@ -569,7 +568,6 @@ input, textarea,button {
     padding:0;
     overflow:auto;
 }
-/*he gros, c'est quoi cette feuille de style pourrage hein ? */
 
 
 @media screen and (max-width: 640px) {
@@ -580,7 +578,7 @@ input, textarea,button {
 	display:none;
 	width:0;
 }
-#page {
+main {
 	left:0vw;
 }
 .some_selector { padding: 20px;

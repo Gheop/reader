@@ -15,6 +15,7 @@ zhr,
 totalItems = 0,
 readItems =0;
 const D = document;
+const DM = document.getElementsByTagName("main")[0];
 var inactivityTime = function () {
   var t;
   window.onload = resetTimer;
@@ -78,7 +79,7 @@ function search(t) {
 
 function scroll() {
   for (var varscroll = 0, len = d.i.length; varscroll < len; varscroll++) {
-    if ($(d.i[varscroll].i).offsetTop <= $('page').scrollTop) {
+    if ($(d.i[varscroll].i).offsetTop <= DM.scrollTop) {
       if (d.i[varscroll].r == 1) read(varscroll);
       if (!loadinprogress && varscroll + 5 >= loadmore) {
         loadinprogress = 1;
@@ -89,11 +90,11 @@ function scroll() {
 }
 
 function goUp() {
-  $('page').scrollTop -= 20;
+  DM.scrollTop -= 20;
 }
 
 function goDown() {
-  $('page').scrollTop += 20;
+  DM.scrollTop += 20;
 }
 
 function goPrev() {
@@ -102,8 +103,8 @@ function goPrev() {
     return;
   }
   for (var k = d.i.length - 1; k >= 0; k--) {
-    if ($(d.i[k].i).offsetTop < $('page').scrollTop - 10) {
-      $('page').scrollTop = $(d.i[k].i).offsetTop - 10;
+    if ($(d.i[k].i).offsetTop < DM.scrollTop - 10) {
+      DM.scrollTop = $(d.i[k].i).offsetTop - 10;
       return;
     }
   }
@@ -115,10 +116,10 @@ function goNext() {
   if (!d) return;
   for (var k = 0, l = d.i.length; k <= l; k++) {
     if (!(d.i[k])) {
-      $('page').scrollTop = $('addblank').offsetTop - 20;
+      DM.scrollTop = $('addblank').offsetTop - 20;
       return;
-    } else if ($(d.i[k].i).offsetTop > $('page').scrollTop + 10) {
-      $('page').scrollTop = $(d.i[k].i).offsetTop - 10;
+    } else if ($(d.i[k].i).offsetTop > DM.scrollTop + 10) {
+      DM.scrollTop = $(d.i[k].i).offsetTop - 10;
       return;
     }
   }
@@ -126,11 +127,11 @@ function goNext() {
 }
 
 function goPrevPage() {
-  $('page').scrollTop -= $('page').offsetHeight;
+  DM.scrollTop -= DM.offsetHeight;
 }
 
 function goNextPage() {
-  $('page').scrollTop += $('page').offsetHeight;
+  DM.scrollTop += DM.offsetHeight;
 }
 
 function delError() {
@@ -304,33 +305,33 @@ function getHTTPObject(action) {
           f.f[k].i = d.i[z].f;*/
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action icon"><a class="nocolor lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
+            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
           }
         }
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
         page += '<div id="addblank">&nbsp;</div>';
-        $('page').innerHTML = page;
-        if(loadmore) $('addblank').style.height = ($('page').offsetHeight - 60) + 'px';
-        $('page').addEventListener('DOMMouseScroll', scroll, false);
-        $('page').onscroll = scroll;
-        $('page').onmousewheel = scroll;
-        $('page').scrollTop = 0;
+        DM.innerHTML = page;
+        if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        DM.addEventListener('DOMMouseScroll', scroll, false);
+        DM.onscroll = scroll;
+        DM.onmousewheel = scroll;
+        DM.scrollTop = 0;
       } else if (action === 'more') {
         if (!xhr.responseText) return 0;
         var p = JSON.parse(xhr.responseText);
         if (!p || p.i.length === 0) return 0;
-        $('page').removeChild($('addblank'));
+        DM.removeChild($('addblank'));
         for (var x = 0, plen = p.i.length; x < plen; x++) {
           //d.i.push(p.i[k]);
           d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
           var n = d.i.length - 1;
           loadmore++;
-          page += '<div id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action icon"><a class="nocolor lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></div>';
+          page += '<div id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></div>';
           n = null;
         }
         page += '<div id="addblank">&nbsp;</div>';
-        $('page').insertAdjacentHTML('beforeend', page);
-        $('addblank').style.height = ($('page').offsetHeight - 60) + 'px';
+        DM.insertAdjacentHTML('beforeend', page);
+        $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
         loadinprogress = 0;
         p = null;
       } else if (action === 'markallread') {
@@ -344,24 +345,24 @@ function getHTTPObject(action) {
         id = 'search';
         $('f' + id).classList.add('show');
         if (!xhr.responseText) {
-          $('page').innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="nocolor search icon" onclick="return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
           return false;
         }
         d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
         loadmore = 0;
         for (var y = 0, tlen = d.i.length; y < tlen; y++) {
           loadmore++;
-          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="nocolor search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
           //voir pour foutre les tags en ul,li
         }
 
         page += '<div id="addblank">&nbsp;</div>';
-        $('page').innerHTML = page;
-        $('addblank').style.height = ($('page').offsetHeight - 60) + 'px';
-        $('page').addEventListener('DOMMouseScroll', scroll, false);
-        $('page').onscroll = scroll;
-        $('page').onmousewheel = scroll;
-        $('page').scrollTop = 0;
+        DM.innerHTML = page;
+        $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        DM.addEventListener('DOMMouseScroll', scroll, false);
+        DM.onscroll = scroll;
+        DM.onmousewheel = scroll;
+        DM.scrollTop = 0;
       }
       if (requestTimer) clearTimeout(requestTimer);
       page = null;
@@ -436,7 +437,7 @@ function read(k) {
 
 function progressBar() {
   var perc = (readItems/totalItems)*100;
-  $('progbar').style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
+  document.getElementsByTagName("footer")[0].style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
 }
 
 function menu() {
@@ -458,14 +459,14 @@ var pressedKeys = [],
 function konami() {
   //document.body.style.background = "url(stickmen.png)";
   //document.body.style.fontFamily = "LaChatteAMaman";
-  $('page').innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+$('page').innerHTML;
+  DM.innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+DM.innerHTML;
   $('konami').style.display='block';
 
   ////js1k.com/2014-dragons/details/1955
  // var a = $('c');
 /*a.style.width=(a.width=1e3)+"px";a.style.height=(a.height=500)+"px";for(p in c){c[p[0]+(p[6]||"")]=c[p]}J=K=C=B=0;u=50;D=250;E=F=G=H=1;I=250;setInterval(function(){L=300;M=500;N=400;with(c){A=function(S,x,y,T){T&&a(x,y,T,0,7,0);fillStyle=S.P?S:"#"+"ceff99aaffff333f99ff7".substr(S*3,3);fill();ba()};A(0,0,0,10000);A(6,800,300,140);O=G*u%400;l(0-O,N+100);l(0-O,N);for(i=0;i<7;i++){qt(i*200+100-O,i%2?L:M,i*200+200-O,N)}l(i*200-O,N+100);ca();fillStyle="#5c1";fill();ba();t=(G*(u+E)+I)%200/200;U=1-t;K2=U*U*N+2*t*U*((G*(u+E)+I)%400>200?L:M)+t*t*N;D+=F;if(D>=K){if(K2<K){if(F>0&&(K2-K)<0&&!J){E=E/3;K2=K}E-=E<2?0:0.1}else{E+=0.1*H*H}J=1;D=K;if(K2<K&&F>(K2-K)){F=(K2-K)}}else{J=0}F+=0.4*H;K=K2;A(3-H,I,D-10,10);A(3,I+3,D-12,4);A(4,I+4,D-12,1);Q=200+Math.pow(B,1.3)-u;R=50+Math.sin(B/2)*2;A(1,Q,R,30);A(3,Q+20,R+5,7);A(4,Q+22,R+7,2);A(6,0,0,0);fx(++B+" ☆",5,10);fx((C<B?C=B:C)+" ★",40,10);if(Q>4*I){alert(B);E=F=u=B=K=2}}u+=E},30);onkeydown=onkeyup=function(b){H=b.type[5]?2:1};
 */    //c=$('kona');h=t=150;L=w=c.width=800;u=DD=50;H=[];R=Math.random;for(mavar in C=c.getContext('2d'))C[mavar[J=X=Y=0]+(mavar[6]||'')]=C[mavar];timerkona = setInterval("if(DD)for(x=405,i=y=I=0;i<1e4;)L=H[i++]=i<9|L<w&R()<.3?w:R()*u+80|0;mavar=++t%99-u;mavar=mavar*mavar/8+20;y+=Y;x+=y-H[(x+X)/u|0]>9?0:X;j=H[o=x/u|0];Y=y<j|Y<0?Y+1:(y=j,J?-10:0);with(C){A=function(c,x,y,r){r&&arc(x,y,r,0,7,0);fillStyle=c.P?c:'#'+'ceff99ff78f86eeaaffffd45333'.substr(c*3,3); f(); ba()};for(DD=Z=0;Z<21;Z++){Z<7&&A(Z%6,w/2,235,Z?250-15*Z:w);i=o-5+Z;S=x-i*u;B=S>9&S<41;ta(u-S,0);G=cL(0,T=H[i],0,T+9);T%6||(A(2,25,T-7,5),y^j||B&&(H[i]-=.1,I++));G.P=G.addColorStop;G.P(0,i%7?'#7e3':(i^o||y^T||(y=H[i]+=mavar/99),'#c7a'));G.P(1,'#ca6');i%4&&A(6,t/2%200,9,i%2?27:33);m(-6,h);qt(-6,T,3,T);l(47,T);qt(56,T,56,h);A(G);i%3?0:T<w?(A(G,33,T-15,10),fc(31,T-7,4,9)):(A(7,25,mavar,9),A(G,25,mavar,5),fc(24,mavar,2,h),DD=B&y>mavar-9?1:DD);ta(S-u,0)}A(6,u,y-9,11);A(5,M=u+X*.7,Q=y-9+Y/5,8);A(8,M,Q,5);fx(I+'c',5,15)}DD=y>h?1:DD",u);onkeydown=onkeyup=function(e){E=e.type[5]?4:0;e=e.keyCode;J=e^38?J:E;X=e^37?e^39?X:E:-E}
-  $('page').scrollTop = 0;
+  DM.scrollTop = 0;
   kona = 1;
 }
 
@@ -546,7 +547,7 @@ function openActif() {
   for (var k = 0, len = d.i.length; k <= len; k++) {
     if (!(d.i[k])) {
       return;
-    } else if ($(d.i[k].i).offsetTop >= $('page').scrollTop) {
+    } else if ($(d.i[k].i).offsetTop >= DM.scrollTop) {
       log("Fenêtre active : " + d.i[k].l);
       window.focus();
       window.open(d.i[k].l).blur();

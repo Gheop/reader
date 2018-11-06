@@ -48,7 +48,7 @@ else {
   echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';}
 ?>
 </div>
-    <h1 id="g" class="pulse"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
+    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
 <?php
 if(isset($_SESSION['user_id'])) {
 echo '
@@ -61,8 +61,9 @@ echo '
    </form>
 </div>
 <?php
-echo '<ul id="menu">
-  <li id="fall" class="fluxnew" onclick="view(\'all\')" title="Tout voir">All&nbsp;&nbsp;&nbsp;
+echo '<nav>
+  <ul id="menu">
+    <li id="fall" class="fluxnew" onclick="view(\'all\')" title="Tout voir">All&nbsp;&nbsp;&nbsp;
     <span class="icon"><a title="Ajouter un flux" onclick="addflux();"></a>&nbsp;&nbsp;&nbsp;
     <a title="Importer des flux"></a>&nbsp;&nbsp;&nbsp;
     <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp;
@@ -70,11 +71,13 @@ echo '<ul id="menu">
     <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp;
     <a id="up" onclick="up();" title="Mettre à jour les flux"></a>
     </span>
-  </li>
-</ul>
-<div id="page">
-</div>
-<div id="progbar"></div>';
+    </li>
+  </ul>
+</nav>
+<main>
+</main>
+<footer>
+</footer>';
 //<script type="text/javascript" nonce="EDNnf03nceIOfn39fn3e9h3sdfa">i();</script>';
 }
 else {
