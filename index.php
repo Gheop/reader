@@ -45,10 +45,25 @@ if(!isset($_SESSION['pseudo'])) {
 if(!isset($_SESSION['pseudo'])) {
   echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
 else {
-  echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';}
+  echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';
+
+}
 ?>
 </div>
-    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span></a></h1>
+    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span>
+<?php  if($_SESSION['pseudo'] == "SiB") {
+  	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
+
+    $firstLine = $stringfromfile[0]; //get the string from the array
+
+    $explodedstring = explode("/", $firstLine, 3); //seperate out by the "/" in the string
+
+    $branchname = $explodedstring[2]; //get the one that is always the branch name
+
+    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
+  }
+  ?>
+  </a></h1>
 <?php
 if(isset($_SESSION['user_id'])) {
 echo '

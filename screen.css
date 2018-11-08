@@ -127,7 +127,7 @@ b,strong,legend{
     left:0;
     text-align:left;
     margin:0 6px;
-    font:2.5em Gheop;
+    font:2em Gheop;
     text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
     animation-duration: 1s;
   -webkit-animation-name: pulse;
@@ -151,7 +151,7 @@ b,strong,legend{
     position: absolute;
     margin:0;
     margin-top:2em;
-    top:30px;
+    top:12px;
     bottom:10px;
     left:4px;
     width:20vw;
@@ -458,7 +458,7 @@ vertical-align: super
     color:#444;
 }
 .fluxnew a:hover, .flux a:hover {
-    color:red;
+    color:#d43f57;
 }
 
 #error {
