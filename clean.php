@@ -1,14 +1,14 @@
 <?php
 include('/www/conf.php');
 
- // echo "<b>Efface des éléments plus vieux que trois mois :<br />"; 
- // $stmt = $mysqli->prepare("delete from reader_item where pubdate < (select now() - interval  3 month);") or die($mysqli->error); 
- // $stmt->execute(); 
- // echo "<br /><code>".$stmt->affected_rows." éléments effacés.</code><br /><br />"; 
+ // echo "<b>Efface des éléments plus vieux que trois mois :<br />";
+ // $stmt = $mysqli->prepare("delete from reader_item where pubdate < (select now() - interval  3 month);") or die($mysqli->error);
+ // $stmt->execute();
+ // echo "<br /><code>".$stmt->affected_rows." éléments effacés.</code><br /><br />";
 
 //on efface les "marqué comme lu" liés pour tous les utilisateurs.
 echo "<b>Effacement des éléments marqués comme lus devenus inexistants :</b>";
-$stmt = $mysqli->prepare("delete FROM reader_user_item where id_item not in (select id from reader_item);") or die($mysqli->error); 
+$stmt = $mysqli->prepare("delete FROM reader_user_item where id_item not in (select id from reader_item);") or die($mysqli->error);
 $stmt->execute();
 echo "<br /><code>".$stmt->affected_rows." éléments effacés.</code><br /><br />";
 
@@ -23,7 +23,7 @@ while($e = $r->fetch_array()) {
 echo "<code>$cpt éléments effacés.</code><br /><br />";
 
 echo "<b>Effacement des abonnements aux flux qui n'existent plus:</b><br />";
-$stmt = $mysqli->prepare("delete from reader_user_flux where id_flux not in (select F.id from reader_flux F);") or die($mysqli->error); 
+$stmt = $mysqli->prepare("delete from reader_user_flux where id_flux not in (select F.id from reader_flux F);") or die($mysqli->error);
 $stmt->execute();
 echo "<br /><code>".$stmt->affected_rows." éléments effacés.</code><br /><br />";
 ?>
