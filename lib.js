@@ -229,6 +229,12 @@ function editFluxName(idFlux) {
 function addMenu() {
 
 }
+
+function generateArticle(id, ) {
+
+
+  return '<div id="' + d.i[z].i + '" class="item1" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
+}
 function getHTTPObject(action) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
