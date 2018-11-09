@@ -15,6 +15,7 @@ zhr,
 totalItems = 0,
 readItems =0;
 online = true;
+alert = false;
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var inactivityTime = function () {
@@ -30,7 +31,8 @@ var inactivityTime = function () {
   document.onscroll = resetTimer;    // scrolling with arrow keys
   document.onkeypress = resetTimer;
   function rearm() {
-    document.location.reload(true);
+  	if(online)
+	    document.location.reload(true);
   }
   function resetTimer() {
     clearTimeout(t);
@@ -47,17 +49,19 @@ $('favico').href = "//reader.gheop.com/favicon.gif";
 
 function handleConnectionChange(event){
     if(event.type == "offline"){
-    	affError("Vous êtes déconnecté!");
-        log("You lost connection.");
+//    	affError("Vous êtes déconnecté!");
+ //       log("You lost connection.");
 		online = false;
-		$('g').style.textShadow = '1px 0px 1px #d43f57, -1px 0px 1px #d43f57';
+	//	$('g').style.textShadow = '1px 0px 1px #d43f57, -1px 0px 1px #d43f57';
+		$('g').style.textDecoration='line-through';
     }
 
     if(event.type == "online"){
-    	affError("Vous êtes de nouveau en ligne.");
-        log("You are now back online.");
+//    	affError("Vous êtes de nouveau en ligne.");
+//        log("You are now back online.");
         online = true;
-		$('g').style.textShadow = '1px 0px 1px #444, -1px 0px 1px #444';
+//		$('g').style.textShadow = '1px 0px 1px #444, -1px 0px 1px #444';
+		$('g').style.textDecoration='none';
     }
 }
 
@@ -621,35 +625,27 @@ function log(t) {
 
 
 function affError(text,n) {
-  n = typeof n !== 'undefined' ? n : 4;
-  var alert = 0;
-  if('Notification' in window){
-        Notification.requestPermission(function(permission){
-            if (permission === 'granted') {
-                var notification = new Notification('Gheop Reader',{
-                    body : text,
-                    icon : 'alert.png'
-                });
-                alert = 1;
-                setTimeout(function(){ notification.close() }, n*1000);
-            }
-            else {
-              $('error').innerHTML = text;
-              $('error').style.display = 'block';
-              setTimeout(delError, n*1000);
-            }
-            /*else if (permission === 'denied') {
-                alert("Vous n'avez pas accepté les notifications, votre navigation peut en être affecté.");
-            }
-            else {
-                alert("Veuillez accepter les notifications");
-            }*/
-        });
-    }
-    else {
-              $('error').innerHTML = text;
-              $('error').style.display = 'block';
-              setTimeout(delError, n*1000);
-            }
+	n = typeof n !== 'undefined' ? n : 4;
+	if('Notification' in window){
+		Notification.requestPermission(function(permission){
+			if (permission === 'granted') {
+				var notification = new Notification('Gheop Reader',{
+					body : text,
+                   // icon : 'alert.png'
+               });
+				setTimeout(function(){ notification.close() }, n*1000);
+			}
+			else
+				alert = true;
+		});
+	}
+	else {
+		alert = true;
+	}
+	if(alert) {
+		$('error').innerHTML = text;
+		$('error').style.display = 'block';
+		setTimeout(delError, n*1000);
+	}
 
 }
