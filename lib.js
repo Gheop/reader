@@ -14,6 +14,7 @@ loadinprogress = 0,
 zhr,
 totalItems = 0,
 readItems =0;
+online = true;
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var inactivityTime = function () {
@@ -43,6 +44,22 @@ function $(i) {
 }
 
 $('favico').href = "//reader.gheop.com/favicon.gif";
+
+function handleConnectionChange(event){
+    if(event.type == "offline"){
+    	affError("Vous êtes déconnecté!");
+        log("You lost connection.");
+		online = false;
+		$('g').style.textShadow = '1px 0px 1px #d43f57, -1px 0px 1px #d43f57';
+    }
+
+    if(event.type == "online"){
+    	affError("Vous êtes de nouveau en ligne.");
+        log("You are now back online.");
+        online = true;
+		$('g').style.textShadow = '1px 0px 1px #444, -1px 0px 1px #444';
+    }
+}
 
 function getSelectedText() {
   if (typeof window.getSelection !== 'undefined') {
@@ -486,6 +503,8 @@ function konamistop() {
 function i() {
   view('all');
   menu();
+  window.addEventListener('online', handleConnectionChange);
+  window.addEventListener('offline', handleConnectionChange);
   inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;
