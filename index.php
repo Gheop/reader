@@ -53,14 +53,10 @@ else {
     <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span>
 <?php  if($_SESSION['pseudo'] == "SiB") {
   	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
-
-    $firstLine = $stringfromfile[0]; //get the string from the array
-
-    $explodedstring = explode("/", $firstLine, 3); //seperate out by the "/" in the string
-
-    $branchname = $explodedstring[2]; //get the one that is always the branch name
-
-    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
+    $firstLine = $stringfromfile[0];
+    $explodedstring = explode("/", $firstLine, 3);
+    $branchname = $explodedstring[2];
+    if($branchname != 'master')    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
   }
   ?>
   </a></h1>

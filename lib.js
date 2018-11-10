@@ -15,7 +15,7 @@ zhr,
 totalItems = 0,
 readItems =0;
 online = true;
-alert = false;
+notif = false;
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var inactivityTime = function () {
@@ -98,17 +98,21 @@ function search(t) {
 }
 
 
+//vérifier le loadmore suite au changement de json
 function scroll() {
-  for (var varscroll = 0, len = d.i.length; varscroll < len; varscroll++) {
-    if ($(d.i[varscroll].i).offsetTop <= DM.scrollTop) {
-      if (d.i[varscroll].r == 1) read(varscroll);
-      if (!loadinprogress && varscroll + 5 >= loadmore) {
-        loadinprogress = 1;
-        more();
-      }
-    } else return;
-  }
+	var count = 0;
+	for(var i in d) {
+		count++;
+		if($(i).offsetTop <= DM.scrollTop) {
+			if (d[i].r != 0) read(i);
+			if (!loadinprogress && count + 5 >= loadmore) {
+				loadinprogress = 1;
+				more();
+			}
+		} else return;
+	}
 }
+
 
 function goUp() {
   DM.scrollTop -= 20;
@@ -119,32 +123,27 @@ function goDown() {
 }
 
 function goPrev() {
-  if (kona == 1) return;
-  if (!d) {
-    return;
-  }
-  for (var k = d.i.length - 1; k >= 0; k--) {
-    if ($(d.i[k].i).offsetTop < DM.scrollTop - 10) {
-      DM.scrollTop = $(d.i[k].i).offsetTop - 10;
-      return;
-    }
-  }
-  k = null;
+  if (kona == 1 || !d) return;
+  var previous = null;
+	for(var i in d) {
+		if($(i).offsetTop > DM.scrollTop - 10) {
+			if(previous) {DM.scrollTop = $(previous).offsetTop - 10;}
+			return;
+		}
+		previous = i;
+	}
 }
 
 function goNext() {
-  if (kona == 1) return;
-  if (!d) return;
-  for (var k = 0, l = d.i.length; k <= l; k++) {
-    if (!(d.i[k])) {
-      DM.scrollTop = $('addblank').offsetTop - 20;
-      return;
-    } else if ($(d.i[k].i).offsetTop > DM.scrollTop + 10) {
-      DM.scrollTop = $(d.i[k].i).offsetTop - 10;
-      return;
-    }
-  }
-  k = l = null;
+	if (kona == 1 || !d) return;
+	for(var i in d) {
+		if($(i).offsetTop > DM.scrollTop + 10) {
+			DM.scrollTop = $(i).offsetTop - 10;
+			return;
+		}
+	}
+	DM.scrollTop = $('addblank').offsetTop - 20;
+	return;
 }
 
 function goPrevPage() {
@@ -247,9 +246,6 @@ function editFluxName(idFlux) {
   $('focus'+idFlux).focus();
 
 }
-function addMenu() {
-
-}
 
 function generateArticle(id, ) {
 
@@ -262,7 +258,6 @@ function getHTTPObject(action) {
     if (xhr.readyState === 4 && xhr.status && xhr.status === 200) {
       var page = '';
       if (action === 'menu') {
-        //alert('ho');
         if (!xhr.responseText) return false;
         page += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
         var f = JSON.parse(xhr.responseText);
@@ -303,36 +298,25 @@ function getHTTPObject(action) {
         varscroll = 0;
         loadmore = 0;
         if (xhr.responseText) {
-            //                              log("JSON de view : "+xhr.responseText);
-          d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
+          //log("JSON de view : "+xhr.responseText);
+          d = JSON.parse(xhr.responseText);
+          //console.log(d);
+      //     for (var i in d) {
+      //     	console.log(d[i].t);
 
-/*            object.create(menu);*/
-          for (var z = 0, len = d.i.length; z < len; z++) {
-            i = d.i[z].i;
-          //   f = d.i[z].f;
-          //   console.log(f);
-          // if(!M[f]) {
-          //   M[f] = [];
-          //   M[f].d = d.i[z].e;
-          //   M[f].l = d.i[z].o;
-          //   M[f].t = d.i[z].n;
-          //   M[f].n = 1;
-          //   M[f].i = d.i[z].f;
-          // } else {
-          //   M[f].n+=1;
-          // }
-          /*  menu[i].d = d.i[z].e;
-            menu[i].i = d.i[z].f;
-            menu[i].l = d.i[z].e;
-            menu[i].n = d.i[z].e;
-            menu[i].t = d.i[z].e;*/
-/*          f.f[k].d = d.i[z].e;
-          f.f[k].t = d.i[z].e;
-          f.f[k].n = d.i[z].e;
-          f.f[k].i = d.i[z].f;*/
+      // // }
+      //     }
+// Object.keys(d).map(function(objectKey, index) {
+//     var value = "|"+d[objectKey];
+//     console.log(value);
+// });
+          //for (var z = 0, len = d.length; z < len; z++) {
+            //i = d.i[z].i;
+        for(var i in d) {
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-            page += '<div id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
+            page += '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a id="a' + d[i].i + '" href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
+              //          page += '<article id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</article>\n';
           }
         }
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
@@ -353,7 +337,7 @@ function getHTTPObject(action) {
           d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
           var n = d.i.length - 1;
           loadmore++;
-          page += '<div id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></div>';
+          page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
           n = null;
         }
         page += '<div id="addblank">&nbsp;</div>';
@@ -401,21 +385,21 @@ function getHTTPObject(action) {
 
 function unread(k) {
   unr = 1;
-  if (d.i[k].r == 1) return;
-  d.i[k].r = 1;
-  $(d.i[k].i).className = 'item1';
+  if (d[k].r == 1) return;
+  d[k].r = 1;
+  $(k).className = 'item1';
   if (nb_title < 0) nb_title = 0;
   D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
-  M[d.i[k].f].n++;
-//  if ($('S' + d.i[k].f)) $('S' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' (' + M[d.i[k].f].n + ')';
-    if ($('f' + d.i[k].f)) $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux">' + M[d.i[k].f].n + '</span>';
-  $('f' + d.i[k].f).className = "fluxnew";
-  if (id == d.i[k].f) $('f' + d.i[k].f).className = "fluxnew show";
-  light('f' + d.i[k].f);
+  M[d[k].f].n++;
+//  if ($('S' + d[k].f)) $('S' + d[k].f).innerHTML = M[d[k].f].t + ' (' + M[d[k].f].n + ')';
+    if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = M[d[k].f].t + '<span class="nb_flux">' + M[d[k].f].n + '</span>';
+  $('f' + d[k].f).className = "fluxnew";
+  if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
+  light('f' + d[k].f);
   var xhr = getHTTPObject();
   xhr.open("POST", 'unread.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&id=' + d.i[k].i);
+  xhr.send('xhr=1&id=' + k);
   //    requestTimer = setTimeout(function() {xhr.abort();}, 4000);
  requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
@@ -427,30 +411,31 @@ function unread(k) {
 }
 
 function read(k) {
+ 	//alert(k);
   if (search_active == 1) return;
   //obligé sinon 2 read après un verif() ou un unread-read à la suite ... mais why ?
-  if (d.i[k].r === 0) return;
+  if (d[k].r === 0) return;
   if (unr === 1) {
     unr = 0;
     return;
   }
 
-  $(d.i[k].i).className = 'item0';
-  d.i[k].r = 0;
-  M[d.i[k].f].n--;
-  if (M[d.i[k].f].n > 0) {
-    //'<span class="nb_flux"> ' + M[d.i[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d.i[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + '<span class="nb_flux"> ' + M[d.i[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d.i[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d.i[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d.i[k].f].i + ')"></a></span>';
-    light('f' + d.i[k].f);
+  $(k).className = 'item0';
+  d[k].r = 0;
+  M[d[k].f].n--;
+  if (M[d[k].f].n > 0) {
+    //'<span class="nb_flux"> ' + M[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d[k].f].i + ')"></a></span>
+    $('f' + d[k].f).innerHTML = M[d[k].f].t + '<span class="nb_flux"> ' + M[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d[k].f].i + ')"></a></span>';
+    light('f' + d[k].f);
   } else {
-    $('f' + d.i[k].f).innerHTML = M[d.i[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d.i[k].f].t.replace(/'/g, "\\\'") + '\',' + d.i[k].f + ')"></a></span>';
-    if (id == d.i[k].f) $('f' + d.i[k].f).className = "flux show";
-    else $('f' + d.i[k].f).className = "flux";
+    $('f' + d[k].f).innerHTML = M[d[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\',' + d[k].f + ')"></a></span>';
+    if (id == d[k].f) $('f' + d[k].f).className = "flux show";
+    else $('f' + d[k].f).className = "flux";
   }
   var xhr = getHTTPObject();
   xhr.open("POST", 'read.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&id=' + d.i[k].i);
+  xhr.send('xhr=1&id=' + k);
   requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
   }), 4000);
@@ -616,7 +601,7 @@ function more() {
 }
 
 function verif(k) {
-  return (d.i[k].r == 1) ? read(k) : unread(k);
+  return (d[k].r == 1) ? read(k) : unread(k);
 }
 
 function log(t) {
@@ -636,13 +621,13 @@ function affError(text,n) {
 				setTimeout(function(){ notification.close() }, n*1000);
 			}
 			else
-				alert = true;
+				notif = true;
 		});
 	}
 	else {
-		alert = true;
+		notif = true;
 	}
-	if(alert) {
+	if(notif) {
 		$('error').innerHTML = text;
 		$('error').style.display = 'block';
 		setTimeout(delError, n*1000);
