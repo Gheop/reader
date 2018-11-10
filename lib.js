@@ -8,7 +8,8 @@ nb_title = 0,
 id = 'all',
 unr = 0,
 d,
-M = [],
+m,
+//M = [],
 varscroll = 0,
 loadinprogress = 0,
 zhr,
@@ -132,6 +133,7 @@ function goPrev() {
 		}
 		previous = i;
 	}
+	if(previous) {DM.scrollTop = $(previous).offsetTop - 10;}
 }
 
 function goNext() {
@@ -242,7 +244,7 @@ function unsubscribe(t, f) {
 }
 
 function editFluxName(idFlux) {
-  $('f'+idFlux).innerHTML = "<input id=\"focus"+idFlux+"\" type=\"text\" value=\""+M[idFlux].t+"\" />";
+  $('f'+idFlux).innerHTML = "<input id=\"focus"+idFlux+"\" type=\"text\" value=\""+m[idFlux].t+"\" />";
   $('focus'+idFlux).focus();
 
 }
@@ -252,29 +254,22 @@ function generateArticle(id, ) {
 
   return '<div id="' + d.i[z].i + '" class="item1" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
 }
-function getHTTPObject(action) {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.status && xhr.status === 200) {
-      var page = '';
-      if (action === 'menu') {
-        if (!xhr.responseText) return false;
-        page += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
-        var f = JSON.parse(xhr.responseText);
-       // log("JSON du menu : "+f);
-        for (var k = 0, mlen = f.f.length; k < mlen; k++) {
-          i = f.f[k].i;
 
-          M[i] = [];
-          M[i].d = f.f[k].d;
-          M[i].t = f.f[k].t;
-          M[i].n = f.f[k].n;
-          M[i].i = f.f[k].i;
-          if (f.f[k].n > 0) {
-            page += '\t<li id="f' + f.f[k].i + '" class="fluxnew" title="' + f.f[k].d + '" onclick="view(' + f.f[k].i + ');">' + f.f[k].t + '<span class="nb_flux"> ' + f.f[k].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + f.f[k].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + f.f[k].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + f.f[k].t.replace(/'/g, "\\\'") + '\', ' + f.f[k].i + ')"></a></span></li>\n';
-            nb_title += f.f[k].n || 0;
-          } else page += '\t<li href="' + f.f[k].l + '" id="f' + f.f[k].i + '" class="flux" onclick="view(' + f.f[k].i + ');" title="' + f.f[k].d + '">' + f.f[k].t + '</li>\n';
-        }
+function getHTTPObject(action) {
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4 && xhr.status && xhr.status === 200) {
+			var page = '';
+			if (action === 'menu') {
+				if (!xhr.responseText) return false;
+				page += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+				m = JSON.parse(xhr.responseText);
+				for(var i in m) {
+					if (m[i].n > 0) {
+						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+						nb_title += m[i].n || 0;
+					} else page += '\t<li href="' + m[i].l + '" id="f' + i + '" class="flux" onclick="view(' + i + ');" title="' + m[i].d + '">' + m[i].t + '</li>\n';
+				}
         $('menu').insertAdjacentHTML('beforeend', page);
         // $('menu').innerHTML += page;
         D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
@@ -298,21 +293,8 @@ function getHTTPObject(action) {
         varscroll = 0;
         loadmore = 0;
         if (xhr.responseText) {
-          //log("JSON de view : "+xhr.responseText);
           d = JSON.parse(xhr.responseText);
-          //console.log(d);
-      //     for (var i in d) {
-      //     	console.log(d[i].t);
-
-      // // }
-      //     }
-// Object.keys(d).map(function(objectKey, index) {
-//     var value = "|"+d[objectKey];
-//     console.log(value);
-// });
-          //for (var z = 0, len = d.length; z < len; z++) {
-            //i = d.i[z].i;
-        for(var i in d) {
+          for(var i in d) {
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
             page += '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a id="a' + d[i].i + '" href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
@@ -390,9 +372,9 @@ function unread(k) {
   $(k).className = 'item1';
   if (nb_title < 0) nb_title = 0;
   D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
-  M[d[k].f].n++;
-//  if ($('S' + d[k].f)) $('S' + d[k].f).innerHTML = M[d[k].f].t + ' (' + M[d[k].f].n + ')';
-    if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = M[d[k].f].t + '<span class="nb_flux">' + M[d[k].f].n + '</span>';
+  m[d[k].f].n++;
+//  if ($('S' + d[k].f)) $('S' + d[k].f).innerHTML = m[d[k].f].t + ' (' + m[d[k].f].n + ')';
+    if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux">' + m[d[k].f].n + '</span>';
   $('f' + d[k].f).className = "fluxnew";
   if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
   light('f' + d[k].f);
@@ -411,7 +393,6 @@ function unread(k) {
 }
 
 function read(k) {
- 	//alert(k);
   if (search_active == 1) return;
   //obligé sinon 2 read après un verif() ou un unread-read à la suite ... mais why ?
   if (d[k].r === 0) return;
@@ -422,13 +403,12 @@ function read(k) {
 
   $(k).className = 'item0';
   d[k].r = 0;
-  M[d[k].f].n--;
-  if (M[d[k].f].n > 0) {
-    //'<span class="nb_flux"> ' + M[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d[k].f].i + ')"></a></span>
-    $('f' + d[k].f).innerHTML = M[d[k].f].t + '<span class="nb_flux"> ' + M[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + M[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + M[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + M[d[k].f].i + ')"></a></span>';
+  m[d[k].f].n--;
+  if (m[d[k].f].n > 0) {
+    $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux"> ' + m[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + m[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + m[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + m[d[k].f].i + ')"></a></span>';
     light('f' + d[k].f);
   } else {
-    $('f' + d[k].f).innerHTML = M[d[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + M[d[k].f].t.replace(/'/g, "\\\'") + '\',' + d[k].f + ')"></a></span>';
+    $('f' + d[k].f).innerHTML = m[d[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + m[d[k].f].t.replace(/'/g, "\\\'") + '\',' + d[k].f + ')"></a></span>';
     if (id == d[k].f) $('f' + d[k].f).className = "flux show";
     else $('f' + d[k].f).className = "flux";
   }
@@ -453,7 +433,6 @@ function progressBar() {
 }
 
 function menu() {
-  //alert('menu');
   var xhr = getHTTPObject('menu');
   xhr.open("POST", '//reader.gheop.com/menu.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
