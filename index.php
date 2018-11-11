@@ -55,7 +55,7 @@ else {
   	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
     $firstLine = $stringfromfile[0];
     $explodedstring = explode("/", $firstLine, 3);
-    $branchname = $explodedstring[2];
+    $branchname = trim($explodedstring[2]);
     if($branchname != 'master')    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
   }
   ?>
