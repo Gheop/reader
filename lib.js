@@ -249,10 +249,8 @@ function editFluxName(idFlux) {
 
 }
 
-function generateArticle(id, ) {
-
-
-  return '<div id="' + d.i[z].i + '" class="item1" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</div>\n';
+function generateArticle(i) {
+  return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
 }
 
 function getHTTPObject(action) {
@@ -268,7 +266,7 @@ function getHTTPObject(action) {
 					if (m[i].n > 0) {
 						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
 						nb_title += m[i].n || 0;
-					} else page += '\t<li href="' + m[i].l + '" id="f' + i + '" class="flux" onclick="view(' + i + ');" title="' + m[i].d + '">' + m[i].t + '</li>\n';
+					} //else page += '\t<li href="' + m[i].l + '" id="f' + i + '" class="flux" onclick="view(' + i + ');" title="' + m[i].d + '">' + m[i].t + '</li>\n';
 				}
         $('menu').insertAdjacentHTML('beforeend', page);
         // $('menu').innerHTML += page;
@@ -297,11 +295,13 @@ function getHTTPObject(action) {
           for(var i in d) {
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-            page += '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a id="a' + d[i].i + '" href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
+            page += generateArticle(i);
+
+            //'<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a id="a' + d[i].i + '" href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
               //          page += '<article id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</article>\n';
           }
         }
-        if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
+        if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
         page += '<div id="addblank">&nbsp;</div>';
         DM.innerHTML = page;
         if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
@@ -314,14 +314,19 @@ function getHTTPObject(action) {
         var p = JSON.parse(xhr.responseText);
         if (!p || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
-        for (var x = 0, plen = p.i.length; x < plen; x++) {
-          //d.i.push(p.i[k]);
-          d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
-          var n = d.i.length - 1;
-          loadmore++;
-          page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
-          n = null;
+        for(var i in p) {
+            loadmore++;
+            d[i] = p[i];
+            page += generateArticle(i);
         }
+        // for (var x = 0, plen = p.i.length; x < plen; x++) {
+        //   //d.i.push(p.i[k]);
+        //   d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
+        //   var n = d.i.length - 1;
+        //   loadmore++;
+        //   page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
+        //   n = null;
+        // }
         page += '<div id="addblank">&nbsp;</div>';
         DM.insertAdjacentHTML('beforeend', page);
         $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
@@ -366,30 +371,28 @@ function getHTTPObject(action) {
 }
 
 function unread(k) {
-  unr = 1;
-  if (d[k].r == 1) return;
-  d[k].r = 1;
-  $(k).className = 'item1';
-  if (nb_title < 0) nb_title = 0;
-  D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
-  m[d[k].f].n++;
-//  if ($('S' + d[k].f)) $('S' + d[k].f).innerHTML = m[d[k].f].t + ' (' + m[d[k].f].n + ')';
-    if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux">' + m[d[k].f].n + '</span>';
-  $('f' + d[k].f).className = "fluxnew";
-  if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
-  light('f' + d[k].f);
-  var xhr = getHTTPObject();
-  xhr.open("POST", 'unread.php', true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&id=' + k);
-  //    requestTimer = setTimeout(function() {xhr.abort();}, 4000);
- requestTimer = setTimeout((function() {
-    if (xhr) xhr.abort();
+	unr = 1;
+	if (d[k].r == 1) return;
+	d[k].r = 1;
+	$(k).className = 'item1';
+	if (nb_title < 0) nb_title = 0;
+	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
+	m[d[k].f].n++;
+	if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux">' + m[d[k].f].n + '</span>';
+	$('f' + d[k].f).className = "fluxnew";
+	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
+	light('f' + d[k].f);
+	var xhr = getHTTPObject();
+	xhr.open("POST", 'unread.php', true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.send('xhr=1&id=' + k);
+	requestTimer = setTimeout((function() {
+		if (xhr) xhr.abort();
   }), 4000); //a voir si ça marche
-  xhr = null;
-  $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
-  readItems--;
-  progressBar();
+	xhr = null;
+	$('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
+	readItems--;
+	progressBar();
 }
 
 function read(k) {
@@ -449,14 +452,10 @@ var pressedKeys = [],
 
 function konami() {
   //document.body.style.background = "url(stickmen.png)";
-  //document.body.style.fontFamily = "LaChatteAMaman";
+  document.body.style.fontFamily = "LaChatteAMaman";
   DM.innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+DM.innerHTML;
   $('konami').style.display='block';
-
   ////js1k.com/2014-dragons/details/1955
- // var a = $('c');
-/*a.style.width=(a.width=1e3)+"px";a.style.height=(a.height=500)+"px";for(p in c){c[p[0]+(p[6]||"")]=c[p]}J=K=C=B=0;u=50;D=250;E=F=G=H=1;I=250;setInterval(function(){L=300;M=500;N=400;with(c){A=function(S,x,y,T){T&&a(x,y,T,0,7,0);fillStyle=S.P?S:"#"+"ceff99aaffff333f99ff7".substr(S*3,3);fill();ba()};A(0,0,0,10000);A(6,800,300,140);O=G*u%400;l(0-O,N+100);l(0-O,N);for(i=0;i<7;i++){qt(i*200+100-O,i%2?L:M,i*200+200-O,N)}l(i*200-O,N+100);ca();fillStyle="#5c1";fill();ba();t=(G*(u+E)+I)%200/200;U=1-t;K2=U*U*N+2*t*U*((G*(u+E)+I)%400>200?L:M)+t*t*N;D+=F;if(D>=K){if(K2<K){if(F>0&&(K2-K)<0&&!J){E=E/3;K2=K}E-=E<2?0:0.1}else{E+=0.1*H*H}J=1;D=K;if(K2<K&&F>(K2-K)){F=(K2-K)}}else{J=0}F+=0.4*H;K=K2;A(3-H,I,D-10,10);A(3,I+3,D-12,4);A(4,I+4,D-12,1);Q=200+Math.pow(B,1.3)-u;R=50+Math.sin(B/2)*2;A(1,Q,R,30);A(3,Q+20,R+5,7);A(4,Q+22,R+7,2);A(6,0,0,0);fx(++B+" ☆",5,10);fx((C<B?C=B:C)+" ★",40,10);if(Q>4*I){alert(B);E=F=u=B=K=2}}u+=E},30);onkeydown=onkeyup=function(b){H=b.type[5]?2:1};
-*/    //c=$('kona');h=t=150;L=w=c.width=800;u=DD=50;H=[];R=Math.random;for(mavar in C=c.getContext('2d'))C[mavar[J=X=Y=0]+(mavar[6]||'')]=C[mavar];timerkona = setInterval("if(DD)for(x=405,i=y=I=0;i<1e4;)L=H[i++]=i<9|L<w&R()<.3?w:R()*u+80|0;mavar=++t%99-u;mavar=mavar*mavar/8+20;y+=Y;x+=y-H[(x+X)/u|0]>9?0:X;j=H[o=x/u|0];Y=y<j|Y<0?Y+1:(y=j,J?-10:0);with(C){A=function(c,x,y,r){r&&arc(x,y,r,0,7,0);fillStyle=c.P?c:'#'+'ceff99ff78f86eeaaffffd45333'.substr(c*3,3); f(); ba()};for(DD=Z=0;Z<21;Z++){Z<7&&A(Z%6,w/2,235,Z?250-15*Z:w);i=o-5+Z;S=x-i*u;B=S>9&S<41;ta(u-S,0);G=cL(0,T=H[i],0,T+9);T%6||(A(2,25,T-7,5),y^j||B&&(H[i]-=.1,I++));G.P=G.addColorStop;G.P(0,i%7?'#7e3':(i^o||y^T||(y=H[i]+=mavar/99),'#c7a'));G.P(1,'#ca6');i%4&&A(6,t/2%200,9,i%2?27:33);m(-6,h);qt(-6,T,3,T);l(47,T);qt(56,T,56,h);A(G);i%3?0:T<w?(A(G,33,T-15,10),fc(31,T-7,4,9)):(A(7,25,mavar,9),A(G,25,mavar,5),fc(24,mavar,2,h),DD=B&y>mavar-9?1:DD);ta(S-u,0)}A(6,u,y-9,11);A(5,M=u+X*.7,Q=y-9+Y/5,8);A(8,M,Q,5);fx(I+'c',5,15)}DD=y>h?1:DD",u);onkeydown=onkeyup=function(e){E=e.type[5]?4:0;e=e.keyCode;J=e^38?J:E;X=e^37?e^39?X:E:-E}
   DM.scrollTop = 0;
   kona = 1;
 }
