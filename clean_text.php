@@ -27,10 +27,10 @@ $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
     if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
     else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
     else if($type == "image/gif" && `which giflossy`) ;//exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
-    else return '<img src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
+    else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
     $base64 = "//reader.gheop.com/$tmpfile";
 
-    return '<img src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
+    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
   }
   else return '<img src="'.$f[1].'" />';
 }

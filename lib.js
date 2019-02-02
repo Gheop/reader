@@ -66,6 +66,7 @@ function handleConnectionChange(event){
     }
 }
 
+
 function getSelectedText() {
   if (typeof window.getSelection !== 'undefined') {
     return window.getSelection().trim();
@@ -160,15 +161,31 @@ function delError() {
   $('error').style.display = "none";
 }
 
+function likedArticle(i) {
+	var xhr = getHTTPObject('likedArticle');
+	xhr.open('POST', 'likedArticle.php', true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.send('xhr=1&f=' + i);
+	requestTimer = setTimeout((function() {
+		if (xhr) xhr.abort();
+	}), 4000);
+	xhr = null;
+}
+
 function markallread(i) {
-  var xhr = getHTTPObject('markallread');
-  xhr.open("POST", 'markallread.php', true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&f=' + i);
-  requestTimer = setTimeout((function() {
-    if (xhr) xhr.abort();
-  }), 4000);
-  xhr = null;
+	var r = confirm("Tout marquer comme lu pour \"" + m[i].t + "\" ?");
+	if (r) {
+		var xhr = getHTTPObject('markallread');
+		xhr.open("POST", 'markallread.php', true);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xhr.send('xhr=1&f=' + i);
+		requestTimer = setTimeout((function() {
+			if (xhr) xhr.abort();
+		}), 4000);
+		xhr = null;
+	}
+	r = null;
+	return false;
 }
 
 function view(i) {
@@ -250,7 +267,7 @@ function editFluxName(idFlux) {
 }
 
 function generateArticle(i) {
-  return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
+  return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
 
 function getHTTPObject(action) {
@@ -264,8 +281,9 @@ function getHTTPObject(action) {
 				m = JSON.parse(xhr.responseText);
 				for(var i in m) {
 					if (m[i].n > 0) {
-						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
-						nb_title += m[i].n || 0;
+						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+/*						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+*/						nb_title += m[i].n || 0;
 					} //else page += '\t<li href="' + m[i].l + '" id="f' + i + '" class="flux" onclick="view(' + i + ');" title="' + m[i].d + '">' + m[i].t + '</li>\n';
 				}
         $('menu').insertAdjacentHTML('beforeend', page);
@@ -306,6 +324,7 @@ function getHTTPObject(action) {
         DM.innerHTML = page;
         if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
         DM.addEventListener('DOMMouseScroll', scroll, false);
+        lazyLoadImg();
         DM.onscroll = scroll;
         DM.onmousewheel = scroll;
         DM.scrollTop = 0;
@@ -330,6 +349,7 @@ function getHTTPObject(action) {
         page += '<div id="addblank">&nbsp;</div>';
         DM.insertAdjacentHTML('beforeend', page);
         $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        lazyLoadImg();
         loadinprogress = 0;
         p = null;
       } else if (action === 'markallread') {
@@ -342,11 +362,12 @@ function getHTTPObject(action) {
         $('f' + id).classList.remove('show');
         id = 'search';
         $('f' + id).classList.add('show');
-        if (!xhr.responseText) {
+         console.log("response" + xhr.responseText);
+        if (!xhr.responseText || !(d = JSON.parse(xhr.responseText))) {
           DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
           return false;
         }
-        d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
+        // d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
         loadmore = 0;
         for (var y = 0, tlen = d.i.length; y < tlen; y++) {
           loadmore++;
@@ -407,6 +428,14 @@ function read(k) {
   $(k).className = 'item0';
   d[k].r = 0;
   m[d[k].f].n--;
+
+  //
+  ///
+  ///
+  /// voir pour mettre les trucs en dessous en hidden qd className change pour pas avoir à tout réécrire ??
+  /// reste tjrs le nb à mettre à jour mais plus light non?
+  //
+
   if (m[d[k].f].n > 0) {
     $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux"> ' + m[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + m[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + m[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + m[d[k].f].i + ')"></a></span>';
     light('f' + d[k].f);
@@ -467,11 +496,69 @@ function konamistop() {
   $('konami').style.display = 'none';
 }
 
+ function lazyLoadImg() {
+  var lazyloadImages;
+
+  //log("nb img : " + lazyloadImages.length);
+  if ("IntersectionObserver" in window) {
+    lazyloadImages  = document.querySelectorAll("img.lazy");
+    //log(lazyloadImages);
+    var imageObserver = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+    //    	log(entry.target);
+          var image = entry.target;
+          image.src = image.dataset.src;
+          image.classList.remove("lazy");
+          imageObserver.unobserve(image);
+        }
+      });
+    });
+
+    lazyloadImages.forEach(function(image) {
+    	imageObserver.observe(image);
+    });
+
+  } else {
+  	log('tg');
+    var lazyloadThrottleTimeout;
+    lazyloadImages = document.querySelectorAll(".lazy");
+
+    function lazyload () {
+      if(lazyloadThrottleTimeout) {
+        clearTimeout(lazyloadThrottleTimeout);
+      }
+
+      lazyloadThrottleTimeout = setTimeout(function() {
+        var scrollTop = window.pageYOffset;
+        lazyloadImages.forEach(function(img) {
+            if(img.offsetTop < (window.innerHeight + scrollTop)) {
+              img.src = img.dataset.src;
+              img.classList.remove('lazy');
+            }
+        });
+        if(lazyloadImages.length == 0) {
+          document.removeEventListener("scroll", lazyload);
+          window.removeEventListener("resize", lazyload);
+          window.removeEventListener("orientationChange", lazyload);
+        }
+      }, 20);
+    }
+
+    document.addEventListener("scroll", lazyload);
+    window.addEventListener("resize", lazyload);
+    window.addEventListener("orientationChange", lazyload);
+  }
+}
+
 function i() {
   view('all');
   menu();
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
+
+  document.addEventListener('DOMContentLoaded', lazyLoadImg);
+
   inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;

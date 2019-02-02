@@ -1,3 +1,4 @@
+
 <?php
 //header("Content-Security-Policy: default-src 'self' 'unsafe-inline';");
 //header("Content-Security-Policy: img-src: 'self'");
@@ -51,7 +52,7 @@ else {
 ?>
 </div>
     <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span>
-<?php  if($_SESSION['pseudo'] == "SiB") {
+<?php  if(isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == "SiB") {
   	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
     $firstLine = $stringfromfile[0];
     $explodedstring = explode("/", $firstLine, 3);
@@ -76,10 +77,10 @@ echo '<nav>
   <ul id="menu">
     <li id="fall" class="fluxnew" onclick="view(\'all\')" title="Tout voir">All&nbsp;&nbsp;&nbsp;
     <span class="icon"><a title="Ajouter un flux" onclick="addflux();"></a>&nbsp;&nbsp;&nbsp;
-    <a title="Importer des flux"></a>&nbsp;&nbsp;&nbsp;
-    <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp;
-    <a onclick="navigator.registerContentHandler(\'application/atom+xml\', \'//reader.gheop.com/add_flux.php?f=%s\',  \'Gheop Reader\');return false;" title="Enregistrer comme lecteur de flux du navigateur"></a>&nbsp;&nbsp;&nbsp;
-    <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp;
+    <!-- <a title="Importer des flux"></a>&nbsp;&nbsp;&nbsp;
+    <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp; -->
+  <!--  <a onclick="navigator.registerContentHandler(\'application/atom+xml\', \'//reader.gheop.com/add_flux.php?f=%s\',  \'Gheop Reader\');return false;" title="Enregistrer comme lecteur de flux du navigateur"></a>&nbsp;&nbsp;&nbsp; -->
+   <!-- <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp; -->
     <a id="up" onclick="up();" title="Mettre à jour les flux"></a>
     </span>
     </li>
@@ -101,17 +102,17 @@ else {
 <!-- Piwik -->
 <script type="text/javascript">
   i();
-  var _paq = _paq || [];
-  // tracker methods like "setCustomDimension" should be called before "trackPageView"
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="//gheop.com/stats/";
-    _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', '2']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
-  })();
+// <!--  var _paq = _paq || [];
+//   // tracker methods like "setCustomDimension" should be called before "trackPageView"
+//   _paq.push(['trackPageView']);
+//   _paq.push(['enableLinkTracking']);
+//   (function() {
+//     var u="//gheop.com/stats/";
+//     _paq.push(['setTrackerUrl', u+'piwik.php']);
+//     _paq.push(['setSiteId', '2']);
+//     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+//     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+//   })();-->
 </script>
 <!-- End Piwik Code -->
   </body>
