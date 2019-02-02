@@ -44,13 +44,13 @@ function isRSSContent($content) {
 
 function searchRSSUrlSpecialSite($url) {
 
-/* 
+/*
  * youtube
  */
 	if(preg_match('/^.*\/\/www\.youtube\.com\/channel\/(.*)$/',$url, $m )) {
 		return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$m[1];
 	}
-	else if(preg_match('/^.*\/\/www\.youtube\.com\/user\/([^\?\&\/]*)(.*)$/',$url, $m )) { 
+	else if(preg_match('/^.*\/\/www\.youtube\.com\/user\/([^\?\&\/]*)(.*)$/',$url, $m )) {
 		$html = file_get_html($url);
 
 		foreach($html->find('meta[itemprop=channelId]') as $element) {
@@ -58,7 +58,7 @@ function searchRSSUrlSpecialSite($url) {
 			return 'https://www.youtube.com/feeds/videos.xml?channel_id='.$url;
 		}
 		return false;
-	}	
+	}
 	else if(preg_match('/^.*\/\/(www\.|m\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
 	//else if(preg_match('/^.*\/\/(www\.|m\.)?(youtube\.com|youtu.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|)([^\?\&]*)(.*)$/',$url, $m )) {
 		$html = file_get_html('https://www.youtube.com/watch?v='.$m[4]);
@@ -69,7 +69,7 @@ function searchRSSUrlSpecialSite($url) {
 		return false;
 	}
 /*
- * dailymotion 
+ * dailymotion
  */
 	else if(preg_match('/^.*dai\.ly\/(.*)$/', $url, $m)) {
 		$url = 'http://www.dailymotion.com/video/'.$m[1];
@@ -96,7 +96,8 @@ function searchRSSUrlSpecialSite($url) {
 	}
 
 		/*
-	* reddit
+	* reddit *
+    * https://www.reddit.com/wiki/rss *
 	*/
 	else if(preg_match('/^.*\/\/(www\.)?reddit\.com\/(.*)?$/',$url, $m )) {
 		return $m[0].'.rss';
@@ -107,40 +108,32 @@ function searchRSSUrlSpecialSite($url) {
 
 ### function récupérée bien dégueulasse, à nettoyer
 function searchRSSUrl($url) {
-
 	//à passer à la fin qd la suite sera finie.
-	if($url = searchRSSUrlSpecialSite($url)) return $url;
-	
+	if($urlfound = searchRSSUrlSpecialSite($url)) return $urlfound;
 	$doc = new DOMDocument();
 	$doc->strictErrorChecking = FALSE;
 	libxml_use_internal_errors(true);
-	@$doc->loadHTML(getContentUrl($url));
+	$doc->loadHTML(getContentUrl($url));
 	libxml_clear_errors();
-
-	$xml = simplexml_import_dom($doc);
+	if(!$xml = simplexml_import_dom($doc)) return false;
 	$xpath_results = $xml->xpath('//link[@rel="alternate"]');
 	foreach ( $xpath_results as $node ) {
-		if($node['type'] == 'application/rss+xml' or $node['type'] == 'application/rss+xml') {
-			echo (string)$node['title']."->".(string)$node['href']."<br />";
-			$ret[] = array($node['title'],$node['href']); 
+		if($node['type'] == 'application/rss+xml' or $node['type'] == 'application/atom+xml') {
+			if(substr($node['href'], 0, 1) == '/') {
+				$p = parse_url($url);
+				$ret = $p['scheme'] .'://'. $p['host'];
+				if(isset($p['port'])) $ret .= ':'. $p['port'];
+				$ret .= $node['href'];
+				return $ret;
+			}
+			return (string)$node['href'];
 		}
 	}
-	die;
-	if(!empty($ret)) {
-		return $ret;
-	}
-	$s = parse_url($url);
-	print_r($s);
-	die;
-	if(isset($s[path])){
-		print "$s[path]<br />";
-		die;
-	}
-	else return false;
+ return false;
 }
 
 function getRSSLink($url) {
-	$content = getContentUrl($url); 
+	$content = getContentUrl($url);
 	if(!isset($content)) {
 		echo "<br />La page $url n'a pas de contenu.<br />";
 		return false;
@@ -210,7 +203,7 @@ else if(isset($_GET['f'])) {
 }
 else {
 	print "Pas de lien trouvé";
-	exit;
+	return;
 }
 
 $file = 'flux.txt';
@@ -227,16 +220,16 @@ if(preg_match('/^[@#](.*)$/',$rsslink,$m)) {
 
 
 if(!$rsslink = validate_url($rsslink)) {
-	print "Ce lien n'est pas valide.";
-	exit;
+	echo "Ce lien n'est pas valide.";
+	return;
 }
-
+//echo 'link : '.$rsslink."<br />";
 $title = $link = $description = $language = '';
 
 
 if(!$rsslink = getRSSLink($rsslink)) {
 	echo 'Ce site n\'a pas de flux rss';
-	exit;
+	return;
 }
 
 $page = getContentUrl($rsslink);
@@ -309,7 +302,7 @@ if($rss = @simplexml_load_string($page)) {
 					echo 'Vous êtes déjà inscrit à ce flux.';
 					$previous = "javascript:history.go(-1)";
 					echo '<a href="'.$previous.'">Back</a>';
-				} 
+				}
 				exit;
 			}
 		}

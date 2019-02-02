@@ -1,6 +1,6 @@
 <?php
 include('/www/conf.php');
-//$_POST['id'] = '766';
+#$_POST['id'] = '766';
 /*if (!$mysqli->set_charset("utf8")) {
     printf("Erreur lors du chargement du jeu de caractères utf8 : %s\n", $mysqli->error);
 }*/

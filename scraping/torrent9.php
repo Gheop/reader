@@ -1,9 +1,9 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'http://www.torrent9.blue';
+$base_url = 'http://www.torrent9.ch';
 $uri = [
-	'films' => '/torrents_films.html',
-	'series' => '/torrents_series.html',
+	'films' => '/torrents/films',
+	'series' => '/torrents/'.urlencode('séries'),
 	'musique' => '/torrents_musique.html',
 	'ebook' => '/torrents_ebook.html',
 	'logiciels' => '/torrents_logiciels.html',
@@ -40,7 +40,8 @@ echo "    <title>Torrent9 - ".ucfirst($_POST['f'])."</title>
 $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
-$html = file_get_html($url);
+$html = @file_get_html($url);
+if(!isset($html) || !$html || empty($html)) goto end;
 /*exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
 var_dump($htmla);
 die;
@@ -61,6 +62,8 @@ foreach($html->find('td a') as $element) {
 	/*$detail = file_get_html($base_url.$element->href);*/
 	foreach($detail->find('div[class=left-tab-section] a[class=btn btn-danger download]') as $lien) {
 		$mylink = $lien->href;
+		//$mylink = str_replace('http://protege-liens.net', '', $mylink);
+		//$mylink = preg_replace('/.*get_torrent(.*)$/i','http://protege-liens.net/get_torrent\1', $mylink);
 		break;
 	}
 	foreach($detail->find('h5') as $titre) {
@@ -78,63 +81,14 @@ foreach($html->find('td a') as $element) {
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
-	      <link>$base_url".(isset($mylink)?$mylink:"")."</link>
-	      <guid>$base_url".(isset($mylink)?$mylink:"")."</guid>
+	      <link>".(isset($mylink)?$mylink:"")."</link>
+	      <guid>".(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
-$detail->clear(); 
+$detail->clear();
 unset($detail);
 }
-/*   exit;
-
-
-$p = file_get_contents($url);
-//echo $p;
-preg_match_all('/<a title="Télécharger .*?" href="(.*)?" /im', $p, $m);
-
-$i=0;
-$mh = curl_multi_init();
-$ch = array();
-//$dd = array();
-$i = 0;
-
-while(isset($m[1][$i])) {
-	$ch[$i] = curl_init();
-	curl_setopt_array($ch[$i],
-		Array(
-			CURLOPT_URL => $base_url.$m[1][$i],
-			CURLOPT_USERAGENT => 'GheopReader',
-			CURLOPT_TIMEOUT => 5,
-			CURLOPT_CONNECTTIMEOUT => 10,
-			CURLOPT_RETURNTRANSFER => TRUE,
-			CURLOPT_ENCODING => 'UTF-8'
-			)
-		);
-	curl_multi_add_handle($mh, $ch[$i]);
-	//$dd[$i] = $m[2][$i];
-	$i++;
-}
-
-$running=null;
-
-do {
-	curl_multi_exec($mh,$running);
-	//usleep (1000);
-} while ($running > 0);
-
-for($j=0;$j<$i;$j++) {
-	//if($_POST['f'] == 'films')
-		preg_match('/<h5 class="pull-left" style="max-width:inherit"><i class="fa fa-.*"><\/i> (.*)<\/h5>.*<\/strong><\/p>.*<p>(.*)<\/p>.*<a class="btn btn-danger download" href="(.*)">/smiU', curl_multi_getcontent($ch[$j]), $z);
-
-		if(isset($z[1]))
-	echo "    <item>
-      <title>",htmlspecialchars(stripslashes($z[1]),ENT_QUOTES,'UTF-8'),"</title>
-      <description>",(isset($z[2])?htmlspecialchars(stripslashes($z[2]),ENT_QUOTES,'UTF-8'):""),"</description>
-      <link>$base_url".(isset($z[3])?$z[3]:"")."</link>
-      <guid>$base_url".(isset($z[3])?$z[3]:"")."</guid>
-    </item>
-";
-}*/
+end:;
 ?>
   </channel>
 </rss>

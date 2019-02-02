@@ -39,7 +39,7 @@ foreach($html->find('title') as $title_descr) {
 $title_descr = $title_descr->plaintext;
 }
 
-echo "    <title>$site_name - ".$_POST['f']."</title>
+echo "    <title> ".$_POST['f']."</title>
     <description>".htmlspecialchars(stripslashes($title_descr),ENT_QUOTES,'UTF-8')."</description>
 ";
 
@@ -80,7 +80,7 @@ foreach($tweet_block as $tweet) {
     //echo $tweetPic->attr["data-image-url"];
     // die;
 //    if($tweetPic) {->attr["data-image-url"]
-    if($tweetPic->attr["data-image-url"] && $tweetPic->attr["data-image-url"] != '/')
+    if(isset($tweetPic->attr["data-image-url"]) && $tweetPic->attr["data-image-url"] != '/')
     	$tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
 //echo "<text>$tweetText</text>";
     //echo 'Tweet: ' . $tweetText . '<br/>';
