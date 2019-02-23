@@ -1,7 +1,8 @@
 
 <?php
-//header("Content-Security-Policy: default-src 'self' 'unsafe-inline';");
-//header("Content-Security-Policy: img-src: 'self'");
+//header("Content-Security-Policy: default-src 'self' https:;");
+//header("Content-Security-Policy: img-src: 'self' 'inline'");
+//header("Content-Security-Policy: frame-ancestors 'none'");
 //header('Content-Type: text/html; charset=utf-8');
 //header('X-Frame-Options: deny');
 //header('X-Content-Type-Options: nosniff');
@@ -14,17 +15,21 @@ include('/www/conf.php');
 <link rel="stylesheet prefetch" type="text/css" href="//reader.gheop.com/screen.css" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-<link id="favico" href="//reader.gheop.com/favicon.gif" rel="shortcut icon" type="image/gif" />
+<link id="favico" href="https://reader.gheop.com/favicon.gif" rel="shortcut icon" type="image/gif" />
 <!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
 <link rel="apple-touch-icon" href="favicon.gif"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <!--, user-scalable=no"> -->
+
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <!-- Instruct Internet Explorer to use its latest rendering engine -->
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
+<!-- <link rel="preload" href="fonts/Awesome.woff2" as="font" type="font/woff2" sameorigin>
+<script type="text/javascript" src="webp-hero.polyfill.bundle.js"></script> -->
 </head>
+
 <body>
 <?php
 if(!isset($_SESSION['pseudo'])) {
@@ -97,7 +102,7 @@ else {
 }
 ?>
 
-  <script rel="preload" src="//reader.gheop.com/lib.js" type="text/javascript"></script>
+  <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript"></script>
 
 <!-- Piwik -->
 <script type="text/javascript">

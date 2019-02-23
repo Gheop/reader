@@ -19,6 +19,7 @@ online = true;
 notif = false;
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
+var cptReadArticle = 0;
 var inactivityTime = function () {
   var t;
   window.onload = resetTimer;
@@ -46,23 +47,17 @@ function $(i) {
   return D.getElementById(i);
 }
 
-$('favico').href = "//reader.gheop.com/favicon.gif";
+$('favico').href = "https://reader.gheop.com/favicon.gif";
 
 function handleConnectionChange(event){
     if(event.type == "offline"){
-//    	affError("Vous êtes déconnecté!");
- //       log("You lost connection.");
-		online = false;
-	//	$('g').style.textShadow = '1px 0px 1px #d43f57, -1px 0px 1px #d43f57';
-		$('g').style.textDecoration='line-through';
+        online = false;
+        $('g').style.textDecoration='line-through';
     }
 
     if(event.type == "online"){
-//    	affError("Vous êtes de nouveau en ligne.");
-//        log("You are now back online.");
         online = true;
-//		$('g').style.textShadow = '1px 0px 1px #444, -1px 0px 1px #444';
-		$('g').style.textDecoration='none';
+        $('g').style.textDecoration='none';
     }
 }
 
@@ -84,7 +79,7 @@ function search(t) {
     search_value = t;
     $('bs').style.background = "white url(loading.gif) no-repeat 4px center";
     var xhr = getHTTPObject('search');
-    xhr.open("POST", '//reader.gheop.com/search.php', true);
+    xhr.open("POST", 'https://reader.gheop.com/search.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1&s=' + t);
     requestTimer = setTimeout((function() {
@@ -100,19 +95,51 @@ function search(t) {
 }
 
 
-//vérifier le loadmore suite au changement de json
 function scroll() {
-	var count = 0;
-	for(var i in d) {
-		count++;
-		if($(i).offsetTop <= DM.scrollTop) {
-			if (d[i].r != 0) read(i);
-			if (!loadinprogress && count + 5 >= loadmore) {
-				loadinprogress = 1;
-				more();
-			}
-		} else return;
-	}
+    var unreadArticles = document.querySelectorAll(".item1");
+    var rootHeight = DM.offsetHeight-5;
+    if ("IntersectionObserver" in window && navigator.userAgent.toLowerCase().indexOf('safari/') == -1) {
+        window.addEventListener("resize", scroll);
+        window.addEventListener("orientationChange", scroll);
+        var imageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            var art = entry.target;
+                            read(art.id);
+                            cptReadArticle++;
+                            imageObserver.unobserve(art);
+                            if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
+                                loadinprogress = 1;
+                                more();
+                            }
+                        }
+                    });
+            }, {
+            root: DM,
+                    rootMargin: "1px 0px -"+rootHeight+"px 0px"
+                    });
+        unreadArticles.forEach(function(art) {
+                imageObserver.observe(art);
+            });
+    }
+    else {
+        DM.onscroll = oldScroll;
+        DM.onmousewheel = oldScroll;
+    }
+}
+
+function oldScroll() {
+    var count = 0;
+    for(var i in d) {
+        count++;
+        if($(i).offsetTop <= DM.scrollTop) {
+            if (d[i].r != 0) read(i);
+            if (!loadinprogress && count + 5 >= loadmore) {
+                loadinprogress = 1;
+                more();
+            }
+        } else return;
+    }
 }
 
 
@@ -191,7 +218,7 @@ function markallread(i) {
 function view(i) {
   if(zhr) {zhr.abort(); zhr=null;}
   zhr = getHTTPObject('view');
-  zhr.open("POST", '//reader.gheop.com/view.php', true);
+  zhr.open("POST", 'https://reader.gheop.com/view.php', true);
   zhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   zhr.send((i == 'all') ? 'zhr=1' : 'zhr=1&id=' + i);
   //    requestTimer = setTimeout(function() {if(zhr) zhr.abort();}, 8000);
@@ -219,7 +246,7 @@ function addflux() {
   var val = window.prompt("Ajouter le flux :", "http(s)://");
   affError("Récupération du flux '" + val + "' en cours ...", 10);
   var xhr = getHTTPObject('addflux');
-  xhr.open("POST", '//reader.gheop.com/add_flux.php', true);
+  xhr.open("POST", 'https://reader.gheop.com/add_flux.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1&link=' + encodeURIComponent(val));
   requestTimer = setTimeout((function() {
@@ -289,8 +316,8 @@ function getHTTPObject(action) {
         $('menu').insertAdjacentHTML('beforeend', page);
         // $('menu').innerHTML += page;
         D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
-//        $('favico').href = "//reader.gheop.com/favicon" + nb_title + ".gif";
-        $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
+//        $('favico').href = "https://reader.gheop.com/favicon" + nb_title + ".gif";
+        $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
         totalItems = nb_title;
         readItems = 0;
         progressBar();
@@ -305,7 +332,7 @@ function getHTTPObject(action) {
         location.reload();
 //        return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'view') {
-
+      	cptReadArticle = 0;
         varscroll = 0;
         loadmore = 0;
         if (xhr.responseText) {
@@ -322,17 +349,20 @@ function getHTTPObject(action) {
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
         page += '<div id="addblank">&nbsp;</div>';
         DM.innerHTML = page;
-        if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-        DM.addEventListener('DOMMouseScroll', scroll, false);
-        lazyLoadImg();
-        DM.onscroll = scroll;
-        DM.onmousewheel = scroll;
         DM.scrollTop = 0;
+        if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        //DM.addEventListener('DOMMouseScroll', scroll, false);
+        lazyLoadImg();
+        scroll();
+        // DM.onscroll = scroll;
+        // DM.onmousewheel = scroll;
+
       } else if (action === 'more') {
         if (!xhr.responseText) return 0;
         var p = JSON.parse(xhr.responseText);
         if (!p || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
+        cptReadArticle = 0;
         for(var i in p) {
             loadmore++;
             d[i] = p[i];
@@ -343,7 +373,7 @@ function getHTTPObject(action) {
         //   d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
         //   var n = d.i.length - 1;
         //   loadmore++;
-        //   page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="//reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
+        //   page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="https://reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
         //   n = null;
         // }
         page += '<div id="addblank">&nbsp;</div>';
@@ -393,14 +423,14 @@ function getHTTPObject(action) {
 
 function unread(k) {
 	unr = 1;
-	if (d[k].r == 1) return;
+	if (d[k].r == 1 || $(k).className == 'item1') return;
 	d[k].r = 1;
 	$(k).className = 'item1';
 	if (nb_title < 0) nb_title = 0;
 	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
 	m[d[k].f].n++;
-	if ($('f' + d[k].f)) $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux">' + m[d[k].f].n + '</span>';
-	$('f' + d[k].f).className = "fluxnew";
+        $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
+        $('f' + d[k].f).className = "fluxnew";
 	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
 	light('f' + d[k].f);
 	var xhr = getHTTPObject();
@@ -411,7 +441,7 @@ function unread(k) {
 		if (xhr) xhr.abort();
   }), 4000); //a voir si ça marche
 	xhr = null;
-	$('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
+	$('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
 	readItems--;
 	progressBar();
 }
@@ -429,20 +459,13 @@ function read(k) {
   d[k].r = 0;
   m[d[k].f].n--;
 
-  //
-  ///
-  ///
-  /// voir pour mettre les trucs en dessous en hidden qd className change pour pas avoir à tout réécrire ??
-  /// reste tjrs le nb à mettre à jour mais plus light non?
-  //
-
   if (m[d[k].f].n > 0) {
-    $('f' + d[k].f).innerHTML = m[d[k].f].t + '<span class="nb_flux"> ' + m[d[k].f].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + m[d[k].f].i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + m[d[k].f].i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[d[k].f].t.replace(/'/g, "\\\'") + '\', ' + m[d[k].f].i + ')"></a></span>';
-    light('f' + d[k].f);
+      $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
+      light('f' + d[k].f);
   } else {
-    $('f' + d[k].f).innerHTML = m[d[k].f].t + ' <span class="icon"><a title="Se désabonner" onclick="unsubscribe(\'' + m[d[k].f].t.replace(/'/g, "\\\'") + '\',' + d[k].f + ')"></a></span>';
-    if (id == d[k].f) $('f' + d[k].f).className = "flux show";
-    else $('f' + d[k].f).className = "flux";
+      $('f' + d[k].f).firstElementChild.innerHTML = '';
+      if (id == d[k].f) $('f' + d[k].f).className = "flux show";
+      else $('f' + d[k].f).className = "flux";
   }
   var xhr = getHTTPObject();
   xhr.open("POST", 'read.php', true);
@@ -453,7 +476,7 @@ function read(k) {
   }), 4000);
   D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
   if (nb_title < 0) nb_title = 0;
-  $('favico').href = "//reader.gheop.com/favicon.php?n=" + nb_title;
+  $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
   xhr = null;
   readItems++;
   progressBar();
@@ -466,7 +489,7 @@ function progressBar() {
 
 function menu() {
   var xhr = getHTTPObject('menu');
-  xhr.open("POST", '//reader.gheop.com/menu.php', true);
+  xhr.open("POST", 'https://reader.gheop.com/menu.php', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.send('xhr=1');
   requestTimer = setTimeout((function() {
@@ -496,69 +519,63 @@ function konamistop() {
   $('konami').style.display = 'none';
 }
 
- function lazyLoadImg() {
-  var lazyloadImages;
+function lazyLoadImg() {
+    var lazyloadImages = document.querySelectorAll(".lazy");
+    if ("IntersectionObserver" in window /*&& navigator.userAgent.toLowerCase().indexOf('safari/') == -1*/) {
+        var imageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            var image = entry.target;
+                            image.src = image.dataset.src;
+                            //pour lancer la détection des webp pour safari et ie
+                            //         WebpHero();
+                            image.classList.remove("lazy");
+                            imageObserver.unobserve(image);
+                        }
+                    });
+            }, {
+            root: DM,
+                    rootMargin: "0px 0px 500px 0px"
+                    });
 
-  //log("nb img : " + lazyloadImages.length);
-  if ("IntersectionObserver" in window) {
-    lazyloadImages  = document.querySelectorAll("img.lazy");
-    //log(lazyloadImages);
-    var imageObserver = new IntersectionObserver(function(entries, observer) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-    //    	log(entry.target);
-          var image = entry.target;
-          image.src = image.dataset.src;
-          image.classList.remove("lazy");
-          imageObserver.unobserve(image);
-        }
-      });
-    });
-
-    lazyloadImages.forEach(function(image) {
-    	imageObserver.observe(image);
-    });
-
-  } else {
-  	log('tg');
-    var lazyloadThrottleTimeout;
-    lazyloadImages = document.querySelectorAll(".lazy");
-
-    function lazyload () {
-      if(lazyloadThrottleTimeout) {
-        clearTimeout(lazyloadThrottleTimeout);
-      }
-
-      lazyloadThrottleTimeout = setTimeout(function() {
-        var scrollTop = window.pageYOffset;
-        lazyloadImages.forEach(function(img) {
-            if(img.offsetTop < (window.innerHeight + scrollTop)) {
-              img.src = img.dataset.src;
-              img.classList.remove('lazy');
+        lazyloadImages.forEach(function(image) {
+                imageObserver.observe(image);
+            });
+    } else {
+        var lazyloadThrottleTimeout;
+        function lazyload () {
+            if(lazyloadThrottleTimeout) {
+                clearTimeout(lazyloadThrottleTimeout);
             }
-        });
-        if(lazyloadImages.length == 0) {
-          document.removeEventListener("scroll", lazyload);
-          window.removeEventListener("resize", lazyload);
-          window.removeEventListener("orientationChange", lazyload);
+            lazyloadThrottleTimeout = setTimeout(function() {
+                    var scrollTop = window.pageYOffset;
+                    lazyloadImages.forEach(function(img) {
+                            if(img.offsetTop < (window.innerHeight + scrollTop + 500)) {
+                                img.src = img.dataset.src;
+                                img.classList.remove('lazy');
+                            }
+                        });
+                    if(lazyloadImages.length == 0) {
+                        document.removeEventListener("scroll", lazyload);
+                        window.removeEventListener("resize", lazyload);
+                        window.removeEventListener("orientationChange", lazyload);
+                    }
+                }, 20);
         }
-      }, 20);
+        document.addEventListener("scroll", lazyload);
+        window.addEventListener("resize", lazyload);
+        window.addEventListener("orientationChange", lazyload);
     }
-
-    document.addEventListener("scroll", lazyload);
-    window.addEventListener("resize", lazyload);
-    window.addEventListener("orientationChange", lazyload);
-  }
 }
+
+
 
 function i() {
   view('all');
   menu();
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
-
-  document.addEventListener('DOMContentLoaded', lazyLoadImg);
-
+  
   inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;
@@ -666,7 +683,7 @@ function more() {
 }
 
 function verif(k) {
-  return (d[k].r == 1) ? read(k) : unread(k);
+  return (d[k].r == 0) ? unread(k) : read(k);
 }
 
 function log(t) {
@@ -697,5 +714,5 @@ function affError(text,n) {
 		$('error').style.display = 'block';
 		setTimeout(delError, n*1000);
 	}
-
 }
+

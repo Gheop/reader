@@ -24,15 +24,27 @@ $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
     }
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
     if($type == "inode/x-empty") return "";
-    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
-    else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);
-    else if($type == "image/gif" && `which giflossy`) ;//exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
-    else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
-    $base64 = "//reader.gheop.com/$tmpfile";
+    if(($type == "image/jpeg" || $type == "image/png") &&  `which convert`) {
+        exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
+        $tmpfile .= '.webp';
+        /* if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile); */
+        /* else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile); */
+        
 
-    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
+        /* return '<picture><source class="lazy" data-srcset="'.$tmpfile.'.webp" type="image/webp"><source class="lazy" data-srcset="'.$tmpfile.'" type="'.$type.'"><img class="lazy" data-src="'.$tmpfile.'"></picture>'; */
+        
+    }
+/*    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
+      else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);*/
+    else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
+    else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
+//    $base64 = "//reader.gheop.com/$tmpfile";
+
+//    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
+    //voir pour mettre le onerror dans lib.js (stocker $f1 dans src2 ou un truc comme)
+    return '<img class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
   }
-  else return '<img src="'.$f[1].'" />';
+  else return '<img class="lazy" src="'.$f[1].'" />';
 }
 
 function clean_txt($v) {
@@ -92,7 +104,7 @@ function clean_txt($v) {
 
 /*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
-  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
+  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
   $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
 
 /*  $q =array();
