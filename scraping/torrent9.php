@@ -1,8 +1,8 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'http://www.torrent9.ch';
+$base_url = 'https://www.torrent9.uno';
 $uri = [
-	'films' => '/torrents/films',
+	'films' => '/torrents_films.html', //'/torrents/films',
 	'series' => '/torrents/'.urlencode('séries'),
 	'musique' => '/torrents_musique.html',
 	'ebook' => '/torrents_ebook.html',
@@ -16,7 +16,9 @@ $uri = [
 }
 */
 function _get_URI() {
-	return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+    if(isset($_SERVER['HTTPS']))
+        return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+    return 'https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 }
 /*
 if(!_is_curl())  {
@@ -40,7 +42,10 @@ echo "    <title>Torrent9 - ".ucfirst($_POST['f'])."</title>
 $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
+//echo $url;
 $html = @file_get_html($url);
+//var_dump($html);
+//die;
 if(!isset($html) || !$html || empty($html)) goto end;
 /*exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
 var_dump($htmla);
@@ -81,8 +86,8 @@ foreach($html->find('td a') as $element) {
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
-	      <link>".(isset($mylink)?$mylink:"")."</link>
-	      <guid>".(isset($mylink)?$mylink:"")."</guid>
+	      <link>".$base_url.(isset($mylink)?$mylink:"")."</link>
+	      <guid>".$base_url.(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
 $detail->clear();
