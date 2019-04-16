@@ -11,6 +11,7 @@ include('/www/conf.php');
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script>
 
 <link rel="stylesheet prefetch" type="text/css" href="//reader.gheop.com/screen.css" media="screen" title="Normal" />
 <title>Gheop Reader</title>
@@ -102,11 +103,10 @@ else {
 }
 ?>
 
-  <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript"></script>
 
 <!-- Piwik -->
 <script type="text/javascript">
-  i();
+//  i();
 // <!--  var _paq = _paq || [];
 //   // tracker methods like "setCustomDimension" should be called before "trackPageView"
 //   _paq.push(['trackPageView']);

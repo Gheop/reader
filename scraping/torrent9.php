@@ -58,9 +58,10 @@ var_dump($html);*/
 $i = 0;
 foreach($html->find('td a') as $element) {
 	if($i++ >= 10 ) break;
+	//echo $element->href;
 	$htmlaa = array();
       //echo $element->class. ' - '. $element->title. ' - '. $element->href . '<br>';
-      exec('python /www/reader/scraping/cf.py "'.$base_url.$element->href.'"', $htmlaa);
+      exec('python /www/reader/scraping/cf.py "'.$element->href.'"', $htmlaa);
       $detail = str_get_html(implode('
 	', $htmlaa));
       if(!$detail) break;
