@@ -164,6 +164,8 @@ for($j=0;$j<$i;$j++) {
 		}
 		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
 		//le lien n'est pas complet !
+		if(!preg_match('/^https?:\/\//',$linkmaster)) $linkmaster = $ttt[0];
+		//echo "<h1>$linkmaster</h1><br />";
 		$link = complete_link($link, $linkmaster);
 
 		// print $link;

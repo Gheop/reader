@@ -716,3 +716,5 @@ function affError(text,n) {
 	}
 }
 
+
+document.onload = i();

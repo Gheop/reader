@@ -240,6 +240,12 @@ if($rss = @simplexml_load_string($page)) {
 	if($rss->channel->link) $link = $rss->channel->link;
 	elseif($rss->link[0]['href']) $link = $rss->link[0]['href'];
 
+	if(isset($link) && !preg_match('/^https?:\/\//',$link)) {
+		$pu = parse_url($rsslink);
+		if(!isset($pu['scheme'])) $pu['scheme'] = 'https';
+		$link = $pu['scheme'].'://'.$pu['host'].$link;
+	}
+
 	if($rss->channel->description) $description = $rss->channel->description;
 	elseif($rss->subtitle) $description = $rss->subtitle;
 
