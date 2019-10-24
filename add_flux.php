@@ -166,7 +166,7 @@ function getRSSLink($url) {
 function validate_url($url) {
 	if(!preg_match('/^https?:\/\//',$url)) $url = '//'.$url;
 	$url = filter_var($url, FILTER_SANITIZE_URL);
-	if (!filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED) === false) {
+	if (!filter_var($url, FILTER_VALIDATE_URL) === false) {
 		return $url;
 	} else {
 		return false;
@@ -206,15 +206,17 @@ else {
 	return;
 }
 
-$file = 'flux.txt';
-// Ouvre un fichier pour lire un contenu existant
-$current = file_get_contents($file);
-// Ajoute une personne
-$current .= "$rsslink\n";
-// Écrit le résultat dans le fichier
-file_put_contents($file, $current);
+// $rsslink = "@beetcoin";
+// $file = 'flux.txt';
+// // Ouvre un fichier pour lire un contenu existant
+// $current = file_get_contents($file);
+// // Ajoute une personne
+// $current .= "$rsslink\n";
+// // Écrit le résultat dans le fichier
+// file_put_contents($file, $current);
 
 if(preg_match('/^[@#](.*)$/',$rsslink,$m)) {
+	//echo "twitter:".$m[1]."<br />";
  	$rsslink = 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[1];
 }
 

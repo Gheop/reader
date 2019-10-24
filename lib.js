@@ -308,10 +308,11 @@ function getHTTPObject(action) {
 				m = JSON.parse(xhr.responseText);
 				for(var i in m) {
 					if (m[i].n > 0) {
+            /* voir pour faire un event à la place des onclick and co */
+            /*<li class=""><data value="'+i+'">... */
 						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
-/*						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Éditer le nom" onclick="editFluxName(' + i + ')"></a> <a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
-*/						nb_title += m[i].n || 0;
-					} //else page += '\t<li href="' + m[i].l + '" id="f' + i + '" class="flux" onclick="view(' + i + ');" title="' + m[i].d + '">' + m[i].t + '</li>\n';
+  						nb_title += m[i].n || 0;
+					}
 				}
         $('menu').insertAdjacentHTML('beforeend', page);
         // $('menu').innerHTML += page;
@@ -337,6 +338,7 @@ function getHTTPObject(action) {
         loadmore = 0;
         if (xhr.responseText) {
           d = JSON.parse(xhr.responseText);
+          //log(d);
           for(var i in d) {
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
@@ -392,16 +394,16 @@ function getHTTPObject(action) {
         $('f' + id).classList.remove('show');
         id = 'search';
         $('f' + id).classList.add('show');
-         console.log("response" + xhr.responseText);
+         //console.log("response" + xhr.responseText);
         if (!xhr.responseText || !(d = JSON.parse(xhr.responseText))) {
-          DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
           return false;
         }
         // d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
         loadmore = 0;
         for (var y = 0, tlen = d.i.length; y < tlen; y++) {
           loadmore++;
-          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span><!--  ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
           //voir pour foutre les tags en ul,li
         }
 
@@ -460,7 +462,8 @@ function read(k) {
   m[d[k].f].n--;
 
   if (m[d[k].f].n > 0) {
-      $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
+//      $('f' + d[k].f).childNodes[1].innerHTML = m[d[k].f].n;
+     $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
       light('f' + d[k].f);
   } else {
       $('f' + d[k].f).firstElementChild.innerHTML = '';
@@ -575,15 +578,15 @@ function i() {
   menu();
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
-  
+
   inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;
-    log("Focus sur l'input de recherche.");
+    //log("Focus sur l'input de recherche.");
   };
   $('s').onblur = function() {
     search_focus = 0;
-    log("Perte du focus sur l'input de recherche.");
+    //log("Perte du focus sur l'input de recherche.");
   };
   D.onkeydown = function(evt) {
     if (search_focus === 1) return;
@@ -630,7 +633,7 @@ function i() {
         openActif();
         break;
       default:
-        log("Touche non implémentée. Code : " + k);
+        //log("Touche non implémentée. Code : " + k);
         break;
     }
     k = null;
@@ -644,7 +647,7 @@ function openActif() {
     if (!(d.i[k])) {
       return;
     } else if ($(d.i[k].i).offsetTop >= DM.scrollTop) {
-      log("Fenêtre active : " + d.i[k].l);
+      //log("Fenêtre active : " + d.i[k].l);
       window.focus();
       window.open(d.i[k].l).blur();
       window.self.focus();
@@ -687,7 +690,12 @@ function verif(k) {
 }
 
 function log(t) {
-  if (typeof console !== 'undefined') console.log(t);
+  if (typeof console !== 'undefined') {
+    if(typeof t == 'object')
+      console.table(t);
+    else
+      console.log(t);
+  }
 }
 
 

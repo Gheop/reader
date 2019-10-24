@@ -58,8 +58,8 @@ while($d = $r->fetch_array()) {
 		Array(
 			CURLOPT_URL => $d[1],
 			CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
-			CURLOPT_TIMEOUT => 30,
-			CURLOPT_CONNECTTIMEOUT => 30,
+			CURLOPT_TIMEOUT => 60,
+			CURLOPT_CONNECTTIMEOUT => 60,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => 'UTF-8',
             CURLOPT_SSL_VERIFYPEER => FALSE,
@@ -96,10 +96,11 @@ for($j=0;$j<$i;$j++) {
 	//     'output-xml' => true,
 	//     'input-xml' => true
 	// ));
-	$rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+	$rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 	//$rss = $xml->asXML();
-	//print_r($rss);
-	//die;
+	// echo '<pre>';
+	// print_r($rss);
+	// die;
 // 	$rss = new DomDocument();
 // 	$rss->recover=true;
 // 	$rss->loadXML(trim(curl_multi_getcontent($ch[$j])));

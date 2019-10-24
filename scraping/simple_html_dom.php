@@ -109,7 +109,7 @@ if(curl_errno($ch))
 }
 else
 {
-    return $content;        
+    return $content;
 }
     curl_close($ch);
 
@@ -121,11 +121,12 @@ function file_get_html($url, $use_include_path = false, $context=null, $offset =
 	// We DO force the tags to be terminated.
 	$dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
 	// For sourceforge users: uncomment the next line and comment the retreive_url_contents line 2 lines down if it is not already done.
-	
+
 	//modifié par mes soins
-	//$contents = getPage($url); 
-	$contents = file_get_contents($url, $use_include_path, $context, $offset);
-	
+	//$contents = getPage($url);
+//	$contents = file_get_contents($url, $use_include_path, $context, $offset);
+	$contents = file_get_contents($url, $use_include_path, $context);
+
 	// Paperg - use our own mechanism for getting the contents as we want to control the timeout.
 	//$contents = retrieve_url_contents($url);
 	if (empty($contents) || strlen($contents) > MAX_FILE_SIZE)
@@ -738,7 +739,7 @@ class simple_html_dom_node
 // This implies that an html attribute specifier may start with an @ sign that is NOT captured by the expression.
 // farther study is required to determine of this should be documented or removed.
 //		$pattern = "/([\w-:\*]*)(?:\#([\w-]+)|\.([\w-]+))?(?:\[@?(!?[\w-]+)(?:([!*^$]?=)[\"']?(.*?)[\"']?)?\])?([\/, ]+)/is";
-		$pattern = "/([\w-:\*]*)(?:\#([\w-]+)|\.([\w-]+))?(?:\[@?(!?[\w-:]+)(?:([!*^$]?=)[\"']?(.*?)[\"']?)?\])?([\/, ]+)/is";
+		$pattern = "/([\w\-:\*]*)(?:\#([\w\-]+)|\.([\w\-]+))?(?:\[@?(!?[\w\-:]+)(?:([!*^$]?=)[\"']?(.*?)[\"']?)?\])?([\/, ]+)/is";
 		preg_match_all($pattern, trim($selector_string).' ', $matches, PREG_SET_ORDER);
 		if (is_object($debug_object)) {$debug_object->debug_log(2, "Matches Array: ", $matches);}
 
@@ -1434,7 +1435,7 @@ class simple_html_dom
 			return true;
 		}
 
-		if (!preg_match("/^[\w-:]+$/", $tag)) {
+		if (!preg_match("/^[\w\-:]+$/", $tag)) {
 			$node->_[HDOM_INFO_TEXT] = '<' . $tag . $this->copy_until('<>');
 			if ($this->char==='<') {
 				$this->link_nodes($node, false);
