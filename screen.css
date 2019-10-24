@@ -1,12 +1,10 @@
 @font-face {
-  /*font-family: 'Awesome';*/
   font-family: 'fontawesome';
-  
   src: url("fonts/fontawesome-webfont.woff2");
   font-display: block;
 
 }
- 
+
 /*@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700);*/
 /*@font-face {
   font-family: 'Christmas';
@@ -96,12 +94,12 @@ li {
   font: normal 100%/1 fontawesome;
 }
 body {
-font-family:'Open Sans', sans-serif;
-  line-height: 1.3em;
-  font-weight: 400;
-    font-feature-settings: "kern";
-	word-wrap: break-word;
-    background: white url("data:image/gif;base64,R0lGODdhAwADAOcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///ywAAAAAAwADAAAICQDb/Rv4T6DAgAA7");
+       font-family: fontawesome;
+       line-height: 1.3em;
+       font-weight: 400;
+       font-feature-settings: "kern";
+       word-wrap: break-word;
+       background: white;/* url("data:image/gif;base64,R0lGODdhAwADAOcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///ywAAAAAAwADAAAICQDb/Rv4T6DAgAA7");*/
     color: #444;
 -webkit-font-smoothing: antialiased;
        }
@@ -158,6 +156,7 @@ b,strong,legend{
 
 
 main {
+    opacity:80%;
     border-top-left-radius: 1em;
     border-bottom-left-radius: 1em;
     background: #eee;
@@ -182,7 +181,7 @@ main {
 .item1,.item0 {
     background:#fff;
     margin-bottom:10px;
-    border:1px solid #444;
+
     border-radius:1em;
     text-overflow: ellipsis;
     word-wrap: break-word;
@@ -191,10 +190,13 @@ main {
 }
 .descr img,.descr picture, .descr source,.descr pre,.descr code,.item0 pre,.item0 code, .item0 img {max-width:99% !important;}
 .descr a {text-decoration:underline;text-decoration-style:dashed;}
-.item0 {opacity:0.8;
-    box-shadow: inset 0 -5px 45px rgba(100,100,100,0.2), 0 1px 1px rgba(255,255,255,0.2);
-    }
 
+.item0 {
+  opacity:0.8;
+  box-shadow: none;/*inset 0px 0px 10px #ddd;*/
+}
+.item0 .action {
+  opacity:0.8;}
 .action {
     margin:-1px;
     background:#444;
@@ -212,10 +214,10 @@ main {
     cursor:pointer;
     padding-left: 10px;
 }
-
+.love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
-.item1 .lu:before{content:""}
-.item0 .lu:before{content:""}
+.item1 .lu:before{content:"";}
+.item0 .lu:before{content:"";color:#ff8b8b;}
 .search:before{content:""}
 .star:before{content:""}
 .starred:before{content:""}
@@ -252,6 +254,9 @@ main {
     margin-top:10px;
     padding-left: 10px;
 }
+
+
+
 
 p {
     width: 100%;

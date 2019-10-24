@@ -1,4 +1,3 @@
-
 <?php
 //header("Content-Security-Policy: default-src 'self' https:;");
 //header("Content-Security-Policy: img-src: 'self' 'inline'");

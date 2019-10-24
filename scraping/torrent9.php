@@ -1,8 +1,8 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'https://www.torrent9.uno';
+$base_url = 'https://ww1.torrent9.cz';
 $uri = [
-	'films' => '/torrents_films.html', //'/torrents/films',
+	'films' => '/torrents/films', //'/torrents_films.html', //'/torrents/films',
 	'series' => '/torrents/'.urlencode('séries'),
 	'musique' => '/torrents_musique.html',
 	'ebook' => '/torrents_ebook.html',
@@ -43,29 +43,30 @@ $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
 //echo $url;
-$html = @file_get_html($url);
+//$html = @file_get_html($url);
 //var_dump($html);
 //die;
-if(!isset($html) || !$html || empty($html)) goto end;
-/*exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
-var_dump($htmla);
-die;
-$html = implode('
-	', $htmla);
+//if(!isset($html) || !$html || empty($html)) goto end;
+exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
+ var_dump($htmla);
+ die;
+// $html = implode('
+// 	', $htmla);
 $html = str_get_html($html);
-var_dump($html);*/
-//die;
+ var_dump($html);
+  die;
 $i = 0;
-foreach($html->find('td a') as $element) {
-	if($i++ >= 10 ) break;
-	//echo $element->href;
-	$htmlaa = array();
+foreach($html->find('table[class=table table-striped table-bordered cust-table -table] tbody tr td a') as $element) {
+	if($i++ >= 3 ) break;
+	// echo $element->href;
+	// continue;
+    $htmlaa = array();
       //echo $element->class. ' - '. $element->title. ' - '. $element->href . '<br>';
-      exec('python /www/reader/scraping/cf.py "'.$element->href.'"', $htmlaa);
+      exec('python /www/reader/scraping/cf.py "https://www.torrent9.cz'.$element->href.'"', $htmlaa);
       $detail = str_get_html(implode('
 	', $htmlaa));
       if(!$detail) break;
-	/*$detail = file_get_html($base_url.$element->href);*/
+//	$detail = file_get_html($base_url.$element->href);
 	foreach($detail->find('div[class=left-tab-section] a[class=btn btn-danger download]') as $lien) {
 		$mylink = $lien->href;
 		//$mylink = str_replace('http://protege-liens.net', '', $mylink);
@@ -84,6 +85,10 @@ foreach($html->find('td a') as $element) {
 			$mydescription .= "<br /><br />Poids : ".$info->last_child () ->innertext."<br />";
 	}
 
+//	if($mytitle ) {
+
+//	}
+//	else {
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
