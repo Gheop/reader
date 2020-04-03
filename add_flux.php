@@ -296,8 +296,8 @@ if($rss = @simplexml_load_string($page)) {
 					echo 'Vous êtes maintenant inscrit à ce flux.<br />Vous allez être rediriger sur le site d\'origine dans 5 secondes.<br /> Sinon, cliquer <a href="'.$link.'">ici</a>.';
 				} else {
 					echo 'Vous êtes maintenant inscrit à ce flux.';
-					$previous = "javascript:history.go(-1)";
-					echo '<a href="'.$previous.'">Back</a>';
+					// $previous = "javascript:history.go(-1)";
+					// echo '<a href="'.$previous.'">Back</a>';
 				}
 				exit;
 			}
@@ -308,8 +308,8 @@ if($rss = @simplexml_load_string($page)) {
 					echo 'Vous êtes déjà inscrit à ce flux.<br />Vous allez être rediriger sur le site d\'origine dans 5 secondes.<br /> Sinon, cliquer <a href="'.$link.'">ici</a>.';
 				} else {
 					echo 'Vous êtes déjà inscrit à ce flux.';
-					$previous = "javascript:history.go(-1)";
-					echo '<a href="'.$previous.'">Back</a>';
+					// $previous = "javascript:history.go(-1)";
+					// echo '<a href="'.$previous.'">Back</a>';
 				}
 				exit;
 			}
