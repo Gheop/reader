@@ -17,6 +17,8 @@ totalItems = 0,
 readItems =0;
 online = true;
 notif = false;
+
+const locale = navigator.language;
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var cptReadArticle = 0;
@@ -294,7 +296,37 @@ function editFluxName(idFlux) {
 }
 
 function generateArticle(i) {
-  return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
+  //log(d[i]);
+  var mydate = new Date(d[i].p);
+  var Now = new Date();
+
+  //if (typeof Intl.RelativeTimeFormat !== 'undefined') {
+  if(!!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)) {
+    datepub = d[i].p;
+    //datepub = new Intl.DateTimeFormat(locale).format(mydate);
+  }
+  else {
+    var rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    localeFormat = new Intl.DateTimeFormat(locale).format;
+    diffDays = Math.round((mydate - Now) / 86400000);
+    diffHours = Math.round((mydate - Now) / 3600000);
+    diffMinutes = Math.round((mydate - Now) / 60000);
+    if(diffMinutes > -46) {
+      datepub = rtf.format(diffMinutes, 'minute');
+    }
+    else if(diffHours > -24) {
+      datepub = rtf.format(diffHours, 'hour');
+    }
+    else if(diffDays > -32) {
+      datepub = rtf.format(diffDays, 'day');
+    }
+    else {
+      datepub = d[i].p;//new Intl.DateTimeFormat(locale).format(mydate);
+    }
+    // prévoir mois/année ? notamment pour la recherche ?
+  }
+
+  return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
 
 function getHTTPObject(action) {
@@ -338,14 +370,10 @@ function getHTTPObject(action) {
         loadmore = 0;
         if (xhr.responseText) {
           d = JSON.parse(xhr.responseText);
-          //log(d);
           for(var i in d) {
             loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
             page += generateArticle(i);
-
-            //'<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + d[i].p + '</a>\n\t<a id="a' + d[i].i + '" href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
-              //          page += '<article id="' + d.i[z].i + '" class="item' + d.i[z].r + '" onclick="read(' + z + ')">\n\t<a class="date" title="date">' + d.i[z].p + '</a>\n\t<a id="a' + d.i[z].i + '" href="' + d.i[z].l + '" class="title" target="_blank" title="' + d.i[z].t + '">' + d.i[z].t + '</a>\n\t<div class="author">From <a href="' + d.i[z].o + '" title="' + d.i[z].n + '">' + d.i[z].n + '</a>' + ((d.i[z].a) ? (' by ' + d.i[z].a) : '') + '</div>\n\t<div class="descr">' + d.i[z].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + z + ');return true;" title="Lu"></a><span class="tags"> tags  <a href="viewpage.php?id='+d.i[z].i+'" target="_blank"></a> ☺ ☻ ♡ ♥  <i style="color:#d43f57">♥</i>    </span></div>\n</article>\n';
           }
         }
         if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
@@ -370,14 +398,6 @@ function getHTTPObject(action) {
             d[i] = p[i];
             page += generateArticle(i);
         }
-        // for (var x = 0, plen = p.i.length; x < plen; x++) {
-        //   //d.i.push(p.i[k]);
-        //   d.i[d.i.length] = p.i[x]; //plus rapide que ligne précédente
-        //   var n = d.i.length - 1;
-        //   loadmore++;
-        //   page += '<article id="' + d.i[n].i + '" class="item' + d.i[n].r + '" onclick="read(' + x + ')"><div class="date">' + d.i[n].p + '</div><a id="a' + d.i[n].i + '" href="' + d.i[n].l + '" class="title" target="_blank">' + d.i[n].t + '</a><a href="https://reader.gheop.com/viewSrc.php?id=' + d.i[n].i + '" style="vertical-align:sub; font-size:0.8em;color:silver" target="_blank"> src</a> <div class="author">From <a>' + d.i[n].n + '</a>' + ((d.i[n].a) ? (' by ' + d.i[n].a) : '') + '</div><div class="descr">' + d.i[n].d + '</div><div class="action"><a class="lu" onclick="verif(' + x + ');return true;"></a><span class="tags"> tags</span><!--  ☺ ☻ ♡ ♥--></div></article>';
-        //   n = null;
-        // }
         page += '<div id="addblank">&nbsp;</div>';
         DM.insertAdjacentHTML('beforeend', page);
         $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
@@ -394,18 +414,24 @@ function getHTTPObject(action) {
         $('f' + id).classList.remove('show');
         id = 'search';
         $('f' + id).classList.add('show');
-         //console.log("response" + xhr.responseText);
-        if (!xhr.responseText || !(d = JSON.parse(xhr.responseText))) {
+        loadmore = 0;
+        if (xhr.responseText) {
+          d = JSON.parse(xhr.responseText);
+          // for(var i in d) {
+          //   loadmore++;
+          //   //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
+          //   page += generateArticle(i);
+          for (var y = 0, tlen = d.i.length; y < tlen; y++) {
+            loadmore++;
+            page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          //voir pour foutre les tags en ul,li
+          }
+        }
+        else {
           DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
           return false;
         }
-        // d = JSON.parse(xhr.responseText); // d = eval('('+xhr.responseText+')');
-        loadmore = 0;
-        for (var y = 0, tlen = d.i.length; y < tlen; y++) {
-          loadmore++;
-          page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
-          //voir pour foutre les tags en ul,li
-        }
+
 
         page += '<div id="addblank">&nbsp;</div>';
         DM.innerHTML = page;

@@ -1,6 +1,6 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'https://ww1.torrent9.cz';
+$base_url = 'https://www.torrent9.pl/';
 $uri = [
 	'films' => '/torrents/films', //'/torrents_films.html', //'/torrents/films',
 	'series' => '/torrents/'.urlencode('séries'),
@@ -26,13 +26,13 @@ if(!_is_curl())  {
 	exit;
 }*/
 
-header('Content-type: application/rss+xml; charset=utf-8');
+/*header('Content-type: application/rss+xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
+    <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml" />
 ';
-echo '    <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml" />
-';
+*/
 if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
 if(!isset($_POST['f']) || empty($_POST['f']) || !$uri[strtolower($_POST['f'])]) $_POST['f'] = 'films';
 

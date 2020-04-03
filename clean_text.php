@@ -1,6 +1,6 @@
 <?php
 function imgbase64($f) {
-  $f[1] = preg_replace('/^\/\//s','//',$f[1]);
+  $f[1] = preg_replace('/^\/\//s','https://',$f[1]);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
 $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
 /*  $extension_valides = array('jpg','png','gif','jpeg','bmp');
@@ -29,10 +29,10 @@ $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
         $tmpfile .= '.webp';
         /* if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile); */
         /* else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile); */
-        
+
 
         /* return '<picture><source class="lazy" data-srcset="'.$tmpfile.'.webp" type="image/webp"><source class="lazy" data-srcset="'.$tmpfile.'" type="'.$type.'"><img class="lazy" data-src="'.$tmpfile.'"></picture>'; */
-        
+
     }
 /*    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
       else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);*/
@@ -42,9 +42,9 @@ $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
 
 //    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
     //voir pour mettre le onerror dans lib.js (stocker $f1 dans src2 ou un truc comme)
-    return '<img class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+    return '<img loading="lazy" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
   }
-  else return '<img class="lazy" src="'.$f[1].'" />';
+  else return '<img loading="lazy" class="lazy" src="'.$f[1].'" />';
 }
 
 function clean_txt($v) {
