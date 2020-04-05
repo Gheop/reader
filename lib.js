@@ -49,7 +49,9 @@ function $(i) {
   return D.getElementById(i);
 }
 
-$('favico').href = "https://reader.gheop.com/favicon.gif";
+function favicon(nb) {
+    $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb;
+}
 
 function handleConnectionChange(event){
     if(event.type == "offline"){
@@ -217,22 +219,54 @@ function markallread(i) {
 	return false;
 }
 
+function menu() {
+
+  myFetch('menu.php').then(result => {
+      var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+      m = result;
+      for(var i in m) {
+        if (m[i].n > 0) {
+          /* voir pour faire un event à la place des onclick and co */
+          /*<li class=""><data value="'+i+'">... */
+          menu += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '"><span onclick="view(' + i + ');">' + m[i].t + '</span><span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+          nb_title += m[i].n || 0;
+        }
+      }
+      $('menu').insertAdjacentHTML('beforeend', menu);
+      D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
+      favicon(nb_title);
+      totalItems = nb_title;
+      readItems = 0;
+      progressBar();
+      return;
+  })
+}
+
 function view(i) {
-  if(zhr) {zhr.abort(); zhr=null;}
-  zhr = getHTTPObject('view');
-  zhr.open("POST", 'https://reader.gheop.com/view.php', true);
-  zhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  zhr.send((i == 'all') ? 'zhr=1' : 'zhr=1&id=' + i);
-  //    requestTimer = setTimeout(function() {if(zhr) zhr.abort();}, 8000);
- requestTimer = setTimeout((function() {
-    if (zhr) zhr.abort();
-  }), 8000);
+  myFetch('view.php', 'id='+i).then(result => {
+    var page = '';
+    cptReadArticle = 0;
+    varscroll = 0;
+    loadmore = 0;
+    d = result;
+    for(var i in d) {
+      loadmore++;
+            //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
+            page += generateArticle(i);
+          }
+          if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
+          page += '<div id="addblank">&nbsp;</div>';
+          DM.innerHTML = page;
+          DM.scrollTop = 0;
+          if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+          lazyLoadImg();
+          scroll();
+        })
   $('f' + id).classList.remove('show');
   id = i;
   $('f' + id).classList.add('show');
   if ($('fsearch')) $('fsearch').className = "flux";
   search_active = 0;
-  //zhr = null;   Les autres timeout ne marchent pas car xhr = null en fin de fonction !!!!!!!!!!!!
 }
 
 function removelight(i) {
@@ -276,16 +310,16 @@ function up() {
 function unsubscribe(t, f) {
   var r = confirm("Se désinscrire de \"" + t + "\" ?");
   if (r) {
-    var xhr = getHTTPObject('unsubscribeflux');
-    xhr.open("POST", 'unsubscribe_flux.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send('xhr=1&link=' + f);
-    requestTimer = setTimeout((function() {
-      if (xhr) xhr.abort();
-    }), 4000);
-    xhr = null;
+    myFetch('unsubscribe_flux.php', 'link='+f, 1);
+    for(var i in d) {
+      if(d[i].f == f) {
+        d[i].r = 0;
+        $(i).style.display='none';
+      }
+    }
+    if($('f' + f).className == 'fluxnew show') view('all'); //problème si la désincription mets trop de temps, on peut retrouver des articles pas encore enlevés ... voir pour passer par generateArticleS le jour ou ça sera fait.
+    $('f' + f).className = "flux";
   }
-  r = null;
   return false;
 }
 
@@ -295,6 +329,9 @@ function editFluxName(idFlux) {
 
 }
 
+
+//faire une fonction qui génère TOUS les articles d'un coup et qui n'execute qu'une seule fois le calcul des dates...
+//ne pas vider la 'page' pour more...
 function generateArticle(i) {
   //log(d[i]);
   var mydate = new Date(d[i].p);
@@ -329,64 +366,36 @@ function generateArticle(i) {
   return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
 
+// voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json
+async function myFetch(url, data, noreturn) {
+  let response = await fetch(url, {
+    method: "POST",
+    body: data,
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+  if(!noreturn) {
+  let json = await response.json();
+  return json;
+}
+}
+
+
+
+
 function getHTTPObject(action) {
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === 4 && xhr.status && xhr.status === 200) {
 			var page = '';
-			if (action === 'menu') {
-				if (!xhr.responseText) return false;
-				page += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
-				m = JSON.parse(xhr.responseText);
-				for(var i in m) {
-					if (m[i].n > 0) {
-            /* voir pour faire un event à la place des onclick and co */
-            /*<li class=""><data value="'+i+'">... */
-						page += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">' + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
-  						nb_title += m[i].n || 0;
-					}
-				}
-        $('menu').insertAdjacentHTML('beforeend', page);
-        // $('menu').innerHTML += page;
-        D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
-//        $('favico').href = "https://reader.gheop.com/favicon" + nb_title + ".gif";
-        $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
-        totalItems = nb_title;
-        readItems = 0;
-        progressBar();
-
-        f = null;
-        return;
-      } else if (action === 'addflux') {
+	    if (action === 'addflux') {
         return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'unsubscribeflux') {
         return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'up') {
         location.reload();
 //        return xhr.responseText ? affError(xhr.responseText) : location.reload();
-      } else if (action === 'view') {
-      	cptReadArticle = 0;
-        varscroll = 0;
-        loadmore = 0;
-        if (xhr.responseText) {
-          d = JSON.parse(xhr.responseText);
-          for(var i in d) {
-            loadmore++;
-            //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-            page += generateArticle(i);
-          }
-        }
-        if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
-        page += '<div id="addblank">&nbsp;</div>';
-        DM.innerHTML = page;
-        DM.scrollTop = 0;
-        if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-        //DM.addEventListener('DOMMouseScroll', scroll, false);
-        lazyLoadImg();
-        scroll();
-        // DM.onscroll = scroll;
-        // DM.onmousewheel = scroll;
-
       } else if (action === 'more') {
         if (!xhr.responseText) return 0;
         var p = JSON.parse(xhr.responseText);
@@ -457,19 +466,12 @@ function unread(k) {
 	if (nb_title < 0) nb_title = 0;
 	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
 	m[d[k].f].n++;
-        $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
+        $('f' + d[k].f).children[1].innerHTML = m[d[k].f].n;
         $('f' + d[k].f).className = "fluxnew";
 	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
 	light('f' + d[k].f);
-	var xhr = getHTTPObject();
-	xhr.open("POST", 'unread.php', true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xhr.send('xhr=1&id=' + k);
-	requestTimer = setTimeout((function() {
-		if (xhr) xhr.abort();
-  }), 4000); //a voir si ça marche
-	xhr = null;
-	$('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
+  myFetch('unread.php', 'id='+k, 1);
+	favicon(nb_title);
 	readItems--;
 	progressBar();
 }
@@ -486,26 +488,19 @@ function read(k) {
   $(k).className = 'item0';
   d[k].r = 0;
   m[d[k].f].n--;
-
+myFetch('read.php', 'id='+k, 1);
   if (m[d[k].f].n > 0) {
-//      $('f' + d[k].f).childNodes[1].innerHTML = m[d[k].f].n;
-     $('f' + d[k].f).firstElementChild.innerHTML = m[d[k].f].n;
+     $('f' + d[k].f).children[1].innerHTML = m[d[k].f].n;
       light('f' + d[k].f);
   } else {
-      $('f' + d[k].f).firstElementChild.innerHTML = '';
+      $('f' + d[k].f).children[1].innerHTML = '';
       if (id == d[k].f) $('f' + d[k].f).className = "flux show";
       else $('f' + d[k].f).className = "flux";
   }
-  var xhr = getHTTPObject();
-  xhr.open("POST", 'read.php', true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1&id=' + k);
-  requestTimer = setTimeout((function() {
-    if (xhr) xhr.abort();
-  }), 4000);
+
   D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
   if (nb_title < 0) nb_title = 0;
-  $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb_title;
+  favicon(nb_title);
   xhr = null;
   readItems++;
   progressBar();
@@ -514,17 +509,6 @@ function read(k) {
 function progressBar() {
   var perc = (readItems/totalItems)*100;
   document.getElementsByTagName("footer")[0].style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
-}
-
-function menu() {
-  var xhr = getHTTPObject('menu');
-  xhr.open("POST", 'https://reader.gheop.com/menu.php', true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send('xhr=1');
-  requestTimer = setTimeout((function() {
-    if (xhr) xhr.abort();
-  }), 4000);
-  xhr = null;
 }
 
 var pressedKeys = [],
@@ -596,7 +580,6 @@ function lazyLoadImg() {
         window.addEventListener("orientationChange", lazyload);
     }
 }
-
 
 
 function i() {
