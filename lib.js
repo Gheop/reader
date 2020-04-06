@@ -17,8 +17,10 @@ totalItems = 0,
 readItems =0;
 online = true;
 notif = false;
-
+var Now;
 const locale = navigator.language;
+
+var rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var cptReadArticle = 0;
@@ -249,6 +251,7 @@ function view(i) {
     varscroll = 0;
     loadmore = 0;
     d = result;
+    Now = new Date();
     for(var i in d) {
       loadmore++;
             //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
@@ -329,39 +332,43 @@ function editFluxName(idFlux) {
 
 }
 
-
-//faire une fonction qui génère TOUS les articles d'un coup et qui n'execute qu'une seule fois le calcul des dates...
-//ne pas vider la 'page' pour more...
-function generateArticle(i) {
-  //log(d[i]);
-  var mydate = new Date(d[i].p);
-  var Now = new Date();
+function dateArticle(articleDate) {
+	 //log(d[i]);
+  
 
   //if (typeof Intl.RelativeTimeFormat !== 'undefined') {
-  if(!!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)) {
-    datepub = d[i].p;
-    //datepub = new Intl.DateTimeFormat(locale).format(mydate);
+ // if(!!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)) {
+ if(rtf == undefined) {
+    return articleDate;
+    //return new Intl.DateTimeFormat(locale).format(mydate);
   }
   else {
-    var rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-    localeFormat = new Intl.DateTimeFormat(locale).format;
-    diffDays = Math.round((mydate - Now) / 86400000);
-    diffHours = Math.round((mydate - Now) / 3600000);
-    diffMinutes = Math.round((mydate - Now) / 60000);
+  	var mydate = new Date(articleDate);
+    var diffDates = mydate - Now;
+  //  localeFormat = new Intl.DateTimeFormat(locale).format;
+    var diffDays = Math.round(diffDates / 86400000);
+    var diffHours = Math.round(diffDates / 3600000);
+    var diffMinutes = Math.round(diffDates / 60000);
     if(diffMinutes > -46) {
-      datepub = rtf.format(diffMinutes, 'minute');
+      return rtf.format(diffMinutes, 'minute');
     }
     else if(diffHours > -24) {
-      datepub = rtf.format(diffHours, 'hour');
+      return rtf.format(diffHours, 'hour');
     }
     else if(diffDays > -32) {
-      datepub = rtf.format(diffDays, 'day');
+      return rtf.format(diffDays, 'day');
     }
     else {
-      datepub = d[i].p;//new Intl.DateTimeFormat(locale).format(mydate);
+      return articleDate;//new Intl.DateTimeFormat(locale).format(mydate);
     }
     // prévoir mois/année ? notamment pour la recherche ?
   }
+
+}
+//faire une fonction qui génère TOUS les articles d'un coup et qui n'execute qu'une seule fois le calcul des dates...
+//ne pas vider la 'page' pour more...
+function generateArticle(i) {
+ 	var datepub = dateArticle(d[i].p);
 
   return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
@@ -402,6 +409,7 @@ function getHTTPObject(action) {
         if (!p || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
         cptReadArticle = 0;
+        Now = new Date();
         for(var i in p) {
             loadmore++;
             d[i] = p[i];
