@@ -546,7 +546,6 @@ function lazyLoadImg() {
 
 //firefox75 le supporte en natif !
 	if(hasSupportLoading) { 
-		alert("Has support Loading!");
 		lazyloadImages.forEach(function(img) {
 			img.src = img.dataset.src;
             img.classList.remove('lazy');
