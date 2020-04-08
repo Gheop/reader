@@ -251,8 +251,9 @@ function view(i) {
     cptReadArticle = 0;
     varscroll = 0;
     loadmore = 0;
+    d = result;
     Now = new Date();
-    for(var i in result) {
+    for(var i in d) {
     	loadmore++;
         //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
         page += generateArticle(i);
@@ -403,7 +404,6 @@ function getHTTPObject(action) {
         location.reload();
 //        return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'more') {
-        if (!xhr.responseText || (xhr.responseText.trim() == '')) return 0;
         var p = JSON.parse(xhr.responseText);
         if (!p || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
