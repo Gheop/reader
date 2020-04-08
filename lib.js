@@ -251,14 +251,13 @@ function view(i) {
     cptReadArticle = 0;
     varscroll = 0;
     loadmore = 0;
-    d = result;
     Now = new Date();
-    for(var i in d) {
-      loadmore++;
-            //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-            page += generateArticle(i);
-          }
-          if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
+    for(var i in result) {
+    	loadmore++;
+        //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
+        page += generateArticle(i);
+    }
+    if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
           page += '<div id="addblank">&nbsp;</div>';
           DM.innerHTML = page;
           DM.scrollTop = 0;
@@ -404,7 +403,7 @@ function getHTTPObject(action) {
         location.reload();
 //        return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'more') {
-        if (!xhr.responseText) return 0;
+        if (!xhr.responseText || (xhr.responseText.trim() == '')) return 0;
         var p = JSON.parse(xhr.responseText);
         if (!p || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
