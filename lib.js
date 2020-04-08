@@ -19,6 +19,7 @@ online = true;
 notif = false;
 var Now;
 const locale = navigator.language;
+const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 
 var rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 const D = document;
@@ -369,7 +370,6 @@ function dateArticle(articleDate) {
 //ne pas vider la 'page' pour more...
 function generateArticle(i) {
  	var datepub = dateArticle(d[i].p);
-
   return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
 
@@ -540,8 +540,21 @@ function konamistop() {
   $('konami').style.display = 'none';
 }
 
+
 function lazyLoadImg() {
-    var lazyloadImages = document.querySelectorAll(".lazy");
+	var lazyloadImages = document.querySelectorAll("img.lazy");
+
+//firefox75 le supporte en natif !
+	if(hasSupportLoading) { 
+		alert("Has support Loading!");
+		lazyloadImages.forEach(function(img) {
+			img.src = img.dataset.src;
+            img.classList.remove('lazy');
+		});
+		return 0;
+	}
+    
+
     if ("IntersectionObserver" in window /*&& navigator.userAgent.toLowerCase().indexOf('safari/') == -1*/) {
         var imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
