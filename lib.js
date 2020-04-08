@@ -564,7 +564,7 @@ var pressedKeys = [],
 
 function konami() {
   //document.body.style.background = "url(stickmen.png)";
-  document.body.style.fontFamily = "LaChatteAMaman";
+ // document.body.style.fontFamily = "LaChatteAMaman";
   DM.innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+DM.innerHTML;
   $('konami').style.display='block';
   ////js1k.com/2014-dragons/details/1955
