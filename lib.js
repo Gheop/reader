@@ -223,7 +223,7 @@ function markallread(i) {
 }
 
 function menu() {
-
+alert("menu");
   myFetch('menu.php').then(result => {
       var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
@@ -246,6 +246,7 @@ function menu() {
 }
 
 function view(i) {
+	alert('view');
   myFetch('view.php', 'id='+i).then(result => {
     var page = '';
     cptReadArticle = 0;
@@ -373,6 +374,30 @@ function generateArticle(i) {
   return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
 }
 
+
+
+async function myFetch(url, data, noreturn) {
+	//alert(url);
+  try {
+    const response = await fetch(url, {
+    method: "POST",
+    body: data,
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+  if(!noreturn) {
+  //	alert(url);
+  const json = await response.json();
+  return json;
+}
+  }
+  catch (err) {
+  	//alert(err);
+    console.log('fetch failed', err);
+  }
+}
+
 // voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json
 async function myFetch(url, data, noreturn) {
   let response = await fetch(url, {
@@ -383,6 +408,7 @@ async function myFetch(url, data, noreturn) {
     }
   });
   if(!noreturn) {
+  //	alert(url);
   let json = await response.json();
   return json;
 }
@@ -602,6 +628,7 @@ function lazyLoadImg() {
 
 
 function i() {
+	alert('Début');
   view('all');
   menu();
   window.addEventListener('online', handleConnectionChange);
