@@ -18,10 +18,13 @@ readItems =0;
 online = true;
 notif = false;
 var Now;
-const locale = navigator.language;
-const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 
-var rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+var rtf;
+const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
+if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
+	const locale = navigator.language;
+ 	rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+}
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var cptReadArticle = 0;
@@ -223,7 +226,6 @@ function markallread(i) {
 }
 
 function menu() {
-alert("menu");
   myFetch('menu.php').then(result => {
       var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
@@ -246,7 +248,6 @@ alert("menu");
 }
 
 function view(i) {
-	alert('view');
   myFetch('view.php', 'id='+i).then(result => {
     var page = '';
     cptReadArticle = 0;
@@ -259,10 +260,22 @@ function view(i) {
         //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
         page += generateArticle(i);
     }
-    if(loadmore == 0) {page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';}
+    if(loadmore == 0) {
+    	page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';
+    }
+        
+        
+
+
           page += '<div id="addblank">&nbsp;</div>';
           DM.innerHTML = page;
           DM.scrollTop = 0;
+
+          DM.addEventListener('DOMMouseScroll', scroll, false);
+        DM.onscroll = scroll;
+        DM.onmousewheel = scroll;
+        DM.scrollTop = 0;
+
           if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
           lazyLoadImg();
           scroll();
@@ -430,8 +443,9 @@ function getHTTPObject(action) {
         location.reload();
 //        return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'more') {
+      	if(!xhr.responseText || xhr.responseText == '{}') return 0;
         var p = JSON.parse(xhr.responseText);
-        if (!p || p.i.length === 0) return 0;
+        if (!p.i || p.i.length === 0) return 0;
         DM.removeChild($('addblank'));
         cptReadArticle = 0;
         Now = new Date();
@@ -628,7 +642,6 @@ function lazyLoadImg() {
 
 
 function i() {
-	alert('Début');
   view('all');
   menu();
   window.addEventListener('online', handleConnectionChange);
@@ -781,3 +794,4 @@ function affError(text,n) {
 
 
 document.onload = i();
+//i();
