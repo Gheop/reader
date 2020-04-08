@@ -13,6 +13,8 @@ $r = $mysqli->query("SELECT CONCAT('{',GROUP_CONCAT(CONCAT('\"',I.id,'\":{'),CON
 $d = $r->fetch_row();
 header('Content-Type: application/json');
 //echo $d[1];
-echo $d[0];
+if($d[0])
+    echo $d[0];
+else echo '{}';
 ?>
 
