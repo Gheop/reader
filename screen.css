@@ -22,12 +22,7 @@ https://github.com/mirgj/cryptocurrency-icons-font/blob/master/dist/webfont/cryp
 }*/
   @font-face {
     font-family: 'Gheop';
-    src: url('fonts/gheop-webfont.eot');
-    src: local("hybrid"),url('fonts/gheop-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/gheop-webfont.woff2') format('woff2'),
-         url('fonts/gheop-webfont.woff') format('woff'),
-         url('fonts/gheop-webfont.ttf') format('truetype'),
-         url('fonts/gheop-webfont.svg#hybridoutline') format('svg');
+    src: url('fonts/gheop-webfont.woff2');
     font-weight: normal;
     font-style: normal;
 
