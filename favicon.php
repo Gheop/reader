@@ -1,5 +1,6 @@
 <?php
-$image = new Imagick('favicon.gif') or die("msg error");
+//$image = new Imagick('favicon.gif') or die("msg error");
+$image = new Imagick('i/ico.gif') or die("msg error");
 
 if(isset($_GET['n']) && is_numeric($_GET['n']) && $_GET['n'] > 0) {
 	$draw = new ImagickDraw();
