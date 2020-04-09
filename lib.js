@@ -59,6 +59,18 @@ function favicon(nb) {
     $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb;
 }
 
+function changeTheme(style) {
+  const regTheme = RegExp('screen.css');
+  if(regTheme.test($('stylesheet').href)) {
+   $('stylesheet').href='dark.css';
+   $('stylesheet').innerHTML='';
+ }
+  else {
+    $('stylesheet').href='screen.css';
+    $('stylesheet').innerHTML='e';
+  }
+}
+
 function handleConnectionChange(event){
     if(event.type == "offline"){
         online = false;

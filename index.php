@@ -12,10 +12,10 @@ include('/www/conf.php');
 <head>
   <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script>
 
-<link rel="stylesheet prefetch" type="text/css" href="//reader.gheop.com/screen.css" media="screen" title="Normal" />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-<link id="favico" href="https://reader.gheop.com/favicon.php" rel="shortcut icon" type="image/gif" />
+<link id="favico" href="favicon.php" rel="shortcut icon" type="image/gif" />
 <!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
 <link rel="apple-touch-icon" href="favicon.gif"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -47,6 +47,7 @@ if(!isset($_SESSION['pseudo'])) {
    else if(isset($_GET['a']) && $_GET['a'] == 'destroy') include('../destroy.php');
 ?>
 <div id="register">
+  <a id='theme' href="" onclick="changeTheme();return false;"></a>
 <?php
 if(!isset($_SESSION['pseudo'])) {
   echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
