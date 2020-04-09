@@ -28,6 +28,8 @@ if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 const D = document;
 const DM = document.getElementsByTagName("main")[0];
 var cptReadArticle = 0;
+var imageObserver;
+
 var inactivityTime = function () {
   var t;
   window.onload = resetTimer;
@@ -116,14 +118,17 @@ function search(t) {
   return false;
 }
 
-
 function scroll() {
     var unreadArticles = document.querySelectorAll(".item1");
     var rootHeight = DM.offsetHeight-5;
     if ("IntersectionObserver" in window && navigator.userAgent.toLowerCase().indexOf('safari/') == -1) {
         window.addEventListener("resize", scroll);
         window.addEventListener("orientationChange", scroll);
-        var imageObserver = new IntersectionObserver(function(entries, observer) {
+        //on vire tout en cas de resize car rootHeight change ... et on recommence
+        if(imageObserver) imageObserver.disconnect();
+        if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        
+        imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
                             var art = entry.target;
@@ -140,6 +145,7 @@ function scroll() {
             root: DM,
                     rootMargin: "1px 0px -"+rootHeight+"px 0px"
                     });
+
         unreadArticles.forEach(function(art) {
                 imageObserver.observe(art);
             });
@@ -658,6 +664,7 @@ function i() {
   menu();
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
+  window.onresize = scroll;
 
   inactivityTime();
   $('s').onfocus = function() {
