@@ -101,7 +101,7 @@ function getSelectedText() {
 function search(t) {
   if (t) {
     search_value = t;
-    $('bs').style.background = "white url(loading.gif) no-repeat 4px center";
+    $('bs').style.background = "white url(i/loading.gif) no-repeat 4px center";
     var xhr = getHTTPObject('search');
     xhr.open("POST", 'https://reader.gheop.com/search.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
