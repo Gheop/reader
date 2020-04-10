@@ -220,16 +220,16 @@ main {
 }
 .love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
-.item1 .lu:before{content:"ï°";}
-.item0 .lu:before{content:"ï®";color:#ff8b8b;}
-.search:before{content:"ï"}
-.star:before{content:"ï"}
-.starred:before{content:"ï"}
-.love0:before{content:"ï"}
-/*ïïâ¥*/
-.love1:before{color:red;content:"ï"}
-.print:before{content:"ï¯"}
-/*ï¬ ï âº â» â¡ â¥ ï  ï¡ */
+.item1 .lu:before{content:"";}
+.item0 .lu:before{content:"";color:#ff8b8b;}
+.search:before{content:""}
+.star:before{content:""}
+.starred:before{content:""}
+.love0:before{content:""}
+/*♥*/
+.love1:before{color:red;content:""}
+.print:before{content:""}
+/*  ☺ ☻ ♡ ♥   */
 .title {
     font-size: 1.2em;
     font-weight: 600;
