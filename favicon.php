@@ -4,7 +4,7 @@ $image = new Imagick('i/ico.gif') or die("msg error");
 
 if(isset($_GET['n']) && is_numeric($_GET['n']) && $_GET['n'] > 0) {
 	$draw = new ImagickDraw();
-	$draw->setFillColor('black');
+	$draw->setFillColor('red');
   //  $draw->setFont('fontawesome-webfont.ttf');
 	if($_GET['n'] > 999 && $_GET['n'] = "∞") $draw->setFontSize(70);
 	else if($_GET['n'] <100) $draw->setFontSize(50);
