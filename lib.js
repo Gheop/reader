@@ -62,26 +62,27 @@ function favicon(nb) {
 }
 
 function changeTheme(style) {
+  if(imageObserver) imageObserver.disconnect();
   const regTheme = RegExp('screen.css');
   if(regTheme.test($('stylesheet').href)) {
    $('stylesheet').href='dark.css';
-   $('stylesheet').innerHTML='';
- }
+   $('theme').innerHTML='';
+  }
   else {
     $('stylesheet').href='screen.css';
-    $('stylesheet').innerHTML='e';
+    $('theme').innerHTML='';
   }
+  setTimeout(scroll, 2000);
 }
 
 function handleConnectionChange(event){
     if(event.type == "offline"){
-        online = false;
-        $('g').style.textDecoration='line-through';
+      online = false;
+      $('g').style.textDecoration='line-through';
     }
-
     if(event.type == "online"){
-        online = true;
-        $('g').style.textDecoration='none';
+      online = true;
+      $('g').style.textDecoration='none';
     }
 }
 
@@ -406,9 +407,8 @@ function generateArticle(i) {
 }
 
 
-
+// voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<  
 async function myFetch(url, data, noreturn) {
-	//alert(url);
   try {
     const response = await fetch(url, {
     method: "POST",
@@ -418,32 +418,30 @@ async function myFetch(url, data, noreturn) {
     }
   });
   if(!noreturn) {
-  //	alert(url);
   const json = await response.json();
   return json;
 }
   }
   catch (err) {
-  	//alert(err);
     console.log('fetch failed', err);
   }
 }
 
-// voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json
-async function myFetch(url, data, noreturn) {
-  let response = await fetch(url, {
-    method: "POST",
-    body: data,
-    headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-  });
-  if(!noreturn) {
-  //	alert(url);
-  let json = await response.json();
-  return json;
-}
-}
+
+// async function myFetch(url, data, noreturn) {
+//   let response = await fetch(url, {
+//     method: "POST",
+//     body: data,
+//     headers: {
+//         "Content-Type": "application/x-www-form-urlencoded"
+//     }
+//   });
+//   if(!noreturn) {
+//   //	alert(url);
+//   let json = await response.json();
+//   return json;
+// }
+// }
 
 
 
