@@ -404,6 +404,7 @@ function dateArticle(articleDate) {
 function generateArticle(i) {
  	var datepub = dateArticle(d[i].p);
   return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>    </span></div>\n</article>\n';
+   //🥚 🥚 🥚 🥚 🥚 🥚 🥚 🥚 easter egg
 }
 
 
@@ -426,25 +427,6 @@ async function myFetch(url, data, noreturn) {
     console.log('fetch failed', err);
   }
 }
-
-
-// async function myFetch(url, data, noreturn) {
-//   let response = await fetch(url, {
-//     method: "POST",
-//     body: data,
-//     headers: {
-//         "Content-Type": "application/x-www-form-urlencoded"
-//     }
-//   });
-//   if(!noreturn) {
-//   //	alert(url);
-//   let json = await response.json();
-//   return json;
-// }
-// }
-
-
-
 
 function getHTTPObject(action) {
 	var xhr = new XMLHttpRequest();
