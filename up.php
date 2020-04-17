@@ -91,12 +91,20 @@ for($j=0;$j<$i;$j++) {
 	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 
 	$xml = trim(curl_multi_getcontent($ch[$j]));
-	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);
-	// $xml = tidy_repair_string($xml, array(
+	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);	
+// $xml = tidy_repair_string($xml, array(
 	//     'output-xml' => true,
 	//     'input-xml' => true
 	// ));
-	$rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+$rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+//$rss = simplexml_load_string($xml, null, LIBXML_NOCDATA);
+	//$rss = simplexml_load_file($url, null, LIBXML_NOCDATA);
+//$namespaces = $rss->getNamespaces(true);
+// $media_content = $rss->entry->item[0]->children($namespaces['media']);
+// foreach($media_content->group->content as $i){
+//     var_dump((string)$i->attributes()->url);
+// }
+// die;
 	//$rss = $xml->asXML();
 	// echo '<pre>';
 	// print_r($rss);
@@ -146,7 +154,11 @@ for($j=0;$j<$i;$j++) {
 	if($rss->channel->link) $linkmaster = $rss->channel->link;
 	elseif($rss->link[0]['href']) $linkmaster = $rss->link[0]['href'];
 
-	if(isset($rss->channel->item)) $flux = $rss->channel->item;
+// 	if(is_object($rss->children($namespaces['media']))) {$flux=$rss->children($namespaces['media']);
+// // echo '<pre>';print_r($flux);
+// }
+// 	else 
+		if(isset($rss->channel->item)) $flux = $rss->channel->item;
 	else if(isset($rss->item)) $flux=$rss->item;
 	else if(isset($rss->entry)) $flux=$rss->entry;
 	else {
@@ -156,6 +168,8 @@ for($j=0;$j<$i;$j++) {
 	}
 	foreach ($flux as $item) {
 		$link=null;
+		// echo '<pre>';
+		// print_r($item);
 		if(is_object($item->link)) {
 			foreach($item->link as $t) {
 
@@ -223,7 +237,12 @@ for($j=0;$j<$i;$j++) {
 //				die ("FUCK OFF!");
 
 			}*/
-			if(isset($item->description)) $content = $item->description;
+
+			// if($item->children($namespaces['media'])) $content=$item->children($namespaces['media']);
+			// else 
+				if(isset($item->description)) $content = $item->description;
+			//else if(isset($item->{'media:description'})) $content = $item->{'media:description'}; //ne marche pas
+			//voir xpath dans TESTS
 			else if(isset($item->content)) $content = $item->content;
 			else if(isset($item->summary)) $content = $item->summary;
 			else if(isset($item->media)) var_dump($item->media);
