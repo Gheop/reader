@@ -192,7 +192,6 @@ main {
 
     border-radius:1em;
     text-overflow: ellipsis;
-    word-wrap: break-word;
     max-width:100%;
     overflow: hidden;
 }
@@ -224,6 +223,8 @@ main {
 }
 .love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
+.website:before{content:"🏠 ";}
+.author-name:before{content:"✍ ";}
 .item1 .lu:before{content:"";}
 .item0 .lu:before{content:"";color:#ff8b8b;}
 .search:before{content:""}
@@ -234,15 +235,17 @@ main {
 .love1:before{color:red;content:""}
 .print:before{content:""}
 /*  ☺ ☻ ♡ ♥   */
-.title {
+.headline {
     font-size: 1.2em;
     font-weight: 600;
     padding-left: 10px;
+    margin: 0;
 }
 
-.date {
-    float:right;
+time {
+    float:inline-end;
     padding-right:10px;
+    margin-top: -3.2em;
     font-weight: 600;
     font-size: 0.8em;
 
@@ -252,19 +255,13 @@ main {
 .author {
     font-size:0.8em;
     padding-left: 10px;
-    font-style: italic;
+    font-style: normal;
 }
-.author a {
- font-family: fontawesome;
-  font-weight:600;
-}
-.descr{
+
+.descr,.article-content{
     margin-top:10px;
     padding-left: 10px;
 }
-
-
-
 
 p {
     width: 100%;
