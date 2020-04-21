@@ -224,7 +224,7 @@ main {
 .love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
 .website:before{content:"🏠 ";}
-.author-name:before{content:"✍ ";}
+.nickname:before{content:"✍ "  ;}
 .item1 .lu:before{content:"";}
 .item0 .lu:before{content:"";color:#ff8b8b;}
 .search:before{content:""}
