@@ -246,7 +246,7 @@ main {
 }
 
 time {
-    float:inline-end;
+    float:right;
     padding-right:10px;
     margin-top: -3.2em;
     font-weight: 600;
