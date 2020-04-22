@@ -120,7 +120,9 @@ function search(t) {
 }
 
 function scroll() {
-    var unreadArticles = document.querySelectorAll(".item1");
+    //var unreadArticles = document.querySelectorAll(".item1");
+    //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
+    var unreadArticles = Array.from(document.getElementsByClassName("item1"));
     var rootHeight = DM.offsetHeight-5;
     if ("IntersectionObserver" in window && navigator.userAgent.toLowerCase().indexOf('safari/') == -1) {
         window.addEventListener("resize", scroll);
@@ -585,8 +587,10 @@ function konamistop() {
 
 
 function lazyLoadImg() {
-	var lazyloadImages = document.querySelectorAll("img.lazy");
+//	var lazyloadImages = document.querySelectorAll("img.lazy");
 
+    //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
+    var lazyloadImages = Array.from(document.getElementsByClassName("lazy"));
 //firefox75 le supporte en natif !
 	if(hasSupportLoading) { 
 		lazyloadImages.forEach(function(img) {
