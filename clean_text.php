@@ -2,8 +2,8 @@
 function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','https://',$f[1]);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
-$extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
-file_put_contents('log_image.txt', 'Fichier:'.$f[1]."\n", FILE_APPEND | LOCK_EX);
+//$extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
+//file_put_contents('log_image.txt', 'Fichier:'.$f[1]."\n", FILE_APPEND | LOCK_EX);
 //file_put_contents('log_image.txt', $extension_fichier.'\n', FILE_APPEND | LOCK_EX);
 
 /*  $extension_valides = array('jpg','png','gif','jpeg','bmp');
