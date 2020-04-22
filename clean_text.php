@@ -3,13 +3,16 @@ function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','https://',$f[1]);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
 $extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
+file_put_contents('log_image.txt', 'Fichier:'.$f[1]."\n", FILE_APPEND | LOCK_EX);
+//file_put_contents('log_image.txt', $extension_fichier.'\n', FILE_APPEND | LOCK_EX);
+
 /*  $extension_valides = array('jpg','png','gif','jpeg','bmp');
 */
 /*  if (in_array($extension_fichier, $extension_valides))
       {*/
   if($data = file_get_contents($f[1])) {
     //if(!$data) return '';
-    $tmpfile='tmp/'.md5($data).'.'.$extension_fichier;
+    $tmpfile='tmp/'.md5($data); //.'.'.$extension_fichier;
     file_put_contents($tmpfile, $data);
     list($width, $height, $t, $attr) = getimagesize("$tmpfile");
     if($width == 1 && $height == 1) {
@@ -105,7 +108,9 @@ function clean_txt($v) {
 /*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
   $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
-  $v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
+  /*$v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v); */
+
+  $v = @preg_replace_callback('#<\s*img[^>]+?src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
 
 /*  $q =array();
   $q[]='/<span.*?>/s';
