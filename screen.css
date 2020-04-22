@@ -223,8 +223,11 @@ main {
 }
 .love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
-.website:before{content:"🏠 ";}
+/*.website:before{content:"🏠 ";}
 .nickname:before{content:"✍ "  ;}
+*/
+.website:before{content:"From ";}
+.nickname:before{content:" by "  ;}
 .item1 .lu:before{content:"";}
 .item0 .lu:before{content:"";color:#ff8b8b;}
 .search:before{content:""}
