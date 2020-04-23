@@ -21,14 +21,17 @@ function imgbase64($f) {
     }
     if($width > 1680) {
   	 exec('convert -resize 1680x '.$tmpfile.' '.$tmpfile);
+     $attr='width="1680px"';
     }
     if($height > 1024) {
   	 exec('convert -resize x1024 '.$tmpfile.' '.$tmpfile);
+     $attr='height="1024px"';
     }
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
     if($type == "inode/x-empty") return "";
     if(($type == "image/jpeg" || $type == "image/png") &&  `which convert`) {
         exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
+        unlink($tmpfile);
         $tmpfile .= '.webp';
         /* if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile); */
         /* else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile); */
@@ -39,7 +42,10 @@ function imgbase64($f) {
     }
 /*    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
       else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);*/
-    else if($type == "image/gif" && `which giflossy`) exec('giflossy -O3 --lossy=80 -o '.$tmpfile.' '.$tmpfile);
+    else if($type == "image/gif" && `which giflossy`) {
+      exec('giflossy -O3 --lossy=80 -o '.$tmpfile.'.gif '.$tmpfile);
+      $tmpfile .= '.gif';
+    }
     else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
 //    $base64 = "//reader.gheop.com/$tmpfile";
 
