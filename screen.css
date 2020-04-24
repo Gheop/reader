@@ -1,65 +1,13 @@
-
 @font-face {
   font-family: 'fontawesome';
   src: url("fonts/fontawesome-webfont.woff2");
   font-display: block;
-
 }
-/*
-https://github.com/mirgj/cryptocurrency-icons-font/blob/master/dist/webfont/cryptocurrency-icons.css
 @font-face {
-  font-family: 'crypto';
-  src: url("https://github.com/mirgj/cryptocurrency-icons-font/blob/master/dist/webfont/cryptocurrency-icons.woff2?raw=true");
-  font-display: block;
-
-}
-*/
-/*@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700);*/
-/*@font-face {
-  font-family: 'Christmas';
-    src: url('fonts/Christmas.ttf');
-  src: url('fonts/COCKTAIL.TTF');
-}*/
-  @font-face {
     font-family: 'Gheop';
     src: url('fonts/gheop-webfont.woff2');
     font-weight: normal;
     font-style: normal;
-
-}
-
-/*#disconnect:hover {
-	position:fixed;
-	right:10px;
-	opacity:0.5;
-	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
-	transform: rotate(360deg);
-}
-*/
-
-@keyframes spin {
-    from {transform:rotate(0deg);}
-    to {transform:rotate(360deg);}
-}
-/*
-#up {
-
-
-
-}
-*/
-@keyframes swing {
-    20% { transform: rotate(15deg); }
-    40% { transform: rotate(-10deg); }
-    60% { transform: rotate(5deg); }
-    80% { transform: rotate(-5deg); }
-    100% { transform: rotate(0deg); }
-}
-.swing {
-    animation-duration: 1s;
-    animation-fill-mode: both;
-    transform-origin: top center;
-    animation-name: swing;
 }
 
 @keyframes pulse {
@@ -103,8 +51,8 @@ body {
        font-weight: 400;
        font-feature-settings: "kern";
        word-wrap: break-word;
-       background: white;/* url("data:image/gif;base64,R0lGODdhAwADAOcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///ywAAAAAAwADAAAICQDb/Rv4T6DAgAA7");*/
-    color: #444;
+       background: white;
+       color: #444;
 -webkit-font-smoothing: antialiased;
        }
 a {
@@ -130,8 +78,7 @@ b,strong,legend{
     font:2em Gheop;
     text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
     animation-duration: 1s;
-  -webkit-animation-name: pulse;
-  animation-name: pulse;
+	 animation-name: pulse;
 }
 #g a:hover{
   /*    color:red;*/
@@ -164,7 +111,6 @@ b,strong,legend{
 
 
 main {
-    /*opacity:80%;*/
     border-top-left-radius: 1em;
     border-bottom-left-radius: 1em;
     background: #eee;
@@ -176,7 +122,6 @@ main {
     right: 10px;
     padding:10px;
     overflow:auto;
-   /*	-webkit-overflow-scrolling: touch;*/
 }
 
 .light {
@@ -223,9 +168,6 @@ main {
 }
 .love { color:#ff8b8b; }
 .item0 .action a {opacity:0.8}
-/*.website:before{content:"🏠 ";}
-.nickname:before{content:"✍ "  ;}
-*/
 .website:before{content:"From ";}
 .nickname:before{content:" by "  ;}
 .item1 .lu:before{content:"";}
@@ -234,10 +176,9 @@ main {
 .star:before{content:""}
 .starred:before{content:""}
 .love0:before{content:""}
-/*♥*/
 .love1:before{color:red;content:""}
 .print:before{content:""}
-/*  ☺ ☻ ♡ ♥   */
+/*🏠✍  ☺ ☻ ♡ ♥   */
 .headline {
     font-size: 1.2em;
     font-weight: 600;
@@ -281,167 +222,10 @@ p {
         color:black;
         }
 }
-@keyframes shake-base {
-  0% {
-    transform: translate(0px, 0px) rotate(0deg);
-  }
-  2% {
-    transform: translate(2.5px, -0.5px) rotate(1.5deg);
-  }
-  4% {
-    transform: translate(2.5px, 2.5px) rotate(-0.5deg);
-  }
-  6% {
-    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
-  }
-  8% {
-    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
-  }
-  10% {
-    transform: translate(2.5px, -1.5px) rotate(-0.5deg);
-  }
-  12% {
-    transform: translate(2.5px, 1.5px) rotate(0.5deg);
-  }
-  14% {
-    transform: translate(2.5px, 0.5px) rotate(-0.5deg);
-  }
-  16% {
-    transform: translate(-1.5px, 2.5px) rotate(-0.5deg);
-  }
-  18% {
-    transform: translate(-1.5px, 2.5px) rotate(0.5deg);
-  }
-  20% {
-    transform: translate(-0.5px, -0.5px) rotate(0.5deg);
-  }
-  22% {
-    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
-  }
-  24% {
-    transform: translate(2.5px, 1.5px) rotate(-0.5deg);
-  }
-  26% {
-    transform: translate(1.5px, 2.5px) rotate(1.5deg);
-  }
-  28% {
-    transform: translate(-0.5px, 0.5px) rotate(1.5deg);
-  }
-  30% {
-    transform: translate(0.5px, -1.5px) rotate(-0.5deg);
-  }
-  32% {
-    transform: translate(-1.5px, 1.5px) rotate(1.5deg);
-  }
-  34% {
-    transform: translate(2.5px, 2.5px) rotate(0.5deg);
-  }
-  36% {
-    transform: translate(0.5px, -0.5px) rotate(-0.5deg);
-  }
-  38% {
-    transform: translate(1.5px, 0.5px) rotate(0.5deg);
-  }
-  40% {
-    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
-  }
-  42% {
-    transform: translate(1.5px, 2.5px) rotate(-0.5deg);
-  }
-  44% {
-    transform: translate(0.5px, 2.5px) rotate(-0.5deg);
-  }
-  46% {
-    transform: translate(2.5px, 2.5px) rotate(0.5deg);
-  }
-  48% {
-    transform: translate(2.5px, -0.5px) rotate(1.5deg);
-  }
-  50% {
-    transform: translate(-1.5px, -0.5px) rotate(0.5deg);
-  }
-  52% {
-    transform: translate(0.5px, 1.5px) rotate(0.5deg);
-  }
-  54% {
-    transform: translate(-0.5px, 1.5px) rotate(0.5deg);
-  }
-  56% {
-    transform: translate(-1.5px, -1.5px) rotate(-0.5deg);
-  }
-  58% {
-    transform: translate(-1.5px, -0.5px) rotate(-0.5deg);
-  }
-  60% {
-    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
-  }
-  62% {
-    transform: translate(-0.5px, 2.5px) rotate(0.5deg);
-  }
-  64% {
-    transform: translate(2.5px, -0.5px) rotate(0.5deg);
-  }
-  66% {
-    transform: translate(0.5px, -1.5px) rotate(1.5deg);
-  }
-  68% {
-    transform: translate(2.5px, 0.5px) rotate(-0.5deg);
-  }
-  70% {
-    transform: translate(0.5px, 0.5px) rotate(1.5deg);
-  }
-  72% {
-    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
-  }
-  74% {
-    transform: translate(0.5px, 0.5px) rotate(1.5deg);
-  }
-  76% {
-    transform: translate(1.5px, 1.5px) rotate(0.5deg);
-  }
-  78% {
-    transform: translate(-0.5px, 0.5px) rotate(1.5deg);
-  }
-  80% {
-    transform: translate(-0.5px, 1.5px) rotate(-0.5deg);
-  }
-  82% {
-    transform: translate(2.5px, 1.5px) rotate(-0.5deg);
-  }
-  84% {
-    transform: translate(1.5px, -1.5px) rotate(0.5deg);
-  }
-  86% {
-    transform: translate(-0.5px, -0.5px) rotate(1.5deg);
-  }
-  88% {
-    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
-  }
-  90% {
-    transform: translate(2.5px, -0.5px) rotate(0.5deg);
-  }
-  92% {
-    transform: translate(1.5px, -1.5px) rotate(-0.5deg);
-  }
-  94% {
-    transform: translate(-1.5px, 0.5px) rotate(1.5deg);
-  }
-  96% {
-    transform: translate(-0.5px, 0.5px) rotate(0.5deg);
-  }
-  98% {
-    transform: translate(-0.5px, 2.5px) rotate(0.5deg);
-  }
-}
 .blink {
-transition:all 0.5s ease-in-out;
+	transition:all 0.5s ease-in-out;
     animation: blink 1.5s linear 1;
-/*  animation-name: shake-base;
-  animation-duration: 100ms;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-  animation-delay: 0s;
-*/}
+}
 .nb_flux {
 	font-size: .8em;
 vertical-align: super
@@ -493,13 +277,7 @@ vertical-align: super
     right: 0px;
 
 }
-/*
-#register:hover {
-	    	opacity:0.5;
-	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
-	transform: rotate(360deg);
-}
-*/
+
 .show {
     color:#fff;
     background: #eee;
@@ -509,13 +287,12 @@ vertical-align: super
     text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
 }
 
-
 input, textarea,button {
     border : 1px solid black;
     color: black;
     opacity: 0.8;
     border-radius: 5px;
-    background-color: #ffffff;
+    background: #ffffff;
     margin:0;
     padding:0;
     z-index:99;
@@ -526,9 +303,6 @@ input, textarea,button {
     position:absolute;
     top:2px;
     left:38%;
-
-   /* border:1px solid black;
-    color: black;*/
     width:24%;
    border-top-right-radius:0;
    border-bottom-right-radius:0;
@@ -542,18 +316,16 @@ input, textarea,button {
    top:2px;
    left:62%;
    width:2em;
-  /* border:1px solid black;*/
    border-left:none;
    background:white url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAARCAYAAADdRIy+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAAd0SU1FB9kCBxQkAPQ1ZpQAAAGrSURBVDjLjdRNiE5xFAbw372v14zvkEGsjLD20UghKTay1uykyEIWSpY2Stmp2dhMoWQ1USYbScrKhpKyGkVDNDaGfM21ed5ct/cOp/7dc+89/+c8z/k/9xYoUPkTu7EXm7EQM3iO+3jfp/6v6NTyJbiEY1iE13iXfB+O4BdeoAxo0Q+0yLqGCRxFt1GzChfDctR/xDncxY5ak7KW9+I8JjE8H9iagJ36R9Nek5u43FZUYicGcCv3ZQtYhTk8xFYsbgPcgGnM1jb1A+vFMwxifRtgmdOba1FR1WrhR8MhRRPwA9ZFdtlgVo9ewy34mn0a9inK+KrC4TA9EZvUZe7BweQHAvipoaKABXiVNYoHmeV1PMZbbMcmnIlHh/JuPHabCc7PurS1MfU4VmN5vozjYSdgE7iBFdlzG/u1zGlbvoaleIKnkTaEQ9iIjznhQVyNoiuYwli/wXdwEiOxU5W5vsQdPMLpzLMbT47F7NO4UPRhW9V+FgP4jO+NxiM4G6azebYMk50W+WWG/C12KRpefBO2u7AyDbuY6sxj5uYqatcCX3AvhzgcX479BrxnZh85IOwcAAAAAElFTkSuQmCC") no-repeat scroll 0.2em center;
    padding-left:22px;
    height:1.85em;
 }
 
-/* marrant mais fait tourner l'input aussi
 #bs:hover {
 	transition: all 0.8s cubic-bezier(.68,-0.55,.27,1.55);
 	transform: rotate(360deg);
-}*/
+}
 
 .bsborder {
    border-top-left-radius:0;
@@ -566,6 +338,11 @@ input, textarea,button {
     border-radius:2px;
     background: #444;
     color: white;
+}
+
+article ::selection {
+    background: yellow;
+    color: blue;
 }
 
 footer {
@@ -586,7 +363,6 @@ a.liked {
 .tags {
     padding-right: 10px;
     float: right;
-    /*visibility: hidden;*/
 }
 
 @media screen and (max-width: 640px) {
@@ -608,15 +384,3 @@ main {
 	}
   .some_selector { padding: 20px;
 }
-
-
-::-moz-selection {
-                   color: white;
-                   background: #555555;
-}
-/*
-::selection {
-    color: white;
-    background: #eee;
-}
-*/
