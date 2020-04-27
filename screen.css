@@ -5,10 +5,11 @@
 }
 @font-face {
     font-family: 'Gheop';
-    src: url('fonts/gheop-webfont.woff2');
+    src: url('fonts/gheop-light.woff2');
     font-weight: normal;
     font-style: normal;
 }
+/* http://fontstore.baidu.com/static/editor/index-en.html# pour éditer les fonts, top ! */
 
 @keyframes pulse {
   from {
