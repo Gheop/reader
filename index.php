@@ -57,7 +57,7 @@ else {
 }
 ?>
 </div>
-    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">Gheop </span><span id="g2">Reader</span>
+    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">gheop </span><span id="g2">reader</span>
 <?php  if(isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == "SiB") {
   	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
     $firstLine = $stringfromfile[0];
