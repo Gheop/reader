@@ -1,15 +1,28 @@
 @font-face {
-  font-family: 'fontawesome';
-  src: url("fonts/fontawesome-webfont.woff2");
-  font-display: block;
+	font-family: 'fa';
+	src: url("fonts/fontawesome-webfont.woff2");
+	font-display: block;
 }
+
 @font-face {
-    font-family: 'Gheop';
-    src: url('fonts/gheop-light.woff2');
-    font-weight: normal;
-    font-style: normal;
+	font-family: 'Gheop';
+	src: url('fonts/gheop-light.woff2');
+	font-weight: normal;
+	font-style: normal;
 }
+
 /* http://fontstore.baidu.com/static/editor/index-en.html# pour éditer les fonts, top ! */
+
+body {
+       font-family: fa, Arial, Helvetica, 'Twemoji Mozilla';
+       line-height: 1.3em;
+       font-weight: 400;
+       font-feature-settings: "kern";
+       word-wrap: break-word;
+       background: white;
+       color: #444;
+-webkit-font-smoothing: antialiased;
+       }
 
 @keyframes pulse {
   from {
@@ -39,23 +52,15 @@ li > input {
   background: transparent;
   font-weight: bold;
 }
-.icon{
+
+/*.icon{
     font: normal 100%/1.15 fontawesome;
     color: #eee;
 }
 li {
-  font: normal 100%/1 fontawesome;
-}
-body {
-       font-family: fontawesome;
-       line-height: 1.3em;
-       font-weight: 400;
-       font-feature-settings: "kern";
-       word-wrap: break-word;
-       background: white;
-       color: #444;
--webkit-font-smoothing: antialiased;
-       }
+  font: normal 100%/1 "Twemoji Mozilla",fa;
+}*/
+
 a {
   text-decoration: none;
   color:#444;
@@ -157,7 +162,7 @@ main {
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
     color:white;
-    font: normal 100%/1.15 fontawesome;
+    font-weight: bold;
 }
 .item1 {
     box-shadow: 8px 8px 12px #444;
@@ -171,8 +176,8 @@ main {
 .item0 .action a {opacity:0.8}
 .website:before{content:"From ";}
 .nickname:before{content:" by "  ;}
-.item1 .lu:before{content:"";}
-.item0 .lu:before{content:"";color:#ff8b8b;}
+.item1 .lu:before{/*content:"👁";*/content:"";}
+.item0 .lu:before{/*content:"⏿";*/content:"";color:#ff8b8b;}
 .search:before{content:""}
 .star:before{content:""}
 .starred:before{content:""}
@@ -205,8 +210,8 @@ time {
 }
 
 .descr,.article-content{
-    margin-top:10px;
-    padding-left: 10px;
+	text-align: justify;
+	padding: 10px;
 }
 
 p {
