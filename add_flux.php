@@ -268,6 +268,8 @@ if($rss = @simplexml_load_string($page)) {
     #Le flux n'est pas déjà présent dans la base, on l'ajoute
 		/*$id_flux*/
 		if($v->num_rows == 0) {
+			if(preg_match('/^https:\/\/github.com\/.*/', $rsslink)) $title = ' '.$title;
+			if(preg_match('/^https?:\/\/(.*)?youtube.com\/.*/', $rsslink)) $title = ' '.$title;
 			$t = $mysqli->query('insert into reader_flux (title, description, language, rss, link) values ("'.$mysqli->real_escape_string(nl2br(trim($title))).'","'.$mysqli->real_escape_string(nl2br(trim($description))).'","'.$language.'","'.$rsslink.'","'.$link.'")') or die($mysqli->error);
 			if($mysqli->insert_id) {
 				$id_flux = $mysqli->insert_id;
