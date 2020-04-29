@@ -1,4 +1,10 @@
 <?php
+function cutString($string, $start, $length, $endStr = '…') { //[&hellip]'){
+  if( mb_strlen( $string ) <= $length ) return $string;
+  $str = mb_substr( $string, $start, $length - mb_strlen( $endStr ) + 1, 'UTF-8');
+  return substr( $str, 0, strrpos( $str,' ') ).$endStr;
+}
+
 function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','https://',$f[1]);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
