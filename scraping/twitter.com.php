@@ -98,7 +98,7 @@ foreach($tweet_block as $tweet) {
    // print_r($mylink->children[0]->attr['data-time']);
    // die;
     echo "    <item>
-	      <title>",htmlspecialchars(stripslashes($tweetText),ENT_QUOTES,'UTF-8'),"</title>
+	      <title>",htmlspecialchars(cutString(stripslashes($tweetText), 0, 128),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($tweetText2)?htmlspecialchars(stripslashes($tweetText2),ENT_QUOTES,'UTF-8'):""),"</description>
 	      <pubDate>$date</pubDate>
 	      <link>".(isset($mylink)?$mylink:"")."</link>
