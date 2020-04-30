@@ -86,18 +86,25 @@ for($j=0;$j<$i;$j++) {
 	//echo "<i>$dd[$j]</i><br />";
 	$tt = $mysqli->query("select link, title, rss from reader_flux where id=".$dd[$j].";") or die($mysqli->error);
 	$ttt = $tt->fetch_array();
-	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
-	if($DEBUG) libxml_use_internal_errors(true);
+//	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
+	//if($DEBUG) libxml_use_internal_errors(true);
 	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 
+	
 	$xml = trim(curl_multi_getcontent($ch[$j]));
+		//$xml = preg_replace('/(url=".*)\?.*"/s', 'url="\\1', $xml);
 	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);	
+	$xml = preg_replace('/url="(.*?\.jpg)\?.*?"/s', 'url="'.htmlspecialchars('\\1',ENT_XML1, 'UTF-8',true).'"' , $xml);
+		$xml = preg_replace('/type=""/s', '' , $xml);
+//$xml = htmlspecialchars($xml,ENT_XML1, 'UTF-8',true);
+// echo $xml;
+// die;
 // $xml = tidy_repair_string($xml, array(
 	//     'output-xml' => true,
 	//     'input-xml' => true
 	// ));
 $rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-//$rss = simplexml_load_string($xml, null, LIBXML_NOCDATA);
+//$rss = @simplexml_load_string($xml, null, LIBXML_NOCDATA);
 	//$rss = simplexml_load_file($url, null, LIBXML_NOCDATA);
 //$namespaces = $rss->getNamespaces(true);
 // $media_content = $rss->entry->item[0]->children($namespaces['media']);
@@ -127,6 +134,7 @@ $rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
         // gérer les erreurs ici
 		}
 		echo '<pre>';
+		print_r($rss);
 		print curl_multi_getcontent($ch[$j]);
 		echo '</pre>';
 		libxml_clear_errors();
@@ -177,6 +185,7 @@ $rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 				if(!isset($link) && isset($t['href'])) $link = $t['href'];
 			}
 		}
+		if(!isset($link) && isset($item->guid) && preg_match('/^https?:\/\//',$item->guid)) $link = $item->guid;
 		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
 		//le lien n'est pas complet !
 		if(!preg_match('/^https?:\/\//',$linkmaster)) $linkmaster = $ttt[0];
