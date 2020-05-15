@@ -1,6 +1,6 @@
 <?php
 require('simple_html_dom.php');
-$base_url = 'https://www.torrent9.pl/';
+$base_url = 'https://www.oxtorrent.com';
 $uri = [
 	'films' => '/torrents/films', //'/torrents_films.html', //'/torrents/films',
 	'series' => '/torrents/'.urlencode('séries'),
@@ -26,63 +26,62 @@ if(!_is_curl())  {
 	exit;
 }*/
 
-/*header('Content-type: application/rss+xml; charset=utf-8');
+header('Content-type: application/rss+xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml" />
 ';
-*/
+
 if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
 if(!isset($_POST['f']) || empty($_POST['f']) || !$uri[strtolower($_POST['f'])]) $_POST['f'] = 'films';
 
-echo "    <title>Torrent9 - ".ucfirst($_POST['f'])."</title>
-    <description>".ucfirst($_POST['f'])." de Torrent9</description>
+echo "    <title>Oxtorrent - ".ucfirst($_POST['f'])."</title>
+    <description>".ucfirst($_POST['f'])." de Oxtorrent</description>
 ";
 $url = $base_url.$uri[strtolower($_POST['f'])];
 echo "    <link>"._get_URI()."</link>
 ";
 //echo $url;
 //$html = @file_get_html($url);
+$html = file_get_html($url);
 //var_dump($html);
 //die;
 //if(!isset($html) || !$html || empty($html)) goto end;
-exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
- var_dump($htmla);
- die;
+// exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
+//  var_dump($htmla);
+//  die;
 // $html = implode('
 // 	', $htmla);
-$html = str_get_html($html);
- var_dump($html);
-  die;
+//$html = str_get_html($html);
+ // var_dump($html);
+ //  die;
 $i = 0;
-foreach($html->find('table[class=table table-striped table-bordered cust-table -table] tbody tr td a') as $element) {
-	if($i++ >= 3 ) break;
-	// echo $element->href;
-	// continue;
-    $htmlaa = array();
-      //echo $element->class. ' - '. $element->title. ' - '. $element->href . '<br>';
-      exec('python /www/reader/scraping/cf.py "https://www.torrent9.cz'.$element->href.'"', $htmlaa);
-      $detail = str_get_html(implode('
-	', $htmlaa));
+foreach($html->find('div[class=maxi] a') as $element) {
+	if($i++ >= 20 ) break;
+	//echo $element->href;
+	$detail = file_get_html($base_url.$element->href);
       if(!$detail) break;
-//	$detail = file_get_html($base_url.$element->href);
-	foreach($detail->find('div[class=left-tab-section] a[class=btn btn-danger download]') as $lien) {
-		$mylink = $lien->href;
+	foreach($detail->find('div[class=title] a') as $title) {
+		$mytitle = $title->plaintext;
 		//$mylink = str_replace('http://protege-liens.net', '', $mylink);
 		//$mylink = preg_replace('/.*get_torrent(.*)$/i','http://protege-liens.net/get_torrent\1', $mylink);
 		break;
 	}
-	foreach($detail->find('h5') as $titre) {
-		$mytitle = $titre->plaintext;
+	foreach($detail->find('div[id=torrentsimage] img') as $img) {
+		$mydescription = '<img src="'.$base_url.$img->src.'" /><br />';
 		break;
 	}
-	foreach($detail->find('div[class=movie-information]') as $info) {
-		$mydescription = $info->last_child () ->innertext;
+	foreach($detail->find('div[class=btn-download] a') as $link) {
+		$mylink = $base_url.$link->href;
+		break;
 	}
-	foreach($detail->find('div[class=movie-information] ul li',9) as $info) {
+	foreach($detail->find('div[class=torrentsdesc]') as $info) {
+		$mydescription .= $info->innertext;
+	}
+	foreach($detail->find('table[class=table] tr td',4) as $info) {
 		if(isset($info->innertext))
-			$mydescription .= "<br /><br />Poids : ".$info->last_child () ->innertext."<br />";
+			$mydescription .= "<br /><br />".$info->plaintext."<br />";
 	}
 
 //	if($mytitle ) {
@@ -92,8 +91,8 @@ foreach($html->find('table[class=table table-striped table-bordered cust-table -
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
-	      <link>".$base_url.(isset($mylink)?$mylink:"")."</link>
-	      <guid>".$base_url.(isset($mylink)?$mylink:"")."</guid>
+	      <link>".(isset($mylink)?$mylink:"")."</link>
+	      <guid>".(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
 $detail->clear();
