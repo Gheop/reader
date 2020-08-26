@@ -21,8 +21,8 @@ if(!_is_curl())  {
 	echo "<b>Install and load <a href='http://php.net/manual/en/book.curl.php'>curl extension</a></b>";
 	exit;
 }*/
-
-header('Content-type: application/rss+xml; charset=utf-8');
+if(!isset($_GET['debug']))
+	header('Content-type: application/rss+xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
@@ -36,8 +36,8 @@ echo "    <title>$site_name</title>
 echo "    <link>".$base_url."</link>
 ";
 $html = file_get_html($base_url);
-// var_dump($html);
-// die;
+/* var_dump($html);
+ die;*/
 
 /*exec('/usr/bin/python /www/reader/scraping/cf.py "'.$url.'"', $htmla); //file_get_html($url);
 var_dump($htmla);
@@ -48,19 +48,28 @@ $html = str_get_html($html);
 var_dump($html);*/
 //die;
 $i = 0;
-foreach($html->find('h1[class=blog-post-title] a') as $element) {
+foreach($html->find('article[class=blog-post index-blog-post]') as $detail) {
 	if($i++ >= 20 ) break;
- 	$detail = file_get_html($element->href);
- 	foreach($detail->find('h1[class=blog-post-title]') as $titre) {
+ 	//$detail = file_get_html($element->href);
+ 	foreach($detail->find('h1[class=index-blog-post-title] a') as $titre) {
+ 		$mytitle = $titre->plaintext;
+ 		$mylink= $titre->href;
+ 		break;
+ 	}
+/* 	 	foreach($detail->find('h1[class=index-blog-post-title] a') as $link) {
+ 		$mylink = $titre->href;
+ 		break;
+ 	}*/
+ 	foreach($detail->find('h1[class=index-blog-post-title]') as $titre) {
  		$mytitle = $titre->plaintext;
  		break;
  	}
-	foreach($detail->find('div[class=blog-post-content] p img') as $info) {
-		$mydescription = '<img src="'.$info->src.'" />';
+	foreach($detail->find('div[class=blog-post-content] video object') as $info) {
+		$mydescription = '<img src="'.$info->data.'" />';
 		break;
 	}
 	if(!$mydescription) {
-		foreach($detail->find('div[class=blog-post-content] p video') as $info) {
+		foreach($detail->find('div[class=blog-post-content] video') as $info) {
 			$mydescription = $info->outertext;
 			break;
 	}
@@ -68,8 +77,8 @@ foreach($html->find('h1[class=blog-post-title] a') as $element) {
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes(myhtmlspecialchars_decode($mytitle)),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
-	      <link>".$element->href."</link>
-	      <guid>".$element->href."</guid>
+	      <link>".$mylink."</link>
+	      <guid>".$mylink."</guid>
     </item>
 ";
 $detail->clear();

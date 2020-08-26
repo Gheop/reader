@@ -1,7 +1,7 @@
 <?php
 include('/www/conf.php');
 include('clean_text.php');
-
+ini_set('max_execution_time', '240');
 	$extra ='';
 	if(isset($_GET['id']) && is_numeric($_GET['id'])) $extra = ' where id='.$_GET['id'];
 	$DEBUG = 0;
@@ -94,8 +94,8 @@ for($j=0;$j<$i;$j++) {
 	$xml = trim(curl_multi_getcontent($ch[$j]));
 		//$xml = preg_replace('/(url=".*)\?.*"/s', 'url="\\1', $xml);
 	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);	
-	$xml = preg_replace('/url="(.*?\.jpg)\?.*?"/s', 'url="'.htmlspecialchars('\\1',ENT_XML1, 'UTF-8',true).'"' , $xml);
-		$xml = preg_replace('/type=""/s', '' , $xml);
+	$xml = preg_replace('/url="(.*?\.(jpg|png|gif))\?.*?"/s', 'url="'.htmlspecialchars('\\1',ENT_XML1, 'UTF-8',true).'"' , $xml);
+	$xml = preg_replace('/type=""/s', '' , $xml);
 //$xml = htmlspecialchars($xml,ENT_XML1, 'UTF-8',true);
 // echo $xml;
 // die;
@@ -103,7 +103,7 @@ for($j=0;$j<$i;$j++) {
 	//     'output-xml' => true,
 	//     'input-xml' => true
 	// ));
-$rss = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+$rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 //$rss = @simplexml_load_string($xml, null, LIBXML_NOCDATA);
 	//$rss = simplexml_load_file($url, null, LIBXML_NOCDATA);
 //$namespaces = $rss->getNamespaces(true);

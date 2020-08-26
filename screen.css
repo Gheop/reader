@@ -53,6 +53,9 @@ li > input {
   font-weight: bold;
 }
 
+.icon a {
+	cursor: default;
+}
 /*.icon{
     font: normal 100%/1.15 fontawesome;
     color: #eee;
@@ -193,11 +196,10 @@ main {
 }
 
 time {
-    float:right;
-/*    font-weight: 600;*/
-    font-size: 0.8em;
+  float:right;
+  font-size: 0.8em;
+  margin: -3.2em 0.8em;
 }
-
 
 .author {
     font-size:0.8em;
