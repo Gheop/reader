@@ -201,6 +201,9 @@ if(isset($_POST['link'])) {
 else if(isset($_GET['f'])) {
 	$rsslink = $_GET['f'];
 }
+else if(isset($_GET['feed_url'])) {
+	$rsslink = $_GET['feed_url'];
+}
 else {
 	print "Pas de lien trouvé";
 	return;
@@ -216,8 +219,9 @@ else {
 // file_put_contents($file, $current);
 
 if(preg_match('/^[@#](.*)$/',$rsslink,$m)) {
-	//echo "twitter:".$m[1]."<br />";
+	echo "twitter:".$m[1]."<br />";
  	$rsslink = 'https://reader.gheop.com/scraping/twitter.com.php?f='.$m[1];
+ 	echo $rsslink;
 }
 
 

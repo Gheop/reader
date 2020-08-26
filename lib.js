@@ -269,40 +269,36 @@ function menu() {
 }
 
 function view(i) {
-  myFetch('view.php', 'id='+i).then(result => {
-    var page = '';
-    cptReadArticle = 0;
-    varscroll = 0;
-    loadmore = 0;
-    d = result;
-    Now = new Date();
-    for(var i in d) {
-    	loadmore++;
+	myFetch('view.php', 'id='+i).then(result => {
+		var page = '';
+		cptReadArticle = 0;
+		varscroll = 0;
+		loadmore = 0;
+		d = result;
+		Now = new Date();
+		for(var i in d) {
+			loadmore++;
         //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
         page += generateArticle(i);
     }
     if(loadmore == 0) {
-      page = '<article class="item1">\n\t<header>\n\t\t<h1 class="headline"><a class="title" target="_blank">Flux vide</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a class="website">Gheop Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">Pas de nouveaux articles.</div>\n\t<div class="action">&nbsp;&nbsp;</div>\n</article>';
+    	page = '<article class="item1">\n\t<header>\n\t\t<h1 class="headline"><a class="title" target="_blank">Flux vide</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a class="website">Gheop Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">Pas de nouveaux articles.</div>\n\t<div class="action">&nbsp;&nbsp;</div>\n</article>';
+		}
 
-    //	page = '<div id="konami" class="item1"><div class="date">Now!</div><a class="title">Pas de nouveaux articles</a><div class="author">From <a>Gheop</a></div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;</div></div>';
-    }
-        
-        
+		page += '<div id="addblank">&nbsp;</div>';
+		DM.innerHTML = page;
+		DM.scrollTop = 0;
 
-
-          page += '<div id="addblank">&nbsp;</div>';
-          DM.innerHTML = page;
-          DM.scrollTop = 0;
-
-          DM.addEventListener('DOMMouseScroll', scroll, false);
-        DM.onscroll = scroll;
-        DM.onmousewheel = scroll;
-        DM.scrollTop = 0;
-
-          if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-          lazyLoadImg();
-          scroll();
-        })
+		DM.addEventListener('DOMMouseScroll', scroll, false);
+		DM.onscroll = scroll;
+		DM.onmousewheel = scroll;
+		DM.scrollTop = 0;
+		if(loadmore > 0) {
+			if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+			lazyLoadImg();
+			scroll();
+		}
+	})
   $('f' + id).classList.remove('show');
   id = i;
   $('f' + id).classList.add('show');
@@ -411,10 +407,11 @@ function generateArticle(i) {
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<time datetime="'+ d[i].p +'">' + datepub+ '</time>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
 
 //voir http://microformats.org/wiki/hcard
-// ne peux respecter totalement le format sinon time se retrouve mal affiché... on peut le remettre à la bonne place et le cacher si besoin (m)
+// ne peux respecter totalement le format sinon time se retrouve mal affiché... on peut le remettre à la bonne place et le cacher si besoin (m), normalement corrigé maintenant
 
-//return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
-return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
+//return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
+
 }
 
 

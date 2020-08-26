@@ -1,5 +1,6 @@
 <?php
 require('simple_html_dom.php');
+include('../clean_text.php');
 $base_url = 'https://www.oxtorrent.com';
 $uri = [
 	'films' => '/torrents/films', //'/torrents_films.html', //'/torrents/films',
@@ -88,6 +89,8 @@ foreach($html->find('div[class=maxi] a') as $element) {
 
 //	}
 //	else {
+	$mytitle = clean_txt(str_replace('&amp;', '&%26;', $mytitle));
+	$mydescription = htmlentities($mydescription, ENT_QUOTES);
 	echo "    <item>
 	      <title>",htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8'),"</title>
 	      <description>",(isset($mydescription)?htmlspecialchars(stripslashes($mydescription),ENT_QUOTES,'UTF-8'):""),"</description>
