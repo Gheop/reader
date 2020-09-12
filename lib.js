@@ -58,7 +58,7 @@ function $(i) {
 }
 
 function favicon(nb) {
-    $('favico').href = "https://reader.gheop.com/favicon.php?n=" + nb;
+    $('favico').href = "https://reader.gheop.com/favicon"+nb+".png";
 }
 
 function changeTheme(style) {
@@ -254,8 +254,10 @@ function menu() {
         if (m[i].n > 0) {
           /* voir pour faire un event à la place des onclick and co */
           /*<li class=""><data value="'+i+'">... */
-          menu += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '"><span onclick="view(' + i + ');">' + m[i].t + '</span><span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+          //
+          menu += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">'  + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
           nb_title += m[i].n || 0;
+          //$('m'+i).addEventListener("click", vieww); // on peut pas, pas encore créé sur la page ?
         }
       }
       $('menu').insertAdjacentHTML('beforeend', menu);
@@ -403,17 +405,10 @@ function dateArticle(articleDate) {
 //ne pas vider la 'page' pour more...
 function generateArticle(i) {
  	var datepub = dateArticle(d[i].p);
-  //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<a class="date" title="date">' + datepub+ '</a>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a><span class="tags"><a class="love" onclick="likedArticle(' + i + ');">♥</a>  <a>🥚</a>  </span></div>\n</article>\n';
-//return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<time datetime="'+ d[i].p +'">' + datepub+ '</time>\n\t<a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t<div class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '">' + d[i].n + '</a>' + ((d[i].a) ? (' by ' + d[i].a) : '') + '</div>\n\t<div class="descr">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>\n';
-
 //voir http://microformats.org/wiki/hcard
-// ne peux respecter totalement le format sinon time se retrouve mal affiché... on peut le remettre à la bonne place et le cacher si besoin (m), normalement corrigé maintenant
-
 return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
-
 }
-
 
 // voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<  
 async function myFetch(url, data, noreturn) {
@@ -518,7 +513,7 @@ function unread(k) {
 	if (nb_title < 0) nb_title = 0;
 	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
 	m[d[k].f].n++;
-        $('f' + d[k].f).children[1].innerHTML = m[d[k].f].n;
+        $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
         $('f' + d[k].f).className = "fluxnew";
 	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
 	light('f' + d[k].f);
@@ -542,10 +537,10 @@ function read(k) {
   m[d[k].f].n--;
 myFetch('read.php', 'id='+k, 1);
   if (m[d[k].f].n > 0) {
-     $('f' + d[k].f).children[1].innerHTML = m[d[k].f].n;
+     $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
       light('f' + d[k].f);
   } else {
-      $('f' + d[k].f).children[1].innerHTML = '';
+      $('f' + d[k].f).children[0].innerHTML = '';
       if (id == d[k].f) $('f' + d[k].f).className = "flux show";
       else $('f' + d[k].f).className = "flux";
   }

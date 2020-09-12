@@ -1,8 +1,8 @@
 <?php
 require('simple_html_dom.php');
 include('../clean_text.php');
-$base_url = 'https://mobile.twitter.com';
-$site_name = 'Twitter';
+$base_url = 'https://www.picuki.com/profile/';
+$site_name = 'Instagram';
 
 function _get_URI() {
 	return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -28,7 +28,7 @@ echo '    <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml"
 ';
 }
 if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
-if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Twitter spécifié!");
+if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Instagram spécifié!");
 
 $url = $base_url.'/'.$_POST['f'];
 $html = file_get_html($url);
@@ -37,18 +37,18 @@ echo $html;
 echo '</pre>';
 die;*/
 
-foreach($html->find('div[class=bio]') as $title_descr) {
+foreach($html->find('div[class=profile-description]') as $title_descr) {
 $title_descr = $title_descr->plaintext;
 }
 
-echo "    <title> ".$_POST['f']."</title>
+echo "    <title> ".$_POST['f']."</title>
     <description>".htmlspecialchars(stripslashes($title_descr),ENT_QUOTES,'UTF-8')."</description>
 ";
 
-echo "    <link>https://twitter.com/".$_POST['f']."</link>
+echo "    <link>https://www.instagram.com/".$_POST['f']."/</link>
 ";
 $i = 0;
-
+die;
 $tweet_block = $html->find('div[class="timeline"] table[class=tweet]');
 foreach($tweet_block as $tweet) {
 	if($i++ > 19) break;
@@ -58,7 +58,6 @@ foreach($tweet_block as $tweet) {
     $mylink =  'https://twitter.com'.$tweet->find('td[class=timestamp] a',0)->attr['href'];
 
     $tweetText = str_replace('&nbsp;', '', $tweetText);
-   //  pic.twitter.com/qVu97Ws4Fn 
    // $tweetText2 = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $tweetText);
     //$tweetText2 = preg_replace('/\#([^\s]*)/','<a href="https://twitter.com/hashtag/$1">@$1</a>', $tweetText2);
    //// $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
@@ -66,7 +65,6 @@ foreach($tweet_block as $tweet) {
     //$tweetText = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
     //$tweetPic = $tweet->find('div[class=AdaptiveMedia-photoContainer js-adaptive-photo]', 0);
 
-$tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
     //if(isset($tweetPic->attr["data-image-url"]) && $tweetPic->attr["data-image-url"] != '/')
     //	$tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
 
@@ -74,7 +72,7 @@ $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$
 
     echo "    <item>
 	      <title>",htmlspecialchars(cutString(stripslashes($tweetText), 0, 128),ENT_QUOTES,'UTF-8'),"</title>
-	      <description>",(isset($tweetText2)?$tweetText2:""),"</description>
+	      <description>",(isset($tweetText)?$tweetText:""),"</description>
 	      <pubDate>$date</pubDate>
 	      <link>".(isset($mylink)?$mylink:"")."</link>
 	      <guid>".(isset($mylink)?$mylink:"")."</guid>
