@@ -2,7 +2,8 @@
 include('/www/conf.php');
 include('clean_text.php');
 ini_set('max_execution_time', '240');
-	$extra ='';
+//$_GET['id'] = 1275;
+$extra ='';
 	if(isset($_GET['id']) && is_numeric($_GET['id'])) $extra = ' where id='.$_GET['id'];
 	$DEBUG = 0;
 	if(isset($_GET['debug'])) {

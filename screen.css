@@ -1,4 +1,33 @@
 @font-face {
+  font-family: 'Crimson Text';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Crimson Text Italic'), local('CrimsonText-Italic'), url(https://fonts.gstatic.com/s/crimsontext/v11/wlpogwHKFkZgtmSR3NB0oRJfajhRK_Y.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Crimson Text';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Crimson Text Bold Italic'), local('CrimsonText-BoldItalic'), url(https://fonts.gstatic.com/s/crimsontext/v11/wlprgwHKFkZgtmSR3NB0oRJfajDqDuNS_LU.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+'Crimson Text', Georgia, serif02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Crimson Text';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Crimson Text Regular'), local('CrimsonText-Regular'), url(https://fonts.gstatic.com/s/crimsontext/v11/wlp2gwHKFkZgtmSR3NB0oRJfbwhT.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Crimson Text';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Crimson Text Bold'), local('CrimsonText-Bold'), url(https://fonts.gstatic.com/s/crimsontext/v11/wlppgwHKFkZgtmSR3NB0oRJX1C1GDNNQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
 	font-family: 'fa';
 	src: url("fonts/fontawesome-webfont.woff2");
 	font-display: block;
@@ -6,21 +35,20 @@
 
 @font-face {
 	font-family: 'Gheop';
-	src: url('fonts/gheop-light.woff2');
+	src: url(https://fonts.gstatic.com/s/crimsontext/v11/wlppgwHKFkZgtmSR3NB0oRJX1C1GDNNQ.woff2) format('woff2'); /*url('fonts/gheop-light.woff2');*/
 	font-weight: normal;
 	font-style: normal;
 }
 
-/* http://fontstore.baidu.com/static/editor/index-en.html# pour éditer les fonts, top ! */
-
 body {
-       font-family: fa, Arial, Helvetica, 'Twemoji Mozilla';
-       line-height: 1.3em;
+       font-family: 'Crimson Text', Georgia, fa, Arial, Helvetica, 'Twemoji Mozilla';
+      font-size: 1.2em;
+       line-height: 1.4em;
        font-weight: 400;
        font-feature-settings: "kern";
        word-wrap: break-word;
        background: white;
-       color: #444;
+       color: #333;
 -webkit-font-smoothing: antialiased;
        }
 
