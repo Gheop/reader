@@ -17,7 +17,7 @@ include('/www/conf.php');
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.php" rel="shortcut icon" type="image/png" />
 <!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
-<link rel="apple-touch-icon" href="favicon.php"/>
+<!-- <link rel="apple-touch-icon" href="favicon.php"/> -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <!--, user-scalable=no"> -->
 
