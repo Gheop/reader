@@ -68,7 +68,7 @@ foreach($html->find('article[class=blog-post index-blog-post]') as $detail) {
 		$mydescription = '<img src="'.$info->data.'" />';
 		break;
 	}
-	if(!$mydescription) {
+	if(!isset($mydescription)) {
 		foreach($detail->find('div[class=blog-post-content] video') as $info) {
 			$mydescription = $info->outertext;
 			break;
