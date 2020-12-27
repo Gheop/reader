@@ -112,29 +112,29 @@ function search(t) {
         xhr.abort();
       }
     }), 4000);
-    xhr = null;
+    xhr = undefined;
     $('s').blur();
   }
-  t = null;
+  t = undefined;
   return false;
 }
 
 function scroll() {
     //var unreadArticles = document.querySelectorAll(".item1");
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
-    var unreadArticles = Array.from(document.getElementsByClassName("item1"));
-    var rootHeight = DM.offsetHeight-5;
+    let unreadArticles = Array.from(document.getElementsByClassName("item1"));
+    let rootHeight = DM.offsetHeight-5;
     if ("IntersectionObserver" in window && navigator.userAgent.toLowerCase().indexOf('safari/') == -1) {
         window.addEventListener("resize", scroll);
         window.addEventListener("orientationChange", scroll);
         //on vire tout en cas de resize car rootHeight change ... et on recommence
         if(imageObserver) imageObserver.disconnect();
         if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-        
+
         imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
-                            var art = entry.target;
+                            let art = entry.target;
                             read(art.id);
                             cptReadArticle++;
                             imageObserver.unobserve(art);
@@ -160,8 +160,8 @@ function scroll() {
 }
 
 function oldScroll() {
-    var count = 0;
-    for(var i in d) {
+    let count = 0;
+    for(let i in d) {
         count++;
         if($(i).offsetTop <= DM.scrollTop) {
             if (d[i].r != 0) read(i);
@@ -184,7 +184,7 @@ function goDown() {
 
 function goPrev() {
   if (kona == 1 || !d) return;
-  var previous = null;
+  var previous = undefined;
 	for(var i in d) {
 		if($(i).offsetTop > DM.scrollTop - 10) {
 			if(previous) {DM.scrollTop = $(previous).offsetTop - 10;}
@@ -197,7 +197,7 @@ function goPrev() {
 
 function goNext() {
 	if (kona == 1 || !d) return;
-	for(var i in d) {
+	for(let i in d) {
 		if($(i).offsetTop > DM.scrollTop + 10) {
 			DM.scrollTop = $(i).offsetTop - 10;
 			return;
@@ -227,7 +227,7 @@ function likedArticle(i) {
 	requestTimer = setTimeout((function() {
 		if (xhr) xhr.abort();
 	}), 4000);
-	xhr = null;
+	xhr = undefined;
 }
 
 function markallread(i) {
@@ -240,9 +240,9 @@ function markallread(i) {
 		requestTimer = setTimeout((function() {
 			if (xhr) xhr.abort();
 		}), 4000);
-		xhr = null;
+		xhr = undefined;
 	}
-	r = null;
+	r = undefined;
 	return false;
 }
 
@@ -272,13 +272,13 @@ function menu() {
 
 function view(i) {
 	myFetch('view.php', 'id='+i).then(result => {
-		var page = '';
+		let page = '';
 		cptReadArticle = 0;
 		varscroll = 0;
 		loadmore = 0;
 		d = result;
 		Now = new Date();
-		for(var i in d) {
+		for(let i in d) {
 			loadmore++;
         //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
         page += generateArticle(i);
@@ -327,7 +327,7 @@ function addflux() {
   requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
   }), 10000);
-  val = xhr = null;
+  val = xhr = undefined;
 }
 
 function up() {
@@ -342,7 +342,7 @@ function up() {
     requestTimer = setTimeout((function() {
       if (xhr) xhr.abort();
     }), 10000);
-    xhr = null;
+    xhr = undefined;
     return false;
 }
 
@@ -370,7 +370,7 @@ function editFluxName(idFlux) {
 
 function dateArticle(articleDate) {
 	 //log(d[i]);
-  
+
 
   //if (typeof Intl.RelativeTimeFormat !== 'undefined') {
  // if(!!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)) {
@@ -404,13 +404,13 @@ function dateArticle(articleDate) {
 //faire une fonction qui génère TOUS les articles d'un coup et qui n'execute qu'une seule fois le calcul des dates...
 //ne pas vider la 'page' pour more...
 function generateArticle(i) {
- 	var datepub = dateArticle(d[i].p);
+ 	let datepub = dateArticle(d[i].p);
 //voir http://microformats.org/wiki/hcard
 return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
 
-// voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<  
+// voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<
 async function myFetch(url, data, noreturn) {
   try {
     const response = await fetch(url, {
@@ -431,7 +431,7 @@ async function myFetch(url, data, noreturn) {
 }
 
 function getHTTPObject(action) {
-	var xhr = new XMLHttpRequest();
+	let xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === 4 && xhr.status && xhr.status === 200) {
 			var page = '';
@@ -449,7 +449,7 @@ function getHTTPObject(action) {
         DM.removeChild($('addblank'));
         cptReadArticle = 0;
         Now = new Date();
-        for(var i in p) {
+        for(let i in p) {
             loadmore++;
             d[i] = p[i];
             page += generateArticle(i);
@@ -459,7 +459,7 @@ function getHTTPObject(action) {
         $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
         lazyLoadImg();
         loadinprogress = 0;
-        p = null;
+        p = undefined;
       } else if (action === 'markallread') {
         location.reload();
       } else if (action === 'search') {
@@ -477,7 +477,7 @@ function getHTTPObject(action) {
           //   loadmore++;
           //   //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
           //   page += generateArticle(i);
-          for (var y = 0, tlen = d.i.length; y < tlen; y++) {
+          for (let y = 0, tlen = d.i.length; y < tlen; y++) {
             loadmore++;
             page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
           //voir pour foutre les tags en ul,li
@@ -498,7 +498,7 @@ function getHTTPObject(action) {
         DM.scrollTop = 0;
       }
       if (requestTimer) clearTimeout(requestTimer);
-      page = null;
+      page = undefined;
     } else if (xhr.readyState === 4) affError('Le serveur n\'a pas répondu assez rapidement. Veuillez réessayer ultérieurement.');
     return 0;
   };
@@ -548,13 +548,13 @@ myFetch('read.php', 'id='+k, 1);
   D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
   if (nb_title < 0) nb_title = 0;
   favicon(nb_title);
-  xhr = null;
+  xhr = undefined;
   readItems++;
-  progressBar();
+  progressBar();  
 }
 
 function progressBar() {
-  var perc = (readItems/totalItems)*100;
+  let perc = (readItems/totalItems)*100;
   document.getElementsByTagName("footer")[0].style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
 }
 
@@ -584,16 +584,16 @@ function lazyLoadImg() {
 //	var lazyloadImages = document.querySelectorAll("img.lazy");
 
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
-    var lazyloadImages = Array.from(document.getElementsByClassName("lazy"));
+    let lazyloadImages = Array.from(document.getElementsByClassName("lazy"));
 //firefox75 le supporte en natif !
-	if(hasSupportLoading) { 
+	if(hasSupportLoading) {
 		lazyloadImages.forEach(function(img) {
 			img.src = img.dataset.src;
             img.classList.remove('lazy');
 		});
 		return 0;
 	}
-    
+
 
     if ("IntersectionObserver" in window /*&& navigator.userAgent.toLowerCase().indexOf('safari/') == -1*/) {
         var imageObserver = new IntersectionObserver(function(entries, observer) {
@@ -707,7 +707,7 @@ function i() {
         //log("Touche non implémentée. Code : " + k);
         break;
     }
-    k = null;
+    k = undefined;
   };
 }
 
@@ -726,7 +726,7 @@ function openActif() {
       return;
     }
   }
-  k = len = null;
+  k = len = undefined;
   log("Fenêtre active non trouvée!");
 }
 
@@ -753,7 +753,7 @@ function more() {
   requestTimer = setTimeout((function() {
     if (xhr) xhr.abort();
   }), 4000);
-  xhr = null;
+  xhr = undefined;
 }
 
 function verif(k) {
@@ -796,5 +796,17 @@ function affError(text,n) {
 }
 
 
+function showPaintTimings() {
+  if (window.performance) {
+    let performance = window.performance;
+    let performanceEntries = performance.getEntriesByType('paint');
+    performanceEntries.forEach( (performanceEntry, i, entries) => {
+      console.log("The time to " + performanceEntry.name + " was " + performanceEntry.startTime + " milliseconds.");
+    });
+  } else {
+    console.log('Performance timing isn\'t supported.');
+  }
+}
 document.onload = i();
+showPaintTimings();
 //i();
