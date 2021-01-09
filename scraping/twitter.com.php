@@ -31,32 +31,54 @@ if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
 if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Twitter spécifié!");
 
 $url = $base_url.'/'.$_POST['f'];
-$html = file_get_html($url);
+
+$timeout = 10;
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+if (preg_match('`^https://`i', $url))
+{
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+}
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+// Définition du header "User-Agent:"
+// Simulation d'un Firefox 3.6.13
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+$page_content = curl_exec($ch);
+curl_close($ch);
+/*echo $page_content;
+die;*/
+$html =  str_get_html($page_content);
+//$html = file_get_html($url);
 /*echo '<pre>';
 echo $html;
 echo '</pre>';
 die;*/
 
-foreach($html->find('div[class=bio]') as $title_descr) {
-$title_descr = $title_descr->plaintext;
+foreach($html->find('a[class=fullname]') as $title_descr) {
+  $mytitle = trim($title_descr->plaintext);
 }
 
 echo "    <title> ".$_POST['f']."</title>
-    <description>".htmlspecialchars(stripslashes($title_descr),ENT_QUOTES,'UTF-8')."</description>
+    <description>".htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8')."</description>
 ";
 
 echo "    <link>https://twitter.com/".$_POST['f']."</link>
 ";
 $i = 0;
 
-$tweet_block = $html->find('div[class="timeline"] table[class=tweet]');
+$tweet_block = $html->find('li[data-item-type=tweet]');
 foreach($tweet_block as $tweet) {
+  //echo 'PROOT!';
 	if($i++ > 19) break;
 
     // get tweet text
-    $tweetText = $tweet->find('div[class=tweet-text] div', 0)->plaintext;
-    $mylink =  'https://twitter.com'.$tweet->find('td[class=timestamp] a',0)->attr['href'];
-
+    $tweetText = $tweet->find('p[class=TweetTextSize TweetTextSize--normal js-tweet-text tweet-text]',0)->plaintext;
+    $mylink =  'https://twitter.com'.$tweet->find('small[class=time] a',0)->attr['href'];
+    $mydate = $tweet->find('span[class=_timestamp]',0)->attr['data-time'];
     $tweetText = str_replace('&nbsp;', '', $tweetText);
    //  pic.twitter.com/qVu97Ws4Fn 
    // $tweetText2 = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $tweetText);
@@ -70,7 +92,7 @@ $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$
     //if(isset($tweetPic->attr["data-image-url"]) && $tweetPic->attr["data-image-url"] != '/')
     //	$tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
 
-    $date = date('r');
+    $date = date('r', $mydate);
 
     echo "    <item>
 	      <title>",htmlspecialchars(cutString(stripslashes($tweetText), 0, 128),ENT_QUOTES,'UTF-8'),"</title>
