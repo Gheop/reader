@@ -35,8 +35,12 @@ function imgbase64($f) {
     }
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
     if($type == "inode/x-empty") return "";
-    if(($type == "image/jpeg" || $type == "image/png") &&  `which convert`) {
-        exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
+
+    //apt install webp
+
+    if(($type == "image/jpeg" || $type == "image/png" || $type == "image/tiff") &&  `which cwebp`) {
+        //exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
+        exec('cwebp -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
         unlink($tmpfile);
         $tmpfile .= '.webp';
         /* if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile); */
@@ -48,9 +52,11 @@ function imgbase64($f) {
     }
 /*    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
       else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);*/
-    else if($type == "image/gif" && `which giflossy`) {
-      exec('giflossy -O3 --lossy=80 -o '.$tmpfile.'.gif '.$tmpfile);
-      $tmpfile .= '.gif';
+    else if($type == "image/gif" && `which gif2webp`) {
+      //exec('giflossy -O3 --lossy=80 -o '.$tmpfile.'.gif '.$tmpfile);
+      //$tmpfile .= '.gif';
+      exec('gif2webp -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
+      $tmpfile .= '.webp';
     }
     else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
 //    $base64 = "//reader.gheop.com/$tmpfile";
