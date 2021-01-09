@@ -36,7 +36,7 @@ function imgbase64($f) {
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
     if($type == "inode/x-empty") return "";
 
-    //apt install webp
+    //apt install webp on debian
 
     if(($type == "image/jpeg" || $type == "image/png" || $type == "image/tiff") &&  `which cwebp`) {
         //exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
