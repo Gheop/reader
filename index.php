@@ -63,6 +63,7 @@ else {
     $firstLine = $stringfromfile[0];
     $explodedstring = explode("/", $firstLine, 3);
     $branchname = trim($explodedstring[2]);
+    if(file_exists('version')) $branchname .= ' '.file_get_contents('version');
     if($branchname != 'master')    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
   }
   ?>
