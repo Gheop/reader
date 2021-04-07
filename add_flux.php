@@ -102,6 +102,15 @@ function searchRSSUrlSpecialSite($url) {
 	else if(preg_match('/^.*\/\/(www\.)?reddit\.com\/(.*)?$/',$url, $m )) {
 		return $m[0].'.rss';
 	}
+	/*
+	* medium 
+	* https://help.medium.com/hc/en-us/articles/214874118-Using-RSS-feeds-of-profiles-publications-and-topics
+	*/
+	else if(preg_match('/^.*\/\/(.*)\.medium\.com\/(.*)?$/',$url, $m )) {
+		if(isset($m[1]) && $m[1] != 'www' )
+			return 'https://'.$m[1].'medium.com/feed';
+		return false;
+	}
 	return false;
 }
 
@@ -131,6 +140,7 @@ function searchRSSUrl($url) {
 	}
  return false;
 }
+
 
 function getRSSLink($url) {
 	$content = getContentUrl($url);

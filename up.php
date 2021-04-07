@@ -58,7 +58,8 @@ while($d = $r->fetch_array()) {
 	curl_setopt_array($ch[$i],
 		Array(
 			CURLOPT_URL => $d[1],
-			CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
+			//CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
+			CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
 			CURLOPT_TIMEOUT => 60,
 			CURLOPT_CONNECTTIMEOUT => 60,
 			CURLOPT_RETURNTRANSFER => TRUE,
@@ -91,10 +92,10 @@ for($j=0;$j<$i;$j++) {
 	//if($DEBUG) libxml_use_internal_errors(true);
 	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
 
-	
+
 	$xml = trim(curl_multi_getcontent($ch[$j]));
 		//$xml = preg_replace('/(url=".*)\?.*"/s', 'url="\\1', $xml);
-	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);	
+	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);
 	$xml = preg_replace('/url="(.*?\.(jpg|png|gif))\?.*?"/s', 'url="'.htmlspecialchars('\\1',ENT_XML1, 'UTF-8',true).'"' , $xml);
 	$xml = preg_replace('/type=""/s', '' , $xml);
 //$xml = htmlspecialchars($xml,ENT_XML1, 'UTF-8',true);
@@ -166,7 +167,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 // 	if(is_object($rss->children($namespaces['media']))) {$flux=$rss->children($namespaces['media']);
 // // echo '<pre>';print_r($flux);
 // }
-// 	else 
+// 	else
 		if(isset($rss->channel->item)) $flux = $rss->channel->item;
 	else if(isset($rss->item)) $flux=$rss->item;
 	else if(isset($rss->entry)) $flux=$rss->entry;
@@ -249,7 +250,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 			}*/
 
 			// if($item->children($namespaces['media'])) $content=$item->children($namespaces['media']);
-			// else 
+			// else
 				if(isset($item->description)) $content = $item->description;
 			//else if(isset($item->{'media:description'})) $content = $item->{'media:description'}; //ne marche pas
 			//voir xpath dans TESTS

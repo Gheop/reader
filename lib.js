@@ -18,7 +18,7 @@ readItems =0;
 online = true;
 notif = false;
 var Now;
-
+var favicon_badge;
 var rtf;
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
@@ -58,7 +58,8 @@ function $(i) {
 }
 
 function favicon(nb) {
-    $('favico').href = "https://reader.gheop.com/favicon"+nb+".png";
+	if(nb >= 0) favicon_badge.badge(nb);
+  //  $('favico').href = "https://reader.gheop.com/favicon"+nb+".png";
 }
 
 function changeTheme(style) {
@@ -550,7 +551,7 @@ myFetch('read.php', 'id='+k, 1);
   favicon(nb_title);
   xhr = undefined;
   readItems++;
-  progressBar();  
+  progressBar();
 }
 
 function progressBar() {
@@ -649,6 +650,10 @@ function i() {
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
   window.onresize = scroll;
+  favicon_badge=new Favico({
+    animation:'none'
+});
+//favicon_badge.badge(222);
 
   inactivityTime();
   $('s').onfocus = function() {
