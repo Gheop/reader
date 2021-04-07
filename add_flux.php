@@ -105,6 +105,7 @@ function searchRSSUrlSpecialSite($url) {
 	/*
 	* medium 
 	* https://help.medium.com/hc/en-us/articles/214874118-Using-RSS-feeds-of-profiles-publications-and-topics
+	* semble trouver directement l'adresse sur la page maintenant ... inutile ?
 	*/
 	else if(preg_match('/^.*\/\/(.*)\.medium\.com\/(.*)?$/',$url, $m )) {
 		if(isset($m[1]) && $m[1] != 'www' )
