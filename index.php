@@ -1,8 +1,8 @@
 <?php
 //header("Content-Security-Policy: default-src 'self' https:;");
-//header("Content-Security-Policy: img-src: 'self' 'inline'");
+header("Content-Security-Policy: img-src: 'self' 'inline'");
 //header("Content-Security-Policy: frame-ancestors 'none'");
-//header('Content-Type: text/html; charset=utf-8');
+header('Content-Type: text/html; charset=utf-8');
 //header('X-Frame-Options: deny');
 //header('X-Content-Type-Options: nosniff');
 include('/www/conf.php');
@@ -11,11 +11,12 @@ include('/www/conf.php');
 <html lang="fr">
 <head>
   <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script>
-
+<!-- https://github.com/ejci/favico.js -->
+<script src="favico.min.js"></script>
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-<link id="favico" href="favicon.php" rel="shortcut icon" type="image/png" />
+<link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
 <!-- <link rel="apple-touch-icon" href="favicon.php"/> -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
