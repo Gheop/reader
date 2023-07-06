@@ -1,178 +1,133 @@
-<?php declare(strict_types=1);
-
-#https://gitlab.com/Daniel-KM/Omeka-S-module-BlockPlus/-/snippets/2068979
-
-
-
-if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
-if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Twitter spécifié!");
+<?php
+require('simple_html_dom.php');
+include('../clean_text.php');
+$base_url = 'https://mobile.twitter.com';
+$site_name = 'Twitter';
 
 function _get_URI() {
-    return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	return ($_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 }
 
-$user = $_POST['f'];
-$count = 20;
+function file_url($url){
+  $parts = parse_url($url);
+  $path_parts = array_map('rawurldecode', explode('/', $parts['path']));
 
-const URL_JS = 'https://abs.twimg.com/responsive-web/client-web/main.90f9e505.js';
-const GRAPHQL_JS = 'https://twitter.com/i/api/graphql/ku_TJZNyXL2T4-D9Oypg7w/UserByScreenName';
-const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/96.0';
-
-// Get the authorization bearer from the browser.
-$curl = curl_init(URL_JS);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-$page = curl_exec($curl);
-$matches = [];
-preg_match('/s=\"AAAAA[^\"]+\"/', $page, $matches, PREG_OFFSET_CAPTURE);
-$bearer = empty($matches[0][0]) ? null : substr($matches[0][0], 3, -1);
-curl_close($curl);
-if (!$bearer) {
-    echo 'Scraper error: No authorization bearer';
-    exit;
+  return
+    $parts['scheme'] . '://' .
+    $parts['host'] .
+    implode('/', array_map('rawurlencode', $path_parts))
+  ;
 }
-
-// Get the guest token.
-$curl = curl_init('https://api.twitter.com/1.1/guest/activate.json');
-curl_setopt($curl, CURLOPT_POST, 1);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, [
-    'User-Agent: ' . USER_AGENT,
-    'Content-Type: application/json',
-    'Authorization: Bearer ' . $bearer,
-]);
-$page = curl_exec($curl);
-$json_page = json_decode($page, true);
-$token = $json_page['guest_token'] ?? null;
-curl_close($curl);
-if (!$token) {
-    echo 'Scraper error: No guest token;';
-    exit;
-}
-
-// Get the user ID here.            [
-$query = ['variables' => json_encode([
-    'screen_name' => (string) $user,
-    'withHighlightedLabel' => true,
-])];
-$curl = curl_init(GRAPHQL_JS . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986));
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, [
-    'User-Agent: ' . USER_AGENT,
-    'Content-Type: application/json',
-    'Authorization: Bearer ' . $bearer,
-    'x-guest-token: ' . $token,
-]);
-$page = curl_exec($curl);
-if (curl_errno($curl)) {
-    echo 'Scraper error: ' . curl_error($curl);
-    exit;
-}
-$page_json = json_decode($page, true);
-$userId = $page_json['data']['user']['rest_id'];
-curl_close($curl);
-
-// Scrap the tweets.
-$query = [
-    'include_profile_interstitial_type' => 1,
-    'include_blocking' => 1,
-    'include_blocked_by' => 1,
-    'include_followed_by' => 1,
-    'include_want_retweets' => 0,
-    'include_mute_edge' => 1,
-    'include_can_dm' => 1,
-    'include_can_media_tag' => 1,
-    'skip_status' => 1,
-    'cards_platform' => 'Web-12',
-    'include_cards' => 1,
-    'include_ext_alt_text' => 1,
-    'include_quote_count' => 1,
-    'include_reply_count' => 1,
-    'tweet_mode' => 'extended',
-    'include_entities' => 1,
-    'include_user_entities' => 1,
-    'include_ext_media_color' => 1,
-    'include_ext_media_availability' => 1,
-    'send_error_codes' => 1,
-    'simple_quoted_tweet' => 1,
-    'include_tweet_replies' => 0,
-    'count' => $count,
-    'userId' => $userId,
-    'ext' => 'mediaStats,highlightedLabel',
-];
-$curl = curl_init("https://twitter.com/i/api/2/timeline/profile/$userId.json?" . http_build_query($query, '', '&', PHP_QUERY_RFC3986));
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, [
-    'User-Agent: ' . USER_AGENT,
-    'Content-Type: application/json',
-    'Authorization: Bearer ' . $bearer,
-    'x-guest-token: ' . $token,
-]);
-$page = curl_exec($curl);
-if (curl_errno($curl)) {
-    echo 'Scraper error: ' . curl_error($curl);
-    exit;
-}
-$json_page = json_decode($page, true);
-
-$tweets = $json_page['globalObjects']['tweets'] ?? [];
-if(isset($_GET['debug'])) {
-echo '<pre>';
-print_r($tweets);
-// print_r([
-//     'authorization_bearer' => $bearer,
-//     'guest_token' => $token,
-// ]);
-
-}
-
-include('../clean_text.php');
-
-if(isset($tweets)) {
-    if(!isset($_GET['debug'])) {
+if(!isset($_GET['debug'])) {
 header('Content-type: application/rss+xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-
 ';
 echo '    <atom:link href="'._get_URI().'" rel="self" type="application/rss+xml" />
 ';
-    echo "    <title> ".$user."</title>
-    <description>Twitter de ".$user."</description>
-";
-
-echo "    <link>https://twitter.com/".$user."</link>
-";
 }
-  
-    foreach($tweets as $k => $v) {
-        $img = '';
-        if(isset($v['retweeted_status_id_str'])) continue;
-        $date = date('r', strtotime($v['created_at']));
-        //$date = date('r');
-        if(isset($v['entities']['media'])) {
-            foreach($v['entities']['media'] as $i) {
-                if(isset($i['media_url_https']))
-                    $img .= '<br /><img src="'.$i['media_url_https'].'" />';
-            }
-        }
+if(isset($_GET['f'])) $_POST['f'] = $_GET['f'];
+if(!isset($_POST['f']) || empty($_POST['f'])) die("Pas de compte Twitter spécifié!");
 
-        $description = $v['full_text'];
-        $description = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $description);
-        $description = preg_replace('/https:\/\/t.co\/([^\s]*)/','<a href="$0">@$0</a>', $description);
+$url = $base_url.'/'.$_POST['f'];
 
+$timeout = 10;
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+if (preg_match('`^https://`i', $url))
+{
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+}
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+// Définition du header "User-Agent:"
+// Simulation d'un Firefox 3.6.13
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+$page_content = curl_exec($ch);
+curl_close($ch);
+//echo $page_content;
+/*die;*/
+$html =  str_get_html($page_content);
+if(!isset($html) || !$html) {
+    file_put_contents('log_twitter.txt', $url." : impossible de charger la page\n", FILE_APPEND | LOCK_EX);
+}
+//$html = file_get_html($url);
+/*echo '<pre>';*/
+//echo $html;
+/*echo '</pre>';*/
+/*die;*/
+$mytitle = '';
+$finddesc = $html->find('div[data-testid*="UserDescription"]', 0);
+if($finddesc)
+   $mytitle = trim($finddesc->plaintext);
+
+echo "    <title> ".$_POST['f']."</title>
+    <description>".htmlspecialchars(stripslashes($mytitle),ENT_QUOTES,'UTF-8')."</description>
+";
+
+echo "    <link>https://twitter.com/".$_POST['f']."</link>
+";
+$i = 0;
+
+$tweet_block = $html->find('article[data-testid*="tweet"]');
+/*echo '<pre>';
+print_r($tweet_block[0]);
+echo '</pre>';*/
+foreach($tweet_block as $tweet) {
+ // echo 'PROOT!';
+ // echo $tweet;
+	if($i++ > 19) break;
+
+    // get tweet text
+    $tweetText = $tweet->find('div[itemprop*="articleBody"]',0)->plaintext;
+    $mylink =  'https://twitter.com'.$tweet->find('a[role="link"]',3)->attr['href'];
+    $mydate = $tweet->find('time',0)->attr['datetime'];
+    $tweetText = str_replace('&nbsp;', '', $tweetText);
+    $imgs = '';
+    foreach($tweet->find('img[alt!=""]') as $img) {
+        if(!preg_match('/profile_images/', $img->attr['src']))
+            $imgs .= '<img src="'.$img->attr['src'].'"/>';
+    }
+   //  pic.twitter.com/qVu97Ws4Fn 
+   // $tweetText2 = preg_replace('/@([^\s]*)/','<a href="https://twitter.com/$1">@$1</a>', $tweetText);
+    //$tweetText2 = preg_replace('/\#([^\s]*)/','<a href="https://twitter.com/hashtag/$1">@$1</a>', $tweetText2);
+   //// $tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
+    //$tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
+    //$tweetText = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','', $tweetText);
+    //$tweetPic = $tweet->find('div[class=AdaptiveMedia-photoContainer js-adaptive-photo]', 0);
+
+$tweetText2 = preg_replace('/\s*(pic.twitter.com\/.+)\s*/s','<img src="https://$1" />', $tweetText);
+$tweetText2 .= $imgs;
+    //if(isset($tweetPic->attr["data-image-url"]) && $tweetPic->attr["data-image-url"] != '/')
+    //	$tweetText2 = $tweetText.'<br /><img src="'.$tweetPic->attr["data-image-url"].'" />';
+
+    $date = date('r', strtotime($mydate));
+    //$date = $mydate;
+
+
+//htmlspecialchars(cutString(stripslashes($tweetText), 0, 128),ENT_QUOTES,'UTF-8'),
     echo "    <item>
-          <title>",htmlspecialchars(cutString(stripslashes($v['full_text']), 0, 128),ENT_QUOTES,'UTF-8'),"</title>
-          <description>",(isset($v['full_text'])?htmlspecialchars(stripslashes($description.$img),ENT_QUOTES,'UTF-8'):""),"</description>
-          <pubDate>$date</pubDate>
-          <link>https://twitter.com/".$user."/status/".$k."</link>
-          <guid>https://twitter.com/".$user."/status/".$k."</guid>
+	      <title>",cutString(stripslashes($tweetText), 0, 128),"</title>
+	      <description>",(isset($tweetText2)?$tweetText2:""),"</description>
+	      <pubDate>$date</pubDate>
+	      <link>".(isset($mylink)?$mylink:"")."</link>
+	      <guid>".(isset($mylink)?$mylink:"")."</guid>
     </item>
 ";
+//die;	      <description>",(isset($tweetText2)?htmlspecialchars(stripslashes($tweetText2),ENT_QUOTES,'UTF-8'):""),"</description>
+/*	var_dump($tweet);
+	die;*/
 
-    }
-} 
+
+$tweet->clear();
+unset($tweet);
+
+}
+
 ?>
   </channel>
 </rss>
-

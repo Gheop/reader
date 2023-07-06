@@ -37,6 +37,7 @@ echo "    <link>".$base_url."</link>
 ";
 
 $json = json_decode(file_get_contents("https://swissborg.com/page-data/blog/page-data.json"));
+if(!isset($json)) exit;
 // echo '<pre>';
 //  //var_dump($json->result->data->allPrismicBlogPost);
 
@@ -54,7 +55,7 @@ $html = str_get_html($html);
 var_dump($html);*/
 //die;
 $i = 0;
- foreach($json->result->data->allPrismicBlogPost->edges as $d) {
+foreach($json->result->data->allPrismicBlogPost->edges as $d) {
 	if($i++ >= 20 ) break;
 
 	$mylink = "https://swissborg.com".$d->node->url;
