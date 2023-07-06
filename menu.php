@@ -20,7 +20,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 // and F.id = I.id_flux
 // group by I.id_flux
 
-$r = $mysqli->query('select CONCAT(\'"\',F.id,\'":{"t":"\', F.title,\'","n":\', count(I.id),\',"d":"\', F.description,\'","l":"\', F.link,
+$r = $_SESSION['mysqli']->query('select CONCAT(\'"\',F.id,\'":{"t":"\', F.title,\'","n":\', count(I.id),\',"d":"\', F.description,\'","l":"\', F.link,
 	\'"}\') from reader_user_flux UF, reader_item I, reader_flux F
 where UF.id_user='.$_SESSION['user_id'].' and UF.id_flux=I.id_flux
 and I.id not in (select id_item from reader_user_item RUI where RUI.id_user='.$_SESSION['user_id'].')

@@ -198,6 +198,11 @@ main {
 .item1 {
     box-shadow: 8px 8px 12px #444;
 }
+
+.item1:hover {
+  box-shadow: 8px 8px 12px #222;
+  color: #111;
+}
 .action a {
     color:white;
     cursor:pointer;
@@ -209,6 +214,7 @@ main {
 .nickname:before{content:" by "  ;}
 .item1 .lu:before{/*content:"👁";*/content:"";}
 .item0 .lu:before{/*content:"⏿";*/content:"";color:#ff8b8b;}
+.readability:before{content:"";}
 .search:before{content:""}
 .star:before{content:""}
 .starred:before{content:""}
@@ -318,6 +324,10 @@ vertical-align: super
     border-top-left-radius: 4px;
     display:block;
     text-shadow:1px 0px 1px #444, -1px 0px 1px #444;
+    /*border-left: 1px solid rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(0, 0, 0, 0.3);*/
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 input, textarea,button {

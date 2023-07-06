@@ -7,6 +7,9 @@ function cutString($string, $start, $length, $endStr = '…') { //[&hellip]'){
 
 function imgbase64($f) {
   $f[1] = preg_replace('/^\/\//s','https://',$f[1]);
+
+//un petit log pour aider
+ // file_put_contents('logimg', urldecode($f[1])."\n", FILE_APPEND | LOCK_EX);
  // $f[1] = preg_replace('/\?.*$/s','//',$f[1]);
 //$extension_fichier = pathinfo($f[1], PATHINFO_EXTENSION);
 //file_put_contents('log_image.txt', 'Fichier:'.$f[1]."\n", FILE_APPEND | LOCK_EX);
@@ -16,7 +19,7 @@ function imgbase64($f) {
 */
 /*  if (in_array($extension_fichier, $extension_valides))
       {*/
-  if($data = file_get_contents($f[1])) {
+  if($data = file_get_contents(urldecode($f[1]))) {
     //if(!$data) return '';
     $tmpfile='tmp/'.md5($data); //.'.'.$extension_fichier;
     file_put_contents($tmpfile, $data);
@@ -26,11 +29,22 @@ function imgbase64($f) {
   	 return '';
     }
     if($width > 1680) {
-  	 exec('convert -resize 1680x '.$tmpfile.' '.$tmpfile);
+      //really more speed then imagick
+      if (`which vipsthumbnail`) { 
+        exec('vipsthumbnail '.$tmpfile.' --size 1680x');
+      }
+      else {
+        exec('convert -resize 1680x '.$tmpfile.' '.$tmpfile);
+      }
      $attr='width="1680px"';
     }
     if($height > 1024) {
-  	 exec('convert -resize x1024 '.$tmpfile.' '.$tmpfile);
+      if (`which vipsthumbnail`) { 
+        exec('vipsthumbnail '.$tmpfile.' --size x1024');
+      }
+      else {
+  	   exec('convert -resize x1024 '.$tmpfile.' '.$tmpfile);
+     }
      $attr='height="1024px"';
     }
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
@@ -73,6 +87,13 @@ function clean_txt($v) {
 //  $config = HTMLPurifier_Config::createDefault();
 //$config->set('Filter.YouTube', true); //don't work, je l'utilise mal ?
 //  $purifier = new HTMLPurifier($config);
+
+//a retester
+//  $allowed_tags = '<p><a><h1><h2><h3>';
+//       $v = strip_tags($v, $allowed_tags);
+
+ // $v = strip_tags($v, ['img', 'object', 'yt', 'pre', 'code', 'u', 'b', 'i']); //supprime le contenu !
+
   $v = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $v);
   $p = array();
   $p[] = '/<img .*?src="(http:)?\/\/feeds\.feedburner\.com\/.*?".*?>/s';
@@ -108,6 +129,20 @@ function clean_txt($v) {
   $p[]='/<\/div>/s';
   $p[]='/<span.*?>/s';
   $p[]='/<\/span>/s';
+
+
+
+  //ajout pour test
+ /*$p[]='/<html.*?>/s';
+  $p[]='/<\/html>/s';
+    $p[]='/<body.*?>/s';
+  $p[]='/<\/body>/s';
+    $p[]='/<head.*?>/s';
+  $p[]='/<\/head>/s';
+      $p[]='/<title.*?>/s';
+  $p[]='/<\/title>/s';*/
+//fin ajout test
+
 /*  $p[]='/<p\s*?.*?>/s';
   $p[]='/<\/p>/s';*/
 /*  $p[]='/<font\s*?.*?>/s';
@@ -125,7 +160,11 @@ function clean_txt($v) {
 
 /*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
-  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
+  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen>$1</iframe>", $v);
+  //test
+//$v = tidy_repair_string($v, ['show-body-only' => true], 'UTF8');
+//finTest
+ // $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
   /*$v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v); */
 
   $v = @preg_replace_callback('#<\s*img[^>]+?src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
@@ -140,5 +179,6 @@ function clean_txt($v) {
 //  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'',"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
   $v = nl2br($v);
   $v = str_replace($a, $b, $v);
+
   return $v;
 }

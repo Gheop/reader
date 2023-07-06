@@ -1,8 +1,9 @@
 <?php
 include('/www/conf.php');
 include('clean_text.php');
-ini_set('max_execution_time', '240');
-//$_GET['id'] = 1275;
+ini_set('max_execution_time', '500');
+$mysqli = $_SESSION['mysqli'];
+//$_GET['id'] = 1341;
 $extra ='';
 	if(isset($_GET['id']) && is_numeric($_GET['id'])) $extra = ' where id='.$_GET['id'];
 	$DEBUG = 0;
@@ -17,7 +18,7 @@ $extra ='';
 
 function get_links() {
 	global $mysqli, $extra;
-	$r = $mysqli->query('select id, rss from reader_flux'.$extra.' order by id;') or die($mysqli->error);
+	$r = $mysqli->query('select id, rss from reader_flux'.$extra.' order BY RAND();') or die($mysqli->error);
 	return $r;
 }
 
@@ -60,8 +61,8 @@ while($d = $r->fetch_array()) {
 			CURLOPT_URL => $d[1],
 			//CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
 			CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-			CURLOPT_TIMEOUT => 60,
-			CURLOPT_CONNECTTIMEOUT => 60,
+			CURLOPT_TIMEOUT => 120,
+			CURLOPT_CONNECTTIMEOUT => 120,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => 'UTF-8',
             CURLOPT_SSL_VERIFYPEER => FALSE,
@@ -78,15 +79,27 @@ while($d = $r->fetch_array()) {
 
 $running=null;
 
-do {
+/*do {
 	curl_multi_exec($mh,$running);
 	//usleep (1000);
 } while ($running > 0);
+*/
+
+//execute the multi handle
+do {
+    $status = curl_multi_exec($mh, $active);
+    if ($active) {
+        // Wait a short time for more activity
+        curl_multi_select($mh);
+    }
+} while ($active && $status == CURLM_OK);
+
 
 //$test = 'https://news.google.fr/news?cf=all&hl=fr&pz=1&ned=fr&topic=h&num=3&output=rss';
 for($j=0;$j<$i;$j++) {
-	//echo "<i>$dd[$j]</i><br />";
+	echo "\n$dd[$j] : ";
 	$tt = $mysqli->query("select link, title, rss from reader_flux where id=".$dd[$j].";") or die($mysqli->error);
+	if(!isset($tt)) contine;
 	$ttt = $tt->fetch_array();
 //	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
 	//if($DEBUG) libxml_use_internal_errors(true);
@@ -146,7 +159,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 	if($DEBUG) print_r($rss);
 	if($DEBUG) echo '</pre>';*/
 	if(empty($rss)) {
-		echo 'Flux vide!<br />';
+		echo 'Flux vide!<br />\n';
 
 		continue;
 	}
@@ -159,7 +172,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 		if($DEBUG) echo '</pre>';
 		continue;
 	}
-	echo "<h1>$title</h1>";
+	echo "$title : ";
 	$linkmaster = null;
 	if($rss->channel->link) $linkmaster = $rss->channel->link;
 	elseif($rss->link[0]['href']) $linkmaster = $rss->link[0]['href'];
@@ -176,8 +189,10 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 		print_r($rss);
 		continue;
 	}
+	$nb_art = 0;
 	foreach ($flux as $item) {
 		$link=null;
+		if($nb_art++ > 5) break;
 		// echo '<pre>';
 		// print_r($item);
 		if(is_object($item->link)) {
@@ -301,6 +316,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 		$mysqli->query("update reader_flux set `update`=CURRENT_TIMESTAMP() where id=".$dd[$j].";") or die($mysqli->error);
 		print ".";
 	}
+	echo "\n";
 	curl_multi_remove_handle($mh,$ch[$j]);
 }
 curl_multi_close($mh);

@@ -1,7 +1,8 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 include('/www/conf.php');
-#$_POST['id'] = '766';
+//$mysqli = $_SESSION['mysqli'];
+//$_POST['id'] = '1175';
 /*if (!$mysqli->set_charset("utf8")) {
     printf("Erreur lors du chargement du jeu de caractères utf8 : %s\n", $mysqli->error);
 }*/
@@ -14,7 +15,7 @@ $r = $mysqli->query("SELECT CONCAT('{',GROUP_CONCAT(CONCAT('\"',I.id,'\":{'),CON
 $d = $r->fetch_row();
 //header('Content-Type: application/json');
 //echo $d[1];
-if($d[0])
+if(isset($d) && isset($d[0]))
     echo $d[0];
 else echo '{}';
 ?>
