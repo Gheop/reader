@@ -27,6 +27,17 @@ and I.id not in (select id_item from reader_user_item RUI where RUI.id_user='.$_
 and I.pubdate > (now()- interval 15 day)
 and F.id = I.id_flux
 group by I.id_flux;') or die($mysqli->error);
+
+//autre requête possible :
+/*SELECT CONCAT('"', F.id,'":{"t":"', F.title,'","n":', COUNT(I.id), ',"d":"', F.description,'","l":"', F.link, '"}') 
+FROM reader_user_flux UF
+INNER JOIN reader_flux F ON UF.id_flux = F.id
+INNER JOIN reader_item I ON UF.id_flux = I.id_flux
+LEFT JOIN reader_user_item RUI ON I.id = RUI.id_item AND RUI.id_user = UF.id_user
+WHERE UF.id_user = 1 
+AND I.pubdate > (NOW() - INTERVAL 15 DAY)
+AND RUI.id_item IS NULL
+GROUP BY F.id;*/
 $cpt = 0;
 $e = '{';
 while($d = $r->fetch_row()) {

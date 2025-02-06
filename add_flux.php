@@ -4,6 +4,8 @@ include('/www/conf.php');
 include('scraping/simple_html_dom.php');
 
 $debug = false;
+$USERAGENT = '';//'GheopSpider';
+
 
 
 
@@ -12,7 +14,7 @@ function getContentUrl($url) {
 	$ch = curl_init();
 	curl_setopt_array($ch, Array(
 		CURLOPT_URL => $url,
-		CURLOPT_USERAGENT => 'GheopSpider',
+		CURLOPT_USERAGENT => $USERAGENT,
 		CURLOPT_TIMEOUT => 120,
 		CURLOPT_CONNECTTIMEOUT => 30,
 		CURLOPT_RETURNTRANSFER => TRUE,

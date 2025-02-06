@@ -10,7 +10,7 @@ if(!isset($_POST['link'])) {
   }
   else $_POST['link'] = $_GET['link'];
 }
-
+if(!is_numeric($_POST['link'])) die('id error');
   $stmt = $mysqli->prepare("delete FROM reader_user_flux where id_flux=$_POST[link] and id_user=$_SESSION[user_id];") or die($mysqli->error); 
   $stmt->execute() or die("error");
   $stmt->close();
