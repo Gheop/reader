@@ -21,7 +21,7 @@ function imgbase64($f) {
       {*/
   if($data = file_get_contents(urldecode($f[1]))) {
     //if(!$data) return '';
-    $tmpfile='tmp/'.md5($data); //.'.'.$extension_fichier;
+    $tmpfile='/www/reader/tmp/'.md5($data); //.'.'.$extension_fichier;
     file_put_contents($tmpfile, $data);
     list($width, $height, $t, $attr) = getimagesize("$tmpfile");
     if($width == 1 && $height == 1) {
@@ -77,6 +77,7 @@ function imgbase64($f) {
 
 //    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
     //voir pour mettre le onerror dans lib.js (stocker $f1 dans src2 ou un truc comme)
+    $tmpfile = str_replace("/www/reader/", "", $tmpfile);
     return '<img loading="lazy" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
   }
   else return '<img loading="lazy" class="lazy" src="'.$f[1].'" />';

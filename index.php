@@ -11,26 +11,16 @@ include('/www/conf.php');
 <html lang="fr">
 <head>
   <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script>
-<!-- https://github.com/ejci/favico.js -->
 <script src="favico.min.js"></script>
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
-<!-- <link id="favico" href="//reader.gheop.com/favicon.svg" rel="shortcut icon" type="image/svg+xml" /> -->
-<!-- <link rel="apple-touch-icon" href="favicon.php"/> -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<!--, user-scalable=no"> -->
-
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-<!-- Instruct Internet Explorer to use its latest rendering engine -->
-<meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
-<!-- <link rel="preload" href="fonts/Awesome.woff2" as="font" type="font/woff2" sameorigin>
-<script type="text/javascript" src="webp-hero.polyfill.bundle.js"></script> -->
 </head>
-
 <body>
 <?php
 if(!isset($_SESSION['pseudo'])) {
@@ -85,10 +75,6 @@ echo '<nav>
   <ul id="menu">
     <li id="fall" class="fluxnew" onclick="view(\'all\')" title="Tout voir">All&nbsp;&nbsp;&nbsp;
     <span class="icon"><a title="Ajouter un flux" onclick="addflux();"></a>&nbsp;&nbsp;&nbsp;
-    <!-- <a title="Importer des flux"></a>&nbsp;&nbsp;&nbsp;
-    <a title="Exporter mes flux"></a>&nbsp;&nbsp;&nbsp; -->
-  <!--  <a onclick="navigator.registerContentHandler(\'application/atom+xml\', \'//reader.gheop.com/add_flux.php?f=%s\',  \'Gheop Reader\');return false;" title="Enregistrer comme lecteur de flux du navigateur"></a>&nbsp;&nbsp;&nbsp; -->
-   <!-- <a href="manage.php" title="Réglages"></a>&nbsp;&nbsp;&nbsp; -->
     <a id="up" onclick="up();" title="Mettre à jour les flux"></a>
     </span>
     </li>
