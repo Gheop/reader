@@ -33,15 +33,15 @@ var imageObserver;
 var inactivityTime = function () {
   var t;
   window.onload = resetTimer;
+
   document.onmousemove = resetTimer;
-  document.onkeypress = resetTimer;
+  document.onkeydown = resetTimer;
   document.onload = resetTimer;
-  document.onmousemove = resetTimer;
   document.onmousedown = resetTimer; // touchscreen presses
   document.ontouchstart = resetTimer;
   document.onclick = resetTimer;     // touchpad clicks
   document.onscroll = resetTimer;    // scrolling with arrow keys
-  document.onkeypress = resetTimer;
+
   function rearm() {
   	if(online)
 	    document.location.reload(true);
@@ -402,6 +402,39 @@ function dateArticle(articleDate) {
   }
 
 }
+
+function summarize(k) {
+  console.log('get summarize for article '+k);
+  $(k).children[1].innerHTML += '<hr /><div id="loader'+k+'" style="display: block;"><div class="spinner"></div></div>';
+ // Prépare les données à envoyer en POST
+ let formData = new FormData();
+ // Ajoute la variable contenant ton HTML
+ formData.append('article', $(k).children[1].innerText);
+
+ fetch('https://reader.gheop.com/summarize.php', {
+   method: 'POST',
+   // On envoie le formData comme body de la requête
+   body: formData
+ })
+ .then(response => {
+   // Quand la page est chargée, on la convertit en texte
+   return response.text();
+ })
+ .then(html => {
+   // On parse le HTML
+   const parser = new DOMParser();
+   const doc = parser.parseFromString(html, "text/html");
+   console.log(doc);
+
+   // Met à jour l'affichage, par exemple :
+//   $(k).children[1].innerHTML += doc.querySelector('html').innerHTML;
+$('loader'+k).innerHTML = doc.querySelector('html').innerHTML;
+})
+ .catch(error => {
+   console.error('Failed to fetch page: ', error);
+ });
+}
+
 function readability(k) {
   console.log('fetch https://reader.gheop.com/readability/?output&url='+d[k].l);
   fetch('https://reader.gheop.com/readability/?output&url='+d[k].l)
@@ -429,7 +462,7 @@ function readability(k) {
 function generateArticle(i) {
  	let datepub = dateArticle(d[i].p);
 //voir http://microformats.org/wiki/hcard
-return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a> <a class="readability" onclick="readability('+i+')"></a></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a> <a class="readability" onclick="readability('+i+')"></a> <a class="summarize" onclick="summarize('+i+')"></a></div>\n</article>';
 //<!--href="https://gheop.com/readability/?url=' + d[i].l + '" -->
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
