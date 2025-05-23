@@ -172,15 +172,17 @@ nav {
 
 #menu-resizer {
   position: absolute;
+    color:black;
   left: 20vw;
   width: 6px;
+    top: 50%;
+  transform: translateY(-50%);
   height: 100%;
   cursor: ew-resize;
   z-index: 1000;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
-
 }
 
 main {

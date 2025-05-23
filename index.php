@@ -84,7 +84,7 @@ echo '<nav>
   </ul>
 
 </nav>
-  <div id="menu-resizer"><!-- ⇹ --></div>
+  <div id="menu-resizer"></div>
 <main>
 </main>
 <footer>
