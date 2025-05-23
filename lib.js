@@ -271,6 +271,46 @@ function menu() {
   })
 }
 
+
+
+customElements.define('article-content', class extends HTMLElement {
+  connectedCallback() {
+    const shadow = this.attachShadow({mode: 'open'});
+    /*const style = document.createElement("style");
+    shadow.appendChild(style);
+*/    shadow.innerHTML = this.innerHTML;
+    updateStyle(this);
+  }
+});
+
+function updateStyle(elem) {
+ // console.log(elem);
+//  console.log(countWords(elem)+' words.');
+  const shadow = elem.shadowRoot;
+  const style = document.createElement("style");
+  shadow.appendChild(style);
+  shadow.querySelector("style").textContent = `
+    .article-content {
+  text-align: justify;
+  padding: 10px;
+}
+  .spinner {
+  margin: 20px auto;
+  width: 20px;
+  height: 20px;
+  border: 4px solid #111;         
+  border-top-color: #ff8b8b;      
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+  `;
+}
+
 function view(i) {
 	myFetch('view.php', 'id='+i).then(result => {
 		let page = '';
@@ -281,14 +321,14 @@ function view(i) {
 		Now = new Date();
 		for(let i in d) {
 			loadmore++;
-        //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-        page += generateArticle(i);
+      page += generateArticle(i);
     }
     if(loadmore == 0) {
     	page = '<article class="item1">\n\t<header>\n\t\t<h1 class="headline"><a class="title" target="_blank">Flux vide</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a class="website">Gheop Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">Pas de nouveaux articles.</div>\n\t<div class="action">&nbsp;&nbsp;</div>\n</article>';
 		}
 
 		page += '<div id="addblank">&nbsp;</div>';
+
 		DM.innerHTML = page;
 		DM.scrollTop = 0;
 
@@ -298,7 +338,7 @@ function view(i) {
 		DM.scrollTop = 0;
 		if(loadmore > 0) {
 			if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-			lazyLoadImg();
+			//lazyLoadImg();
 			scroll();
 		}
 	})
@@ -405,15 +445,20 @@ function dateArticle(articleDate) {
 
 function summarize(k) {
   console.log('get summarize for article '+k);
-  $(k).children[1].innerHTML += '<hr /><div id="loader'+k+'" style="display: block;"><div class="spinner"></div></div>';
+     //faire disparaitre l'icone
+  //marche pas ici ???
+   $('sum'+k).style.display = 'none'; 
+  $('ac'+k).shadowRoot.innerHTML += '<hr /><div id="loader'+k+'" style="display: block;"><div class="spinner"></div></div>';
+      updateStyle($('ac'+k));
  // Prépare les données à envoyer en POST
  let formData = new FormData();
  // Ajoute la variable contenant ton HTML
- formData.append('article', $(k).children[1].innerText);
+formData.append('article', $('ac'+k).shadowRoot.children[0].innerText);
+//  formData.append('article', $('ac'+k).shadowRoot.innerText);
+ //console.log(formData);
 
  fetch('https://reader.gheop.com/summarize.php', {
    method: 'POST',
-   // On envoie le formData comme body de la requête
    body: formData
  })
  .then(response => {
@@ -421,14 +466,17 @@ function summarize(k) {
    return response.text();
  })
  .then(html => {
-   // On parse le HTML
    const parser = new DOMParser();
    const doc = parser.parseFromString(html, "text/html");
-   console.log(doc);
+   const shadow = $('ac'+k).shadowRoot;
+   shadow.querySelector('#loader'+k).innerHTML = doc.querySelector('html').innerHTML;
+  // updateStyle($('ac'+k));
 
-   // Met à jour l'affichage, par exemple :
-//   $(k).children[1].innerHTML += doc.querySelector('html').innerHTML;
-$('loader'+k).innerHTML = doc.querySelector('html').innerHTML;
+     //faire disparaitre l'icone
+   //fait plus haut poru le faire dès le début ?!
+   $('sum'+k).style.display = 'none'; 
+
+   //ajouter le style pour avoir les marges, comme sur l'article, et ça sera nickel ;)
 })
  .catch(error => {
    console.error('Failed to fetch page: ', error);
@@ -448,8 +496,13 @@ function readability(k) {
 
     // Parse the text
     const doc = parser.parseFromString(html, "text/html")
-    console.log(doc)
-    $(k).children[1].innerHTML = doc.querySelector('html').innerHTML;
+/*    console.log(doc)
+    console.log($(k));*/
+    $('ac'+k).shadowRoot.children[0].innerHTML += doc.querySelector('html').innerHTML;
+   // updateStyle($('ac'+k)); // plus besoin ?
+    //hide icon
+    countWords($('ac'+k));
+   $('full'+k).style.display = 'none'; 
   })
   .catch(error => {
      console.error('Failed to fetch page: ', error)
@@ -457,12 +510,39 @@ function readability(k) {
 
 }
 
+function countWords(elem) {
+    // Récupérer le texte de l'élément
+ // console.log(elem.id.substring(2));
+    const text = elem.shadowRoot.innerText || elem.shadowRoot.textContent;
+
+    // Nettoyer le texte : supprimer les espaces en trop et les sauts de ligne
+    const cleanedText = text.trim();
+
+    // Vérifier si le texte n'est pas vide
+    if (cleanedText === '') return 0;
+
+    // Séparer les mots en utilisant une expression régulière pour gérer les espaces multiples
+    const words = cleanedText.split(/\s+/);
+    const nbWords = words.length;
+    if(nbWords < 100) {
+      //$('sum'+elem.id.substring(2)).style.visibility = 'hidden';
+      $('sum'+elem.id.substring(2)).style.display = 'none';
+    }
+    else {
+      $('sum'+elem.id.substring(2)).style.display = 'inline';
+    }
+
+    // Retourner le nombre de mots
+    return ;
+}
+
+
 //faire une fonction qui génère TOUS les articles d'un coup et qui n'execute qu'une seule fois le calcul des dates...
 //ne pas vider la 'page' pour more...
 function generateArticle(i) {
  	let datepub = dateArticle(d[i].p);
 //voir http://microformats.org/wiki/hcard
-return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a> <a class="readability" onclick="readability('+i+')"></a> <a class="summarize" onclick="summarize('+i+')"></a></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a></div>\n</article>';
 //<!--href="https://gheop.com/readability/?url=' + d[i].l + '" -->
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
@@ -514,7 +594,7 @@ function getHTTPObject(action) {
         page += '<div id="addblank">&nbsp;</div>';
         DM.insertAdjacentHTML('beforeend', page);
         $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-        lazyLoadImg();
+        //lazyLoadImg();
         loadinprogress = 0;
         p = undefined;
       } else if (action === 'markallread') {
@@ -562,8 +642,15 @@ function getHTTPObject(action) {
   return xhr;
 }
 
-function unread(k) {
+function verif(k, v=0) {
+  if(v==1) (d[k].readblock == 0) ? d[k].readblock = 1 : d[k].readblock = 0; 
+  return (d[k].r == 0) ? unread(k) : read(k);
+}
+
+function unread(k, v=0) {
 	unr = 1;
+    if(v===0) d[k].readblock = 1;
+  if(v===1) d[k].readblock = 0;
 	if (d[k].r == 1 || $(k).className == 'item1') return;
 	d[k].r = 1;
 	$(k).className = 'item1';
@@ -580,15 +667,15 @@ function unread(k) {
 	progressBar();
 }
 
-function read(k) {
+function read(k, v=0) {
   if (search_active == 1) return;
   //obligé sinon 2 read après un verif() ou un unread-read à la suite ... mais why ?
+if (d[k].readblock == 1) return;
   if (d[k].r === 0) return;
   if (unr === 1) {
     unr = 0;
     return;
   }
-
   $(k).className = 'item0';
   d[k].r = 0;
   m[d[k].f].n--;
@@ -637,7 +724,7 @@ function konamistop() {
 }
 
 
-function lazyLoadImg() {
+/*function lazyLoadImg() {
 //	var lazyloadImages = document.querySelectorAll("img.lazy");
 
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
@@ -646,13 +733,13 @@ function lazyLoadImg() {
 	if(hasSupportLoading) {
 		lazyloadImages.forEach(function(img) {
 			img.src = img.dataset.src;
-            img.classList.remove('lazy');
+      img.classList.remove('lazy');
 		});
 		return 0;
 	}
 
 
-    if ("IntersectionObserver" in window /*&& navigator.userAgent.toLowerCase().indexOf('safari/') == -1*/) {
+    if ("IntersectionObserver" in window) {
         var imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
@@ -698,7 +785,7 @@ function lazyLoadImg() {
         window.addEventListener("orientationChange", lazyload);
     }
 }
-
+*/
 
 function i() {
   view('all');
@@ -708,6 +795,7 @@ function i() {
   window.onresize = scroll;
   favicon_badge=new Favico({
     animation:'none'
+   // animation:'slide'
 });
 //favicon_badge.badge(222);
 
@@ -817,10 +905,6 @@ function more() {
   xhr = undefined;
 }
 
-function verif(k) {
-  return (d[k].r == 0) ? unread(k) : read(k);
-}
-
 function log(t) {
   if (typeof console !== 'undefined') {
     if(typeof t == 'object')
@@ -856,7 +940,7 @@ function affError(text,n) {
 	}
 }
 
-
+/*
 function showPaintTimings() {
   if (window.performance) {
     let performance = window.performance;
@@ -867,7 +951,7 @@ function showPaintTimings() {
   } else {
     console.log('Performance timing isn\'t supported.');
   }
-}
+}*/
 document.onload = i();
-showPaintTimings();
+//showPaintTimings();
 //i();

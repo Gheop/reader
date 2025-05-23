@@ -49,7 +49,6 @@ body {
        word-wrap: break-word;
        background: white;
        color: #333;
--webkit-font-smoothing: antialiased;
        }
 
 @keyframes pulse {
@@ -140,16 +139,48 @@ b,strong,legend{
     left:4px;
     width:20vw;
     overflow:auto;
-    /*user-select: none;*/
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+/*#menu-resizer {
+  position: absolute;
+  color:black;
+  left: 20vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 50px;
+  cursor: ew-resize;
+  z-index: 1000;
+    user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
 
 }
 
+#menu-resizer:hover {
+  color: orange;
+}
+*/
+
+#menu-resizer {
+  position: absolute;
+  left: 20vw;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 1000;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+
+}
 
 main {
-    border-top-left-radius: 1em;
-    border-bottom-left-radius: 1em;
+    border-top-left-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
     background: #eee;
     position: absolute;
     bottom:10px;
@@ -172,7 +203,7 @@ main {
     background:#fff;
     margin-bottom:10px;
 
-    border-radius:1em;
+    border-radius:0.5em;
     text-overflow: ellipsis;
     max-width:100%;
     overflow: hidden;
@@ -192,8 +223,8 @@ main {
     padding-top: 4px;
     background:#444;
     border:1px solid #444;
-    border-bottom-left-radius: 1em;
-    border-bottom-right-radius: 1em;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
     color:white;
     font-weight: bold;
 }
@@ -227,7 +258,7 @@ main {
 .print:before{content:""}
 /*🏠✍  ☺ ☻ ♡ ♥   */
 .headline {
-    font-size: 1.2em;
+    font-size: 1.2rem;
     font-weight: 600;
     padding: 0 10px;
     margin: 0;
@@ -245,10 +276,11 @@ time {
     font-style: normal;
 }
 
-.descr,.article-content{
+/*.descr,.article-content{
+    color: yellow;
 	text-align: justify;
 	padding: 10px;
-}
+}*/
 
 p {
     width: 100%;
@@ -309,7 +341,7 @@ vertical-align: super
     right: 40px;
     top: 80px;
     height: 2em;
-    border-radius: 1em;
+    border-radius: 0.5em;
 }
 
 #register {
@@ -420,6 +452,8 @@ a.liked {
 	display:none;
 	width:0;
 }
+
+
 main {
 	left:0vw;
 }
@@ -435,20 +469,20 @@ main {
 }
 }
 
+/*
+
 .spinner {
   margin: 20px auto;
   width: 20px;
   height: 20px;
-  border: 4px solid #111;         /* couleur de base */
-  border-top-color: #ff8b8b;      /* couleur de la "tête" du spinner */
+  border: 4px solid #111;         
+  border-top-color: #ff8b8b;      
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-
-/* Animation du spinner */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-
+*/

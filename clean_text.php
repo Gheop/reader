@@ -78,7 +78,8 @@ function imgbase64($f) {
 //    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
     //voir pour mettre le onerror dans lib.js (stocker $f1 dans src2 ou un truc comme)
     $tmpfile = str_replace("/www/reader/", "", $tmpfile);
-    return '<img loading="lazy" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+    return '<img loading="lazy" src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+//    return '<img loading="lazy" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
   }
   else return '<img loading="lazy" class="lazy" src="'.$f[1].'" />';
 }
@@ -161,7 +162,9 @@ function clean_txt($v) {
 
 /*  $v = preg_replace('#<a .*href=["\' ]*([^&> "\']*)["\' ]*.*?>#Ssi', '<a href="$1" target="_blank">', $v);*/
   $v = preg_replace('#<object.*<embed[^>]+src=["\' ]*//www.lewistrondheim.com/blog/affiche.swf\?image=([^&> "\']*).*["\' >]*.*</object>#Ssi', "<img src=\"//www.lewistrondheim.com/blog/images/$1\" />", $v);
-  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen>$1</iframe>", $v);
+//  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen>$1</iframe>", $v);
+
+  $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe loading=\"lazy\" width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen>$1</iframe>", $v);
   //test
 //$v = tidy_repair_string($v, ['show-body-only' => true], 'UTF8');
 //finTest
