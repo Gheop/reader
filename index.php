@@ -1,6 +1,8 @@
 <?php
 //header("Content-Security-Policy: default-src 'self' https:;");
-header("Content-Security-Policy: img-src: 'self' 'inline'");
+header("Content-Security-Policy: img-src 'self' data: https:;");
+//header("Content-Security-Policy: img-src 'self' data:;");
+//header("Content-Security-Policy: img-src: 'self' 'inline'");
 //header("Content-Security-Policy: frame-ancestors 'none'");
 header('Content-Type: text/html; charset=utf-8');
 //header('X-Frame-Options: deny');
@@ -79,7 +81,9 @@ echo '<nav>
     </span>
     </li>
   </ul>
+
 </nav>
+  <div id="menu-resizer"><!-- ⇹ --></div>
 <main>
 </main>
 <footer>
