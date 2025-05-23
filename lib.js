@@ -872,12 +872,20 @@ resizer.addEventListener('mousedown', (e) => {
   const onMouseMove = (e) => {
     if (!isResizing) return;
     let newWidth = e.clientX;
-    if (newWidth < 100) newWidth = 100;
+    if (newWidth < 20) {
+      newWidth = 0;
+      resizer.innerHTML ='⇹';
+      resizer.style.height='auto';
+    }
+    else {
+      resizer.innerHTML ='';
+      resizer.style.height='100%';
+    }
     if (newWidth > window.innerWidth * 0.6) newWidth = window.innerWidth * 0.6;
 
     // Appliquer la nouvelle largeur
     nav.style.width = newWidth + 'px';
-    resizer.style.left = newWidth+5 + 'px';
+    resizer.style.left = newWidth + 'px';
  //   nav.style.left = (newWidth + 6) + 'px';
     main.style.left = newWidth + 'px';
     // Optionnel : sauvegarde
@@ -896,15 +904,19 @@ resizer.addEventListener('mousedown', (e) => {
 });
 
 // Charger la largeur sauvegardée au démarrage
-/*window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', () => {
   const savedWidth = localStorage.getItem('menuWidth');
   if (savedWidth) {
-    nav.style.width = savedWidth + 'px';
-    resizer.style.left = savedWidth + 'px';
-    main.style.left = (parseInt(savedWidth) + 6) + 'px';
+    nav.style.width = (parseInt(savedWidth)) + 'px';
+    resizer.style.left = (parseInt(savedWidth)) + 'px';
+    if(savedWidth < 20) {
+      resizer.innerHTML ='⇹';
+      resizer.style.height='auto';
+    }
+    main.style.left = (parseInt(savedWidth)) + 'px';
   }
 });
-*/
+
 }
 
 function openActif() {
