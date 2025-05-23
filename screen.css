@@ -129,7 +129,7 @@ b,strong,legend{
     transition: color 1s linear;
 }
 
-#menu {
+nav {
     padding:0px;
     position: absolute;
     margin:0;
@@ -142,6 +142,11 @@ b,strong,legend{
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
+}
+#menu {
+    padding: 0;
+    margin: 0;
+    width: 100%;
 }
 
 /*#menu-resizer {
