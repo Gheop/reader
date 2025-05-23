@@ -393,8 +393,12 @@ input, textarea,button {
    border-top-right-radius:0;
    border-bottom-right-radius:0;
     position:absolute;
-}
 
+}
+    #s:focus {
+  outline: none;
+  box-shadow: none;
+}
 #bs {
    border-top-left-radius:0;
    border-bottom-left-radius:0;
