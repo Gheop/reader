@@ -4,3 +4,11 @@ tmp/
 readability/
 TODO.txt
 ai.php
+readability
+public.php
+scraping/composer.json
+scraping/composer.lock
+scraping/node_modules/
+scraping/package-lock.json
+scraping/package.json
+scraping/vendor/
