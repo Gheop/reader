@@ -858,6 +858,53 @@ function i() {
     }
     k = undefined;
   };
+
+  const resizer = document.getElementById('menu-resizer');
+const nav = document.querySelector('nav');
+const main = document.querySelector('main');
+
+let isResizing = false;
+
+resizer.addEventListener('mousedown', (e) => {
+  isResizing = true;
+  document.body.classList.add('resizing');
+
+  const onMouseMove = (e) => {
+    if (!isResizing) return;
+    let newWidth = e.clientX;
+    if (newWidth < 100) newWidth = 100;
+    if (newWidth > window.innerWidth * 0.6) newWidth = window.innerWidth * 0.6;
+
+    // Appliquer la nouvelle largeur
+    nav.style.width = newWidth + 'px';
+    resizer.style.left = newWidth+5 + 'px';
+ //   nav.style.left = (newWidth + 6) + 'px';
+    main.style.left = newWidth + 'px';
+    // Optionnel : sauvegarde
+    localStorage.setItem('menuWidth', newWidth);
+  };
+
+  const onMouseUp = () => {
+    isResizing = false;
+    document.body.classList.remove('resizing');
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
+
+// Charger la largeur sauvegardée au démarrage
+/*window.addEventListener('DOMContentLoaded', () => {
+  const savedWidth = localStorage.getItem('menuWidth');
+  if (savedWidth) {
+    nav.style.width = savedWidth + 'px';
+    resizer.style.left = savedWidth + 'px';
+    main.style.left = (parseInt(savedWidth) + 6) + 'px';
+  }
+});
+*/
 }
 
 function openActif() {
@@ -955,3 +1002,5 @@ function showPaintTimings() {
 document.onload = i();
 //showPaintTimings();
 //i();
+
+
