@@ -274,7 +274,7 @@ $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 			else if(isset($item->media)) var_dump($item->media);
 			else {
 				print "pas de content<br />";
-				if(preg_match('/^(.*\/\/)?(www.)?youtube.com\/watch\?v=(.*)/', $link, $m)) {
+				if(preg_match('/^(.*\/\/)?(www.)?youtube.com\/watch\?v=(.*)/', $link, $m) || preg_match('/^(.*\/\/)?(www.)?youtube.com\/shorts\/(.*)/', $link, $m)) {
 					echo "Lien youtube trouvé!<br />";
       		//$content = '<yt width="560" height="315" src="https://www.youtube.com/embed/'.$m[3].'" frameborder="0" allowfullscreen></yt>';
 					$content = '<yt>'.$m[3].'</yt>';
