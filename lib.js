@@ -510,6 +510,26 @@ function readability(k) {
 
 }
 
+function tagIt(k) {
+   let formData = new FormData();
+ // Ajoute la variable contenant ton HTML
+formData.append('article', $('ac'+k).shadowRoot.children[0].innerText);
+
+  console.log('fetch https://reader.gheop.com/tagIt.php?text='+formData);
+  fetch('https://reader.gheop.com/tagIt.php?text='+formData)
+  .then(response => {
+    return response.text()
+  })
+  .then(html => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, "text/html")
+    $('tag'+k).innerHTML = doc.querySelector('html').innerHTML;
+  })
+  .catch(error => {
+     console.error('Failed to fetch page: ', error)
+  })
+
+}
 function countWords(elem) {
     // Récupérer le texte de l'élément
  // console.log(elem.id.substring(2));
@@ -542,9 +562,43 @@ function countWords(elem) {
 function generateArticle(i) {
  	let datepub = dateArticle(d[i].p);
 //voir http://microformats.org/wiki/hcard
-return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a> <a id="kindle'+i+'" class="kindle" onclick="kindle('+i+')"></a><a class="print" onclick="printIt('+i+')"></a><span id="tag'+i+'" class="tags icon"><a onclick="tagIt('+i+')"></a></span></div>\n</article>';
 //<!--href="https://gheop.com/readability/?url=' + d[i].l + '" -->
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
+}
+
+function printIt(k) {
+     let formData = $('ac'+k).shadowRoot.children[0].innerHTML;
+  if (!formData) return;
+
+
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'absolute';
+  iframe.style.left = '-9999px';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
+    <html>
+      <head>
+        <title>Impression de l'article</title>
+        <style>
+          body { font-family: sans-serif; padding: 2em; }
+          article { max-width: 800px; margin: auto; }
+        </style>
+      </head>
+      <body>${formData}</body>
+    </html>
+  `);
+  doc.close();
+
+  iframe.onload = () => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => document.body.removeChild(iframe), 1000);
+  };
 }
 
 // voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<

@@ -257,12 +257,15 @@ main {
 .readability:before{content:"🖺";}
 /* .readability:before{content:"";} */
 .summarize:before{content:"🧠";}
+.kindle:before{content:"🕮";}
+.print:before{content:"⎙";} /* 🖨️";} */
 .search:before{content:""}
 .star:before{content:""}
 .starred:before{content:""}
 .love0:before{content:""}
 .love1:before{color:red;content:""}
 .print:before{content:""}
+.tags:before{content:" "}
 /*🏠✍  ☺ ☻ ♡ ♥   */
 .headline {
     font-size: 1.2rem;
