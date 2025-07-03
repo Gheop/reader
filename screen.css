@@ -258,6 +258,7 @@ main {
 /* .readability:before{content:"";} */
 .summarize:before{content:"🧠";}
 .kindle:before{content:"🕮";}
+.sendTo:before{content:"📤";}
 .print:before{content:"⎙";} /* 🖨️";} */
 .search:before{content:""}
 .star:before{content:""}
