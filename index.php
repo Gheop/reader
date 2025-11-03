@@ -18,8 +18,8 @@ include('/www/conf.php');
 <link rel="stylesheet" type="text/css" href="common.css" media="screen" /><!-- ?v=<?php echo time(); ?> -->
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" /><!-- ?v=<?php echo time(); ?> -->
 <title>Gheop Reader</title>
-<script src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script><!-- ?v=<?php echo time(); ?> -->
 <script src="favico.min.js" defer></script>
+<script src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script><!-- ?v=<?php echo time(); ?> -->
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
