@@ -125,7 +125,9 @@ function scroll() {
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
     let unreadArticles = Array.from(document.getElementsByClassName("item1"));
     let rootHeight = DM.offsetHeight-5;
-    if ("IntersectionObserver" in window && navigator.userAgent.toLowerCase().indexOf('safari/') == -1) {
+    // Utiliser IntersectionObserver sauf pour Safari (bug avec root)
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if ("IntersectionObserver" in window && !isSafari) {
         window.addEventListener("resize", scroll);
         window.addEventListener("orientationChange", scroll);
         //on vire tout en cas de resize car rootHeight change ... et on recommence
@@ -134,20 +136,26 @@ function scroll() {
 
         imageObserver = new IntersectionObserver(function(entries, observer) {
                 entries.forEach(function(entry) {
-                        if (entry.isIntersecting) {
+                        // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
+                        if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
                             let art = entry.target;
-                            read(art.id);
-                            cptReadArticle++;
-                            imageObserver.unobserve(art);
-                            if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
-                                loadinprogress = 1;
-                                more();
+                            // Vérifier que l'article n'est pas déjà lu
+                            if (d[art.id] && d[art.id].r !== 0) {
+                                // Marquer immédiatement comme traité avant d'appeler read()
+                                imageObserver.unobserve(art);
+                                read(art.id);
+                                cptReadArticle++;
+                                if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
+                                    loadinprogress = 1;
+                                    more();
+                                }
                             }
                         }
                     });
             }, {
             root: DM,
-                    rootMargin: "1px 0px -"+rootHeight+"px 0px"
+                    rootMargin: "0px 0px -"+rootHeight+"px 0px",
+                    threshold: [0, 0.01, 1]
                     });
 
         unreadArticles.forEach(function(art) {
@@ -292,7 +300,10 @@ function updateStyle(elem) {
   shadow.querySelector("style").textContent = `
     .article-content {
   text-align: justify;
-  padding: 10px;
+  padding: 10px 10px 0 10px !important;
+}
+  .article-content > :last-child {
+  margin-bottom: 0 !important;
 }
   .spinner {
   margin: 20px auto;
@@ -751,16 +762,17 @@ function unread(k, v=0) {
 function read(k, v=0) {
   if (search_active == 1) return;
   //obligé sinon 2 read après un verif() ou un unread-read à la suite ... mais why ?
-if (d[k].readblock == 1) return;
+  if (d[k].readblock == 1) return;
   if (d[k].r === 0) return;
   if (unr === 1) {
     unr = 0;
     return;
   }
-  $(k).className = 'item0';
+  // Marquer immédiatement comme traité pour éviter les doubles appels
   d[k].r = 0;
+  $(k).className = 'item0';
   m[d[k].f].n--;
-myFetch('read.php', 'id='+k, 1);
+  myFetch('read.php', 'id='+k, 1);
   if (m[d[k].f].n > 0) {
      $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
       light('f' + d[k].f);

@@ -12,14 +12,18 @@ include('/www/conf.php');
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <script rel="preload" src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script>
-<script src="favico.min.js"></script>
-<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" type="text/css" href="common.css?v=<?php echo time(); ?>" media="screen" />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css?v=<?php echo time(); ?>" media="screen" title="Normal" />
 <title>Gheop Reader</title>
+<script src="https://reader.gheop.com/lib.js?v=<?php echo time(); ?>" type="text/javascript" defer></script>
+<script src="favico.min.js" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
 
@@ -44,14 +48,14 @@ if(!isset($_SESSION['pseudo'])) {
   <a id='theme' href="" onclick="changeTheme();return false;"></a>
 <?php
 if(!isset($_SESSION['pseudo'])) {
-  echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="//gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
+  echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="http://www.gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
 else {
   echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';
 
 }
 ?>
 </div>
-    <h1 id="g"><a href="//reader.gheop.com/"><span id="g1">gheop </span><span id="g2">reader</span>
+    <h1 id="g"><a href="//reader.gheop.com/" title="ƒlux∑"><span id="g1">ƒlux∑</span><span id="g2"><!-- reader --></span>
 <?php  if(isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == "SiB") {
   	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
     $firstLine = $stringfromfile[0];
