@@ -16,8 +16,8 @@ class FeedUpdater
      */
     public static function completeLink(?string $link, string $linkmaster): ?string
     {
-        if (!isset($link) || !preg_match('/^https?:\/\//', $link)) {
-            if (isset($link) && substr($link, 0, 1) == '/') {
+        if (!isset($link) || empty($link) || !preg_match('/^https?:\/\//', $link)) {
+            if (isset($link) && !empty($link) && substr($link, 0, 1) == '/') {
                 $pu = parse_url($linkmaster);
                 if (!isset($pu['scheme'])) {
                     $pu['scheme'] = 'https';
@@ -27,7 +27,7 @@ class FeedUpdater
                 } else {
                     $link = $pu['scheme'] . '://' . $pu['host'] . $link;
                 }
-            } elseif (isset($link)) {
+            } elseif (isset($link) && !empty(trim($link))) {
                 $link = $linkmaster . '/' . $link;
             }
         }
