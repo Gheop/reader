@@ -1,74 +1,71 @@
 <?php
 include('/www/conf.php');
-if (file_exists('opml.xml')) $opml = simplexml_load_file('opml.xml');
-else exit('Failed to open opml.xml.');
-  $flag = 0;
+if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 
-foreach($opml->body->outline as $t) {
-  $title = $link = $description = $language = ''; 
-  $rsslink = $t['xmlUrl'][0];
-  $link = $t['htmlUrl'][0];
-  echo "<b><u>$rsslink</b></u> : <br />";
-  if($rss = @simplexml_load_file($rsslink)) {
-    
-    //title
-    if($rss->channel->title) {
-      $title = $rss->channel->title;
+// RÃ©cupÃ©rer tous les flux de l'utilisateur
+$r = $_SESSION['mysqli']->query('SELECT F.id, F.title, F.description, F.rss, F.link
+    FROM reader_flux F, reader_user_flux UF
+    WHERE UF.id_user='.$_SESSION['user_id'].'
+    AND UF.id_flux=F.id
+    ORDER BY F.title ASC') or die($_SESSION['mysqli']->error);
+
+// CrÃ©er le document OPML
+$opml = new DOMDocument('1.0', 'UTF-8');
+$opml->formatOutput = true;
+
+// Ã‰lÃ©ment racine
+$root = $opml->createElement('opml');
+$root->setAttribute('version', '2.0');
+$opml->appendChild($root);
+
+// Head
+$head = $opml->createElement('head');
+$root->appendChild($head);
+
+$title = $opml->createElement('title', 'Gheop Reader Feeds Export');
+$head->appendChild($title);
+
+$dateCreated = $opml->createElement('dateCreated', date('r'));
+$head->appendChild($dateCreated);
+
+// Body
+$body = $opml->createElement('body');
+$root->appendChild($body);
+
+// Ajouter chaque flux
+while($flux = $r->fetch_assoc()) {
+    // Valider et nettoyer les URLs
+    $xmlUrl = trim($flux['rss']);
+    $htmlUrl = trim($flux['link']);
+
+    // VÃ©rifier que les URLs sont valides (commencent par http:// ou https://)
+    if(!preg_match('/^https?:\/\/.+/', $xmlUrl)) {
+        continue; // Ignorer les flux avec URLs invalides
     }
-    elseif($rss->title) {
-      $title = $rss->title;
+
+    // Si htmlUrl est invalide ou vide, utiliser xmlUrl
+    if(empty($htmlUrl) || !preg_match('/^https?:\/\/.+/', $htmlUrl)) {
+        $htmlUrl = $xmlUrl;
     }
-    
-    //link
-    if($rss->channel->link) {
-      $link = $rss->channel->link;
-	}
-    elseif($rss->link[0]['href']) {
-      $link = $rss->link[0]['href'];
+
+    $outline = $opml->createElement('outline');
+    $outline->setAttribute('type', 'rss');
+    $outline->setAttribute('text', htmlspecialchars($flux['title'], ENT_XML1, 'UTF-8'));
+    $outline->setAttribute('title', htmlspecialchars($flux['title'], ENT_XML1, 'UTF-8'));
+    $outline->setAttribute('xmlUrl', htmlspecialchars($xmlUrl, ENT_XML1, 'UTF-8'));
+    $outline->setAttribute('htmlUrl', htmlspecialchars($htmlUrl, ENT_XML1, 'UTF-8'));
+    if(!empty($flux['description'])) {
+        $outline->setAttribute('description', htmlspecialchars($flux['description'], ENT_XML1, 'UTF-8'));
     }
-    
-    //description/subtitle
-    if($rss->channel->description)
-      $description = $rss->channel->description;
-    elseif($rss->subtitle)
-      $description = $rss->subtitle;
-    
-    //language
-    if($rss->channel->language)
-      $language = $rss->channel->language;
-    elseif($rss->language) 
-      $language = $rss->language;
-    
-    
-    if(isset($title) && $title) { echo "$title|$description|$language|$rsslink|$link<br />";}
-    
-    if($title && $rsslink && $link) {
-      $v = $mysqli->query('select id from reader_flux where rss="'.$rsslink.'";') or die ($mysqli->error);
-      if($v->num_rows == 0) {
-	print "pas trouvé !!!!<br />";
-        $t = $mysqli->query('insert into reader_flux (title, description, language, rss, link) values ("'.$mysqli->real_escape_string(trim($title)).'","'.$mysqli->real_escape_string(trim($description)).'","'.$language.'","'.$rsslink.'","'.$link.'")') or die($mysqli->error);
-	print "Ajouté.<br />";
-	if($mysqli->insert_id) $i = $mysqli->query('insert into reader_user_flux (id_user, id_flux) values (1,"'.$mysqli->insert_id.'");') or die ($mysqli->error);
-	else echo "error pour récupérer l'id<br />";
-	
-	
-      }
-      else { 
-	echo "ce flux existe déjà<br />";
-      }
-    }
-    else {
-      echo 'données manquantes pour insérer<br />';
-      echo "<br /><br /><pre>";
-      print_r($rss);
-      echo "</pre>";
-    }
-    echo "<br />";
-  }
-  else
-    {
-      var_dump($rss);
-      echo 'Ne peut ouvrir ce flux.<br />';
-    }
+    $body->appendChild($outline);
 }
 
+// Envoyer les en-tÃªtes pour le tÃ©lÃ©chargement
+header('Content-Type: application/xml; charset=utf-8');
+header('Content-Disposition: attachment; filename="gheop-reader-feeds-' . date('Y-m-d') . '.opml"');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+
+// GÃ©nÃ©rer et envoyer le XML
+echo $opml->saveXML();
+?>

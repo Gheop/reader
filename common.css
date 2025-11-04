@@ -186,6 +186,18 @@ li > input {
   font-size: 1rem;
 }
 
+/* Icône d'export OPML */
+#export {
+  font-size: 0; /* Cacher le texte inséré par le serveur */
+}
+
+#export:before {
+  content: "\f56d";  /* file-export - exporter */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1rem;
+}
+
 /* Icône de déconnexion */
 #disconnect {
   font-size: 0; /* Cacher le texte inséré par le serveur */
