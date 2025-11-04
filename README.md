@@ -1,7 +1,7 @@
 # Gheop Reader
 
 [![CI Status](https://github.com/Gheop/reader/workflows/CI/badge.svg)](https://github.com/Gheop/reader/actions)
-[![codecov](https://codecov.io/gh/Gheop/reader/branch/dev/graph/badge.svg)](https://codecov.io/gh/Gheop/reader)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Gheop/reader/ci.yml?branch=dev&label=tests)](https://github.com/Gheop/reader/actions)
 [![Valid OPML](https://validator.w3.org/feed/images/valid-opml.gif)](https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Freader.gheop.com%2Fopml.opml)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://www.php.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -157,12 +157,13 @@ composer phpcbf
 
 This project uses:
 - **PHPUnit** for unit testing
-- **PHPStan** for static analysis
+- **PHPStan** for static analysis (level 5)
 - **PHP_CodeSniffer** for code style (PSR-12)
 - **ESLint** for JavaScript linting
-- **Codecov** for code coverage tracking
 
 All pushes and pull requests are automatically tested via GitHub Actions CI/CD pipeline.
+
+> **Note**: This is a legacy PHP application originally built without a testing framework. The test suite is actively being expanded. Current tests focus on OPML export validation and utility functions.
 
 ## Contributing
 
