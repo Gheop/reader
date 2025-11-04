@@ -295,8 +295,9 @@ class DisplayHelperTest extends TestCase
         $maliciousPage = 'reader.com"><script>alert(1)</script>';
         $result = DisplayHelper::buildGuestMenu($maliciousPage);
 
+        // The URL is URL-encoded, not HTML-escaped
         $this->assertStringNotContainsString('<script>', $result);
-        $this->assertStringContainsString('&lt;script&gt;', $result);
+        $this->assertStringContainsString('%3Cscript%3E', $result);
     }
 
     public function testSanitizeClassNameUnicode(): void

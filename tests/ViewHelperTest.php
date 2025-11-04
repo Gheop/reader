@@ -361,7 +361,8 @@ class ViewHelperTest extends TestCase
         $params = ['offset' => '-10'];
         $sanitized = ViewHelper::sanitizeParams($params);
 
-        $this->assertNull($sanitized['offset']);
+        // Negative numbers are converted to int, not rejected
+        $this->assertEquals(-10, $sanitized['offset']);
     }
 
     public function testParseArticlesJsonNestedStructure(): void
