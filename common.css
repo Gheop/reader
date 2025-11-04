@@ -132,6 +132,11 @@
    ======================================== */
 ul {
   list-style: none;
+  font-family: var(--font-family-main), var(--font-family-icon);
+}
+
+li {
+  font-family: var(--font-family-main), var(--font-family-icon);
 }
 
 li > input {
@@ -367,6 +372,26 @@ article-content {
 }
 
 /* Icônes avant */
+.website {
+  font-family: var(--font-family-main), var(--font-family-icon);
+  position: relative;
+}
+.website:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--color-text-dark);
+  color: var(--color-text-white);
+  padding: 5px 10px;
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+  font-family: var(--font-family-main), var(--font-family-icon);
+  font-size: 0.9rem;
+  z-index: 1000;
+  pointer-events: none;
+  margin-top: 5px;
+}
 .website:before { content: "From "; }
 .nickname:before { content: " by "; }
 .item1 .lu:before { content: "\f070"; }
@@ -401,6 +426,7 @@ time {
   font-size: 0.8em;
   padding-left: var(--spacing-md);
   font-style: normal;
+  font-family: var(--font-family-main), var(--font-family-icon);
 }
 
 p {
@@ -530,6 +556,29 @@ input, textarea, button {
   border-radius: var(--spacing-xs);
   background: var(--color-text-dark);
   color: var(--color-text-white);
+}
+
+/* Tooltip personnalisé avec Font Awesome */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text-dark);
+  color: var(--color-text-white);
+  padding: 5px 10px;
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+  font-family: var(--font-family-main), var(--font-family-icon);
+  font-size: 0.9rem;
+  z-index: 1000;
+  pointer-events: none;
+  margin-bottom: 5px;
 }
 
 /* Footer */
