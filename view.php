@@ -6,7 +6,9 @@
  * Security improvements:
  * - Prepared statements for user_id and feed_id (prevents SQL injection)
  * - Validated LIMIT as string after (int) casting (compatible with old MySQL)
- * - Native json_encode() instead of SQL CONCAT
+ *
+ * Note: JSON is built manually (not with json_encode) because descriptions in DB
+ * are already escaped for JSON by clean_text.php (\" for quotes, \\ for backslashes)
  */
 
 header("Content-Type: application/json; charset=UTF-8");
@@ -99,24 +101,54 @@ if (!$result) {
     exit;
 }
 
-// Build response array
-$articles = [];
+// Build JSON manually (like MySQL CONCAT did in original)
+// Descriptions in DB are already escaped for JSON by clean_text.php
+$json = '{';
+$first = true;
+
 while ($row = $result->fetch_assoc()) {
-    $articles[(string)$row['id']] = [
-        't' => $row['title'] ?? '',
-        'p' => $row['pubdate'] ?? '',
-        'd' => $row['description'] ?? '',
-        'l' => $row['link'] ?? '',
-        'a' => $row['author'] ?? '',
-        'f' => $row['id_flux'] ?? '',
-        'n' => $row['feed_title'] ?? '',
-        'e' => $row['feed_description'] ?? '',
-        'o' => $row['feed_link'] ?? ''
-    ];
+    if (!$first) $json .= ',';
+    $first = false;
+
+    // Article ID as key
+    $json .= '"' . $row['id'] . '":{';
+
+    // Title (needs escaping)
+    $json .= '"t":"' . str_replace(['"', '\\'], ['\"', '\\\\'], $row['title'] ?? '') . '"';
+
+    // Pubdate
+    $json .= ',"p":"' . ($row['pubdate'] ?? '') . '"';
+
+    // Author (conditional, needs escaping)
+    if (!empty($row['author'])) {
+        $json .= ',"a":"' . str_replace(['"', '\\'], ['\"', '\\\\'], $row['author']) . '"';
+    }
+
+    // Description (already escaped in DB by clean_text.php)
+    $json .= ',"d":"' . ($row['description'] ?? '') . '"';
+
+    // Link
+    $json .= ',"l":"' . ($row['link'] ?? '') . '"';
+
+    // Feed link
+    $json .= ',"o":"' . ($row['feed_link'] ?? '') . '"';
+
+    // Feed ID
+    $json .= ',"f":"' . ($row['id_flux'] ?? '') . '"';
+
+    // Feed title (needs escaping)
+    $json .= ',"n":"' . str_replace(['"', '\\'], ['\"', '\\\\'], $row['feed_title'] ?? '') . '"';
+
+    // Feed description (needs escaping)
+    $json .= ',"e":"' . str_replace(['"', '\\'], ['\"', '\\\\'], $row['feed_description'] ?? '') . '"';
+
+    $json .= '}';
 }
+
+$json .= '}';
 
 $stmt->close();
 
 // Return JSON response
-echo json_encode($articles, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+echo $json;
 ?>
