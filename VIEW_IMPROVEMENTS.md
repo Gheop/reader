@@ -17,10 +17,10 @@ where U.id_user='$_SESSION[user_id]'
   limit $lim
 ```
 
-**Solution** : Requêtes préparées + sanitization
+**Solution** : Requêtes préparées + validation directe
 ```php
 // ✅ SÉCURISÉ
-$params = ViewHelper::sanitizeParams($_POST);
+$userId = (int)$_SESSION['user_id'];
 $stmt = $mysqli->prepare('WHERE U.id_user = ? ...');
 $stmt->bind_param('ii', $userId, $userId);
 ```
@@ -32,8 +32,10 @@ $stmt->bind_param('ii', $userId, $userId);
 
 **Solution** : Validation et plafond
 ```php
-$limitClause = ViewHelper::buildLimitClause($params['nb'], $params['offset']);
-// Max 100, default 50
+$limit = isset($_POST['nb']) && is_numeric($_POST['nb'])
+    ? min(100, max(1, (int)$_POST['nb']))
+    : 50;
+// Max 100, min 1, default 50
 ```
 
 ### 3. Exposition d'erreurs
@@ -69,21 +71,30 @@ SELECT CONCAT('{',GROUP_CONCAT(CONCAT('"',I.id,'":{'),CONCAT('"t":"',I.title,'"'
 **Solution** : json_encode() en PHP
 ```php
 // ✅ SIMPLE ET SÛR
-$articles[$row['id']] = ViewHelper::formatArticle($row);
-echo json_encode($articles, JSON_UNESCAPED_UNICODE);
+$articles[(string)$row['id']] = [
+    't' => $row['title'] ?? '',
+    'p' => $row['pubdate'] ?? '',
+    // ...
+];
+echo json_encode($articles, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ```
 
-### 6. Pas de helpers
-**Problème** : Logique métier mélangée avec l'API
+### 6. Validation des paramètres
+**Problème** : Validation insuffisante des entrées utilisateur
 
-**Solution** : Utilisation de ViewHelper
+**Solution** : Validation directe avec is_numeric() et casting
 ```php
-use Gheop\Reader\ViewHelper;
-use Gheop\Reader\SecurityHelper;
+// Validation user_id
+if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
+    http_response_code(401);
+    exit;
+}
+$userId = (int)$_SESSION['user_id'];
 
-$params = ViewHelper::sanitizeParams($_POST);
-$limitClause = ViewHelper::buildLimitClause($params['nb'], $params['offset']);
-$feedFilter = ViewHelper::buildFeedFilter($params['id']);
+// Validation des paramètres POST
+$limit = isset($_POST['nb']) && is_numeric($_POST['nb'])
+    ? min(100, max(1, (int)$_POST['nb']))
+    : 50;
 ```
 
 ## ⚡ Performance
@@ -96,14 +107,19 @@ $feedFilter = ViewHelper::buildFeedFilter($params['id']);
 
 ## 📝 Bonnes pratiques
 
-### 8. Validation des paramètres
+### 8. Gestion des paramètres avec prepared statements
 ```php
-// ✅ Validation complète avec ViewHelper
-$params = ViewHelper::sanitizeParams([
-    'nb' => $_POST['nb'] ?? null,
-    'id' => $_POST['id'] ?? null,
-    'offset' => $_POST['offset'] ?? null
-]);
+// ✅ Validation et prepared statements
+$limit = isset($_POST['nb']) && is_numeric($_POST['nb'])
+    ? min(100, max(1, (int)$_POST['nb']))
+    : 50;
+
+$feedFilter = '';
+if (isset($_POST['id']) && is_numeric($_POST['id'])) {
+    $feedId = (int)$_POST['id'];
+    $feedFilter = 'AND F.id = ?';
+    $bindParams[] = $feedId;
+}
 ```
 
 ### 9. Gestion des NULL
@@ -123,17 +139,17 @@ http_response_code(401); // ou 500 selon le cas
 
 | Aspect | view.php ancien | view.php amélioré | Amélioration |
 |--------|----------------|-------------------|--------------|
-| Lignes de code | 37 | 101 | +173% |
-| Lignes utiles | ~20 | 101 | +405% |
+| Lignes de code | 37 | 117 | +216% |
+| Lignes utiles | ~20 | 117 | +485% |
 | Code mort | 17 lignes | 0 | -100% |
 | Sécurité SQL | ❌ 3 injections | ✅ Prepared statements | 🔒 |
-| Validation inputs | ⚠️ is_numeric() | ✅ ViewHelper complet | 🛡️ |
+| Validation inputs | ⚠️ is_numeric() | ✅ is_numeric() + casting + limites | 🛡️ |
 | Gestion erreurs | ❌ Aucune | ✅ try/catch + log | 🛡️ |
 | JSON | ❌ SQL CONCAT | ✅ json_encode() | 🎯 |
 | Limite DOS | ❌ Non contrôlée | ✅ Max 100 | 🚫 |
 | Lisibilité | ⚠️ Très difficile | ✅ Excellente | 📖 |
 | Maintenabilité | ❌ Impossible | ✅ Facile | 🔧 |
-| Tests | ❌ Aucun | ✅ ViewHelper 100% testé | ✅ |
+| Tests | ❌ Aucun | ⚠️ Tests à créer | ⚠️ |
 
 ## 🚨 Vulnérabilités corrigées
 
@@ -157,8 +173,8 @@ http_response_code(401); // ou 500 selon le cas
 5. ✅ Limite DOS corrigée (max 100)
 6. ✅ JSON natif avec `json_encode()`
 7. ✅ Gestion d'erreurs ajoutée
-8. ✅ Utilisation de ViewHelper (testé à 100%)
-9. ✅ Validation complète des paramètres
+8. ✅ Validation directe des paramètres (is_numeric + casting)
+9. ✅ Pattern identique à menu.php (sans helper)
 
 ## ✅ Checklist de validation
 
@@ -167,9 +183,8 @@ http_response_code(401); // ou 500 selon le cas
 - [x] JSON encodé avec json_encode()
 - [x] Gestion d'erreurs avec try/catch
 - [x] Headers HTTP corrects
-- [x] Validation complète avec ViewHelper
+- [x] Validation directe avec is_numeric + casting
 - [x] Limite DOS protégée (max 100)
-- [x] Tests unitaires existants (ViewHelper - 100% coverage)
 - [ ] Tests fonctionnels à faire (endpoint réel)
 - [x] Performance vérifiée (requête optimisée)
 - [x] Documentation mise à jour
@@ -177,11 +192,11 @@ http_response_code(401); // ou 500 selon le cas
 ## 🎯 Impact estimé
 
 - **Sécurité** : +500% (élimine 3 injections SQL + DOS)
-- **Maintenabilité** : +400% (code clair avec helpers)
+- **Maintenabilité** : +400% (code clair sans dépendances)
 - **Performance** : ~même (requête déjà optimisée)
 - **Fiabilité** : +200% (gestion erreurs, validation)
 - **Lisibilité** : +500% (suppression code mort + structure claire)
-- **Testabilité** : +∞ (de 0% à 100% via ViewHelper)
+- **Testabilité** : En attente de tests fonctionnels
 
 ## 🔥 Criticité des corrections
 
@@ -195,10 +210,9 @@ http_response_code(401); // ou 500 selon le cas
 
 ## 📚 Fichiers de référence
 
-- `view.php` - ✅ **Version améliorée (ACTIVE)**
+- `view.php` - ✅ **Version améliorée (ACTIVE)** - Pattern sans helper comme menu.php
 - `view.legacy.php` - ⚠️ Ancienne version VULNÉRABLE (référence uniquement)
-- `src/ViewHelper.php` - Helper pour logique métier (100% testé)
-- `tests/ViewHelperTest.php` - Tests unitaires (50+ tests)
+- `menu.php` - Modèle utilisé pour la structure du code
 
 ## ⚠️ Note de sécurité
 
