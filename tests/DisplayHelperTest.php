@@ -235,4 +235,84 @@ class DisplayHelperTest extends TestCase
         $this->assertStringContainsString('name="description"', $result);
         $this->assertStringContainsString('RSS', $result);
     }
+
+    public function testGetBranchDisplayMultipleBranches(): void
+    {
+        file_put_contents($this->testGitHeadPath, "ref: refs/heads/feature/long-branch-name\n");
+
+        $result = DisplayHelper::getBranchDisplay($this->testGitHeadPath);
+        $this->assertEquals('feature/long-branch-name', $result);
+    }
+
+    public function testGetBranchDisplayVersionNotFound(): void
+    {
+        file_put_contents($this->testGitHeadPath, "ref: refs/heads/dev\n");
+
+        $result = DisplayHelper::getBranchDisplay($this->testGitHeadPath, '/nonexistent/version');
+        $this->assertEquals('dev', $result);
+    }
+
+    public function testShouldDisplayBranchEdgeCases(): void
+    {
+        // Branches starting with 'master' should not be displayed
+        $this->assertFalse(DisplayHelper::shouldDisplayBranch('master'));
+        $this->assertFalse(DisplayHelper::shouldDisplayBranch('master-backup'));
+
+        // Other branches should be displayed
+        $this->assertTrue(DisplayHelper::shouldDisplayBranch('dev-master'));
+        $this->assertTrue(DisplayHelper::shouldDisplayBranch('my-master'));
+    }
+
+    public function testFormatBranchBadgeWithSpecialChars(): void
+    {
+        $result = DisplayHelper::formatBranchBadge('dev-1.0.0 <test>');
+
+        $this->assertStringContainsString('&lt;test&gt;', $result);
+        $this->assertStringNotContainsString('<test>', $result);
+    }
+
+    public function testBuildNavigationMenuStructure(): void
+    {
+        $result = DisplayHelper::buildNavigationMenu();
+
+        $this->assertStringContainsString('view(\'all\')', $result);
+        $this->assertStringContainsString('addflux()', $result);
+        $this->assertStringContainsString('up()', $result);
+        $this->assertStringContainsString('event.stopPropagation()', $result);
+    }
+
+    public function testBuildUserMenuLongPseudo(): void
+    {
+        $longPseudo = str_repeat('a', 100);
+        $result = DisplayHelper::buildUserMenu($longPseudo);
+
+        $this->assertStringContainsString($longPseudo, $result);
+        $this->assertStringContainsString('?a=destroy', $result);
+    }
+
+    public function testBuildGuestMenuXSSProtection(): void
+    {
+        $maliciousPage = 'reader.com"><script>alert(1)</script>';
+        $result = DisplayHelper::buildGuestMenu($maliciousPage);
+
+        $this->assertStringNotContainsString('<script>', $result);
+        $this->assertStringContainsString('&lt;script&gt;', $result);
+    }
+
+    public function testSanitizeClassNameUnicode(): void
+    {
+        $result = DisplayHelper::sanitizeClassName('test-éàç_123');
+        // Unicode characters should be removed
+        $this->assertStringNotContainsString('é', $result);
+        $this->assertStringContainsString('test-', $result);
+    }
+
+    public function testBuildContentStructureComplete(): void
+    {
+        $result = DisplayHelper::buildContentStructure();
+
+        $this->assertStringStartsWith('  <div', $result);
+        $this->assertStringEndsWith('</footer>', $result);
+        $this->assertStringContainsString('<main>', $result);
+    }
 }

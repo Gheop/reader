@@ -226,4 +226,163 @@ class SecurityHelperTest extends TestCase
             SecurityHelper::sanitizeRedirectUrl('https://evil.com', '/home')
         );
     }
+
+    public function testEscapeSqlEdgeCases(): void
+    {
+        // Empty string
+        $this->assertEquals('', SecurityHelper::escapeSql(''));
+
+        // Only quotes
+        $this->assertStringContainsString('\\', SecurityHelper::escapeSql("'''"));
+
+        // Mixed content
+        $dangerous = "It's a \"test\" with \\backslash";
+        $escaped = SecurityHelper::escapeSql($dangerous);
+        $this->assertStringContainsString("\\'", $escaped);
+    }
+
+    public function testIsValidUserIdEdgeCases(): void
+    {
+        // Large number
+        $this->assertTrue(SecurityHelper::isValidUserId(999999));
+
+        // Numeric string
+        $this->assertTrue(SecurityHelper::isValidUserId('123'));
+
+        // Float
+        $this->assertFalse(SecurityHelper::isValidUserId(1.5));
+
+        // Boolean
+        $this->assertFalse(SecurityHelper::isValidUserId(true));
+
+        // Array
+        $this->assertFalse(SecurityHelper::isValidUserId([]));
+    }
+
+    public function testSanitizeHtmlEdgeCases(): void
+    {
+        // Empty string
+        $this->assertEquals('', SecurityHelper::sanitizeHtml(''));
+
+        // Only allowed tags
+        $html = '<p>Test</p>';
+        $cleaned = SecurityHelper::sanitizeHtml($html, ['<p>']);
+        $this->assertStringContainsString('<p>', $cleaned);
+
+        // Nested scripts
+        $html = '<div><script>alert(1)</script><p>Safe</p></div>';
+        $cleaned = SecurityHelper::sanitizeHtml($html);
+        $this->assertStringNotContainsString('script', $cleaned);
+    }
+
+    public function testGenerateTokenEdgeCases(): void
+    {
+        // Minimum length
+        $token = SecurityHelper::generateToken(1);
+        $this->assertEquals(1, strlen($token));
+
+        // Very long token
+        $token = SecurityHelper::generateToken(256);
+        $this->assertEquals(256, strlen($token));
+
+        // Uniqueness test
+        $tokens = [];
+        for ($i = 0; $i < 100; $i++) {
+            $tokens[] = SecurityHelper::generateToken();
+        }
+        $unique = array_unique($tokens);
+        $this->assertCount(100, $unique);
+    }
+
+    public function testIsValidEmailEdgeCases(): void
+    {
+        // International domain
+        $this->assertTrue(SecurityHelper::isValidEmail('user@example.co.uk'));
+
+        // Plus addressing
+        $this->assertTrue(SecurityHelper::isValidEmail('user+filter@example.com'));
+
+        // Subdomain
+        $this->assertTrue(SecurityHelper::isValidEmail('user@mail.example.com'));
+
+        // Numbers in local part
+        $this->assertTrue(SecurityHelper::isValidEmail('user123@example.com'));
+
+        // Dots in local part
+        $this->assertTrue(SecurityHelper::isValidEmail('first.last@example.com'));
+    }
+
+    public function testSanitizeFilenameEdgeCases(): void
+    {
+        // Empty string
+        $this->assertEquals('', SecurityHelper::sanitizeFilename(''));
+
+        // Only special chars
+        $this->assertEquals('', SecurityHelper::sanitizeFilename('!@#$%^&*()'));
+
+        // Very long filename
+        $long = str_repeat('a', 300) . '.txt';
+        $result = SecurityHelper::sanitizeFilename($long);
+        $this->assertIsString($result);
+
+        // Multiple extensions
+        $this->assertStringContainsString('.tar.gz', SecurityHelper::sanitizeFilename('file.tar.gz'));
+
+        // Unicode characters
+        $this->assertIsString(SecurityHelper::sanitizeFilename('fichier_éàç.txt'));
+    }
+
+    public function testIsValidDateEdgeCases(): void
+    {
+        // Leap year
+        $this->assertTrue(SecurityHelper::isValidDate('2024-02-29'));
+
+        // Non-leap year
+        $this->assertFalse(SecurityHelper::isValidDate('2025-02-29'));
+
+        // Edge of month
+        $this->assertTrue(SecurityHelper::isValidDate('2025-01-31'));
+
+        // Invalid day
+        $this->assertFalse(SecurityHelper::isValidDate('2025-04-31'));
+
+        // Year boundaries
+        $this->assertTrue(SecurityHelper::isValidDate('1900-01-01'));
+        $this->assertTrue(SecurityHelper::isValidDate('2099-12-31'));
+    }
+
+    public function testContainsSqlInjectionEdgeCases(): void
+    {
+        // Case variations
+        $this->assertTrue(SecurityHelper::containsSqlInjection('SELECT * FROM users'));
+        $this->assertTrue(SecurityHelper::containsSqlInjection('select * from users'));
+
+        // Multiple patterns
+        $this->assertTrue(SecurityHelper::containsSqlInjection("1' OR '1'='1' UNION SELECT"));
+
+        // Encoded attempts
+        $this->assertTrue(SecurityHelper::containsSqlInjection('admin\' --'));
+
+        // Safe SQL-like strings
+        $this->assertFalse(SecurityHelper::containsSqlInjection('My favorite color is union blue'));
+    }
+
+    public function testSanitizeIntEdgeCases(): void
+    {
+        // Negative numbers
+        $this->assertEquals(-42, SecurityHelper::sanitizeInt(-42));
+        $this->assertEquals(-42, SecurityHelper::sanitizeInt('-42'));
+
+        // Float strings
+        $this->assertEquals(42, SecurityHelper::sanitizeInt('42.9'));
+
+        // Leading zeros
+        $this->assertEquals(42, SecurityHelper::sanitizeInt('0042'));
+
+        // Hexadecimal
+        $this->assertEquals(0, SecurityHelper::sanitizeInt('0xFF'));
+
+        // Very large numbers
+        $this->assertEquals(999999999, SecurityHelper::sanitizeInt('999999999'));
+    }
 }
