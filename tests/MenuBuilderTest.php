@@ -240,4 +240,112 @@ class MenuBuilderTest extends TestCase
         $count = MenuBuilder::countUnreadItems($feeds);
         $this->assertEquals(15, $count);
     }
+
+    public function testBuildMenuJsonWithSpecialCharacters(): void
+    {
+        $feedData = ['\"1\":{\"t\":\"Test & <Special>\",\"n\":5}'];
+        $json = MenuBuilder::buildMenuJson($feedData);
+
+        $this->assertStringContainsString('Test & <Special>', $json);
+    }
+
+    public function testParseMenuJsonLargeData(): void
+    {
+        $data = [];
+        for ($i = 1; $i <= 100; $i++) {
+            $data["\"$i\""] = "{\"t\":\"Feed $i\",\"n\":$i}";
+        }
+
+        $json = MenuBuilder::buildMenuJson($data);
+        $parsed = MenuBuilder::parseMenuJson($json);
+
+        $this->assertIsArray($parsed);
+        $this->assertCount(100, $parsed);
+    }
+
+    public function testGetUnreadFeedsWithZeros(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Feed1', 'n' => 0],
+            '2' => ['t' => 'Feed2', 'n' => 5],
+            '3' => ['t' => 'Feed3', 'n' => '0'], // String zero
+        ];
+
+        $unread = MenuBuilder::getUnreadFeeds($feeds);
+
+        $this->assertCount(1, $unread);
+        $this->assertArrayHasKey('2', $unread);
+    }
+
+    public function testSortFeedsByTitleEmptyTitles(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Zebra'],
+            '2' => ['t' => ''],
+            '3' => ['t' => 'Apple'],
+        ];
+
+        $sorted = MenuBuilder::sortFeedsByTitle($feeds);
+
+        $this->assertCount(3, $sorted);
+    }
+
+    public function testSortFeedsByUnreadEqualCounts(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Feed1', 'n' => 5],
+            '2' => ['t' => 'Feed2', 'n' => 5],
+            '3' => ['t' => 'Feed3', 'n' => 5],
+        ];
+
+        $sorted = MenuBuilder::sortFeedsByUnread($feeds);
+
+        $this->assertCount(3, $sorted);
+    }
+
+    public function testGetFeedByIdStringId(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Feed1', 'n' => 5],
+            '2' => ['t' => 'Feed2', 'n' => 10],
+        ];
+
+        $feed = MenuBuilder::getFeedById($feeds, 1);
+
+        $this->assertNotNull($feed);
+        $this->assertEquals('Feed1', $feed['t']);
+    }
+
+    public function testIsValidFeedDataNullValues(): void
+    {
+        $invalid = ['t' => null, 'n' => 5];
+        $this->assertFalse(MenuBuilder::isValidFeedData($invalid));
+
+        $invalid2 = ['t' => 'Title', 'n' => null];
+        $this->assertFalse(MenuBuilder::isValidFeedData($invalid2));
+    }
+
+    public function testCountUnreadItemsNegativeNumbers(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Feed1', 'n' => -5],
+            '2' => ['t' => 'Feed2', 'n' => 10],
+        ];
+
+        $count = MenuBuilder::countUnreadItems($feeds);
+        // Negative numbers should still be counted
+        $this->assertEquals(5, $count);
+    }
+
+    public function testSortFeedsByTitleUnicode(): void
+    {
+        $feeds = [
+            '1' => ['t' => 'Ñandú'],
+            '2' => ['t' => 'Álbum'],
+            '3' => ['t' => 'Épico'],
+        ];
+
+        $sorted = MenuBuilder::sortFeedsByTitle($feeds);
+        $this->assertCount(3, $sorted);
+    }
 }
