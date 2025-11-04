@@ -310,4 +310,157 @@ class ViewHelperTest extends TestCase
 
         $this->assertLessThanOrEqual(501, mb_strlen($truncated));
     }
+
+    public function testBuildLimitClauseZero(): void
+    {
+        $limit = ViewHelper::buildLimitClause(0);
+        $this->assertEquals('50', $limit);
+    }
+
+    public function testBuildLimitClauseFloat(): void
+    {
+        $limit = ViewHelper::buildLimitClause(25.5);
+        $this->assertEquals('25', $limit);
+    }
+
+    public function testBuildLimitClauseLargeOffset(): void
+    {
+        $limit = ViewHelper::buildLimitClause(10, 1000);
+        $this->assertEquals('1000, 10', $limit);
+    }
+
+    public function testBuildFeedFilterZero(): void
+    {
+        $filter = ViewHelper::buildFeedFilter(0);
+        $this->assertEquals('', $filter);
+    }
+
+    public function testBuildFeedFilterFloat(): void
+    {
+        $filter = ViewHelper::buildFeedFilter(5.5);
+        $this->assertEquals(' and F.id=5', $filter);
+    }
+
+    public function testSanitizeParamsAllValid(): void
+    {
+        $params = [
+            'nb' => '100',
+            'id' => '42',
+            'offset' => '50',
+        ];
+
+        $sanitized = ViewHelper::sanitizeParams($params);
+
+        $this->assertEquals(100, $sanitized['nb']);
+        $this->assertEquals(42, $sanitized['id']);
+        $this->assertEquals(50, $sanitized['offset']);
+    }
+
+    public function testSanitizeParamsNegativeOffset(): void
+    {
+        $params = ['offset' => '-10'];
+        $sanitized = ViewHelper::sanitizeParams($params);
+
+        $this->assertNull($sanitized['offset']);
+    }
+
+    public function testParseArticlesJsonNestedStructure(): void
+    {
+        $json = '{
+            "1": {
+                "t": "Article 1",
+                "p": "2025-01-01",
+                "f": 5,
+                "r": 1
+            }
+        }';
+        $parsed = ViewHelper::parseArticlesJson($json);
+
+        $this->assertIsArray($parsed);
+        $this->assertArrayHasKey('1', $parsed);
+        $this->assertEquals(5, $parsed['1']['f']);
+    }
+
+    public function testFormatArticleAllFields(): void
+    {
+        $input = [
+            't' => 'Title',
+            'p' => '2025-01-01',
+            'd' => 'Description',
+            'l' => 'https://example.com',
+            'a' => 'Author',
+            'f' => 10,
+            'n' => 'Feed Name',
+            'o' => 'https://feed.com',
+            'r' => 0,
+        ];
+
+        $formatted = ViewHelper::formatArticle($input);
+
+        $this->assertEquals('Title', $formatted['t']);
+        $this->assertEquals('2025-01-01', $formatted['p']);
+        $this->assertEquals('Description', $formatted['d']);
+        $this->assertEquals('https://example.com', $formatted['l']);
+        $this->assertEquals('Author', $formatted['a']);
+        $this->assertEquals(10, $formatted['f']);
+        $this->assertEquals('Feed Name', $formatted['n']);
+        $this->assertEquals('https://feed.com', $formatted['o']);
+        $this->assertEquals(0, $formatted['r']);
+    }
+
+    public function testFilterByReadStatusMixedStatuses(): void
+    {
+        $articles = [
+            '1' => ['t' => 'A1', 'r' => 1],
+            '2' => ['t' => 'A2', 'r' => 0],
+            '3' => ['t' => 'A3', 'r' => 1],
+            '4' => ['t' => 'A4', 'r' => '1'], // String "1"
+            '5' => ['t' => 'A5', 'r' => '0'], // String "0"
+        ];
+
+        $filtered = ViewHelper::filterByReadStatus($articles, true);
+
+        $this->assertCount(3, $filtered);
+        $this->assertArrayHasKey('1', $filtered);
+        $this->assertArrayHasKey('3', $filtered);
+        $this->assertArrayHasKey('4', $filtered);
+    }
+
+    public function testFilterByFeedMultipleMatches(): void
+    {
+        $articles = [
+            '1' => ['t' => 'A1', 'f' => 5],
+            '2' => ['t' => 'A2', 'f' => 5],
+            '3' => ['t' => 'A3', 'f' => 5],
+            '4' => ['t' => 'A4', 'f' => 10],
+        ];
+
+        $filtered = ViewHelper::filterByFeed($articles, 5);
+
+        $this->assertCount(3, $filtered);
+    }
+
+    public function testSortByDateWithSameDate(): void
+    {
+        $articles = [
+            '1' => ['p' => '2025-01-01 10:00:00', 't' => 'First'],
+            '2' => ['p' => '2025-01-01 10:00:00', 't' => 'Second'],
+        ];
+
+        $sorted = ViewHelper::sortByDate($articles, true);
+
+        $this->assertCount(2, $sorted);
+    }
+
+    public function testTruncateDescriptionEmptyString(): void
+    {
+        $result = ViewHelper::truncateDescription('');
+        $this->assertEquals('', $result);
+    }
+
+    public function testTruncateDescriptionZeroLength(): void
+    {
+        $result = ViewHelper::truncateDescription('test', 0);
+        $this->assertEquals('…', $result);
+    }
 }

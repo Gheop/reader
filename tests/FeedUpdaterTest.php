@@ -352,4 +352,122 @@ class FeedUpdaterTest extends TestCase
         $this->assertFalse(FeedUpdater::isValidItemLink(null));
         $this->assertFalse(FeedUpdater::isValidItemLink(''));
     }
+
+    public function testCompleteLinkEdgeCases(): void
+    {
+        // Empty link
+        $this->assertNull(FeedUpdater::completeLink('', 'https://example.com'));
+
+        // Link with only spaces
+        $link = '   ';
+        $result = FeedUpdater::completeLink($link, 'https://example.com');
+        $this->assertStringContainsString('example.com', $result);
+    }
+
+    public function testParseFeedDateEdgeCases(): void
+    {
+        // Empty string
+        $timestamp = FeedUpdater::parseFeedDate('');
+        $this->assertIsInt($timestamp);
+
+        // Timestamp in the far future
+        $futureDate = '2099-12-31 23:59:59';
+        $timestamp = FeedUpdater::parseFeedDate($futureDate);
+        $this->assertLessThanOrEqual(time(), $timestamp);
+
+        // Various date formats
+        $dates = [
+            'Mon, 01 Jan 2025 12:00:00 GMT',
+            '2025-01-01T12:00:00Z',
+            '01 Jan 2025 12:00:00 +0000',
+        ];
+
+        foreach ($dates as $date) {
+            $timestamp = FeedUpdater::parseFeedDate($date);
+            $this->assertIsInt($timestamp);
+            $this->assertGreaterThan(0, $timestamp);
+        }
+    }
+
+    public function testExtractItemContentEdgeCases(): void
+    {
+        // Item with all content fields
+        $xml = '<item>
+            <description>Description text</description>
+            <content>Content text</content>
+            <summary>Summary text</summary>
+        </item>';
+        $item = simplexml_load_string($xml);
+
+        $content = FeedUpdater::extractItemContent($item);
+        // Should prefer description
+        $this->assertEquals('Description text', $content);
+    }
+
+    public function testExtractItemContentImage(): void
+    {
+        $xml = '<item></item>';
+        $item = simplexml_load_string($xml);
+        $link = '//cdn.example.com/image.jpg';
+
+        $content = FeedUpdater::extractItemContent($item, $link);
+        $this->assertStringContainsString('<img src="//cdn.example.com/image.jpg"', $content);
+    }
+
+    public function testCleanXmlMultipleOperations(): void
+    {
+        $xml = '  <rss>
+            <image url="https://example.com/img.png?w=100&h=100" />
+            <item type="">
+                <enclosure url="https://example.com/file.jpg?size=large" />
+            </item>
+        </rss>  trailing';
+
+        $cleaned = FeedUpdater::cleanXml($xml);
+
+        $this->assertStringNotContainsString('trailing', $cleaned);
+        $this->assertStringNotContainsString('type=""', $cleaned);
+        $this->assertStringNotContainsString('?w=100', $cleaned);
+        $this->assertStringNotContainsString('?size=large', $cleaned);
+    }
+
+    public function testExtractFeedTitleEdgeCases(): void
+    {
+        // Empty feed
+        $xml = '<rss><channel></channel></rss>';
+        $rss = simplexml_load_string($xml);
+
+        $title = FeedUpdater::extractFeedTitle($rss);
+        $this->assertNull($title);
+    }
+
+    public function testExtractMasterLinkEdgeCases(): void
+    {
+        // No link
+        $xml = '<rss><channel></channel></rss>';
+        $rss = simplexml_load_string($xml);
+
+        $link = FeedUpdater::extractMasterLink($rss);
+        $this->assertNull($link);
+    }
+
+    public function testCompleteLinkWithPort(): void
+    {
+        $link = '/feed';
+        $result = FeedUpdater::completeLink($link, 'https://example.com:8080');
+
+        $this->assertStringContainsString('example.com', $result);
+        $this->assertStringContainsString('/feed', $result);
+    }
+
+    public function testCleanArticleLinkAll(): void
+    {
+        $link = 'https://example.com/article(test)"quote\'single\\slash';
+        $result = FeedUpdater::cleanArticleLink($link);
+
+        $this->assertStringNotContainsString('(', $result);
+        $this->assertStringNotContainsString(')', $result);
+        $this->assertStringNotContainsString('"', $result);
+        $this->assertEquals('https://example.com/articletestquote\'single\\\\slash', $result);
+    }
 }
