@@ -98,11 +98,29 @@ jobs:
     - name: Upload coverage to Codecov
       if: hashFiles('coverage.xml') != ''
       uses: codecov/codecov-action@v4
+      continue-on-error: true
       with:
         files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Generate coverage badge
+      if: github.ref == 'refs/heads/master' && hashFiles('coverage.xml') != ''
+      run: |
+        coverage=$(php -r "
+          \$xml = simplexml_load_file('coverage.xml');
+          \$metrics = \$xml->project->metrics;
+          \$covered = (int)\$metrics['coveredstatements'];
+          \$total = (int)\$metrics['statements'];
+          if (\$total > 0) {
+            echo round((\$covered / \$total) * 100, 2);
+          } else {
+            echo '0';
+          }
+        ")
+        echo "Coverage: ${coverage}%"
 
   security:
     name: Security Scan
