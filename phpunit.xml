@@ -19,8 +19,11 @@
         <exclude>
             <directory>vendor</directory>
             <directory>tests</directory>
+            <directory>TESTS</directory>
             <directory>scraping</directory>
             <directory>node_modules</directory>
+            <directory>favicon</directory>
+            <file>favico.min.js</file>
         </exclude>
     </source>
 
