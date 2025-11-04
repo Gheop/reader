@@ -1,7 +1,7 @@
 # Gheop Reader
 
 [![CI Status](https://github.com/Gheop/reader/workflows/CI/badge.svg)](https://github.com/Gheop/reader/actions)
-[![codecov](https://codecov.io/gh/Gheop/reader/branch/master/graph/badge.svg)](https://codecov.io/gh/Gheop/reader)
+[![codecov](https://codecov.io/gh/Gheop/reader/branch/dev/graph/badge.svg)](https://codecov.io/gh/Gheop/reader)
 [![Valid OPML](https://validator.w3.org/feed/images/valid-opml.gif)](https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Freader.gheop.com%2Fopml.opml)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://www.php.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
