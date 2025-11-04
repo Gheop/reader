@@ -12,11 +12,7 @@
         </testsuite>
     </testsuites>
 
-    <coverage includeUncoveredFiles="true"
-              processUncoveredFiles="true"
-              pathCoverage="false"
-              ignoreDeprecatedCodeUnits="true"
-              disableCodeCoverageIgnore="true">
+    <source>
         <include>
             <directory suffix=".php">.</directory>
         </include>
@@ -26,6 +22,13 @@
             <directory>scraping</directory>
             <directory>node_modules</directory>
         </exclude>
+    </source>
+
+    <coverage includeUncoveredFiles="true"
+              processUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="true"
+              disableCodeCoverageIgnore="true">
         <report>
             <clover outputFile="coverage.xml"/>
             <html outputDirectory="coverage-html"/>
