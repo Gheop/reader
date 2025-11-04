@@ -4,17 +4,12 @@
  * Returns JSON format: {"article_id": {"t": "title", "p": "pubdate", "a": "author", ...}}
  */
 
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Gheop\Reader\ViewHelper;
-use Gheop\Reader\SecurityHelper;
-
-header("Content-Type: application/json; charset=UTF-8");
 include('/www/conf.php');
 
 // Security: Validate user authentication
-if (!isset($_SESSION['user_id']) || !SecurityHelper::isValidUserId($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     http_response_code(401);
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
@@ -22,16 +17,29 @@ if (!isset($_SESSION['user_id']) || !SecurityHelper::isValidUserId($_SESSION['us
 $userId = (int)$_SESSION['user_id'];
 
 try {
-    // Sanitize and validate parameters
-    $params = ViewHelper::sanitizeParams([
-        'nb' => $_POST['nb'] ?? null,
-        'id' => $_POST['id'] ?? null,
-        'offset' => $_POST['offset'] ?? null
-    ]);
+    // Validate and sanitize parameters
+    $limit = 50; // Default limit
+    $offset = 0; // Default offset
 
-    // Build SQL clauses
-    $limitClause = ViewHelper::buildLimitClause($params['nb'], $params['offset']);
-    $feedFilter = ViewHelper::buildFeedFilter($params['id']);
+    if (isset($_POST['nb']) && is_numeric($_POST['nb'])) {
+        $limit = min(100, max(1, (int)$_POST['nb'])); // Max 100, min 1
+    }
+
+    if (isset($_POST['offset']) && is_numeric($_POST['offset'])) {
+        $offset = max(0, (int)$_POST['offset']);
+    }
+
+    // Build feed filter
+    $feedFilter = '';
+    $bindTypes = 'ii';
+    $bindParams = [$userId, $userId];
+
+    if (isset($_POST['id']) && is_numeric($_POST['id'])) {
+        $feedId = (int)$_POST['id'];
+        $feedFilter = 'AND F.id = ?';
+        $bindTypes = 'iii';
+        $bindParams[] = $feedId;
+    }
 
     // Prepared statement for security
     $sql = "
@@ -57,7 +65,7 @@ try {
             AND UI.id_item IS NULL
             $feedFilter
         ORDER BY I.pubdate DESC
-        LIMIT $limitClause
+        LIMIT ?, ?
     ";
 
     $stmt = $_SESSION['mysqli']->prepare($sql);
@@ -66,29 +74,36 @@ try {
         throw new Exception('Failed to prepare statement');
     }
 
-    $stmt->bind_param('ii', $userId, $userId);
+    // Bind parameters
+    if ($feedFilter) {
+        $stmt->bind_param($bindTypes . 'ii', ...$bindParams, $offset, $limit);
+    } else {
+        $stmt->bind_param($bindTypes . 'ii', ...$bindParams, $offset, $limit);
+    }
+
     $stmt->execute();
     $result = $stmt->get_result();
 
     // Build response array
     $articles = [];
     while ($row = $result->fetch_assoc()) {
-        $articles[(string)$row['id']] = ViewHelper::formatArticle([
-            't' => $row['title'],
-            'p' => $row['pubdate'],
+        $articles[(string)$row['id']] = [
+            't' => $row['title'] ?? '',
+            'p' => $row['pubdate'] ?? '',
             'd' => $row['description'] ?? '',
             'l' => $row['link'] ?? '',
             'a' => $row['author'] ?? '',
-            'f' => $row['id_flux'],
+            'f' => $row['id_flux'] ?? '',
             'n' => $row['feed_title'] ?? '',
             'e' => $row['feed_description'] ?? '',
             'o' => $row['feed_link'] ?? ''
-        ]);
+        ];
     }
 
     $stmt->close();
 
     // Return JSON response
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode($articles, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {
@@ -97,5 +112,6 @@ try {
 
     // Return error response
     http_response_code(500);
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Internal server error']);
 }
