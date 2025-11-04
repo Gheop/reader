@@ -133,14 +133,23 @@ class FeedUpdater
     {
         $link = null;
 
-        // Check for object link with attributes
-        if (is_object($item->link)) {
+        // Check for direct link first (RSS-style)
+        if (isset($item->link) && preg_match('/^https?:\/\//', (string)$item->link)) {
+            $link = (string)$item->link;
+            return $link;
+        }
+
+        // Check for object link with attributes (Atom-style)
+        if (is_object($item->link) && isset($item->link[0])) {
             foreach ($item->link as $t) {
-                if ($t['rel'] == "alternate" || $t['rel'] == "self") {
-                    $link = (string)$t['href'];
-                }
-                if (!isset($link) && isset($t['href'])) {
-                    $link = (string)$t['href'];
+                if (isset($t['href'])) {
+                    if ($t['rel'] == "alternate" || $t['rel'] == "self") {
+                        $link = (string)$t['href'];
+                        return $link;
+                    }
+                    if (!isset($link)) {
+                        $link = (string)$t['href'];
+                    }
                 }
             }
         }
@@ -148,11 +157,6 @@ class FeedUpdater
         // Check for guid as link
         if (!isset($link) && isset($item->guid) && preg_match('/^https?:\/\//', (string)$item->guid)) {
             $link = (string)$item->guid;
-        }
-
-        // Check for direct link
-        if (!isset($link) && isset($item->link) && preg_match('/^https?:\/\//', (string)$item->link)) {
-            $link = (string)$item->link;
         }
 
         return $link;
@@ -272,7 +276,7 @@ class FeedUpdater
         // Clean image URLs with query parameters
         $xml = preg_replace(
             '/url="(.*?\.(jpg|png|gif))\?.*?"/s',
-            'url="' . htmlspecialchars('\\1', ENT_XML1, 'UTF-8', true) . '"',
+            'url="$1"',
             $xml
         );
 
