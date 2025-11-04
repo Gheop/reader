@@ -13,6 +13,9 @@ ini_set('display_errors', '1');
 define('TESTING', true);
 define('TEST_ROOT', dirname(__DIR__));
 
+// Load Composer autoloader
+require_once TEST_ROOT . '/vendor/autoload.php';
+
 // Mock session for testing
 if (!isset($_SESSION)) {
     $_SESSION = [];
