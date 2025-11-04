@@ -1,5 +1,11 @@
 # Gheop Reader
 
+[![Valid OPML](https://validator.w3.org/feed/images/valid-opml.gif)](https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Freader.gheop.com%2Fopml.opml)
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://www.php.net/)
+[![License](https://img.shields.io/badge/license-Open%20Source-green.svg)](https://github.com/Gheop/reader)
+[![Self Hosted](https://img.shields.io/badge/self--hosted-yes-blue.svg)](https://github.com/Gheop/reader)
+[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://reader.gheop.com)
+
 A lightweight, self-hosted RSS/Atom feed reader built with PHP and JavaScript. Follow all your favorite sites, blogs, and content sources from one unified interface.
 
 ## Features
