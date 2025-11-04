@@ -166,15 +166,16 @@ http_response_code(401); // ou 500 selon le cas
 ## ✅ Migration effectuée
 
 **Actions réalisées** :
-1. ✅ `view.php` sauvegardé → `view.legacy.php`
-2. ✅ `view_improved.php` déployé comme nouveau `view.php`
+1. ✅ `view.php` original sauvegardé → `view_original.php`
+2. ✅ Version corrigée déployée comme nouveau `view.php`
 3. ✅ Code mort supprimé (17 lignes de commentaires)
 4. ✅ 3 injections SQL corrigées (prepared statements)
 5. ✅ Limite DOS corrigée (max 100)
 6. ✅ JSON natif avec `json_encode()`
-7. ✅ Gestion d'erreurs ajoutée
+7. ✅ Gestion d'erreurs ajoutée avec error_log
 8. ✅ Validation directe des paramètres (is_numeric + casting)
-9. ✅ Pattern identique à menu.php (sans helper)
+9. ✅ LIMIT comme chaîne pour compatibilité MySQL/MariaDB ancien
+10. ✅ NOT IN comme l'original pour sémantique identique
 
 ## ✅ Checklist de validation
 
