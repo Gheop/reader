@@ -95,7 +95,7 @@ class RSSDiscovery
         // Medium subdomain
         if (preg_match('/^.*\/\/(.*)\.medium\.com\/(.*)?$/', $url, $m)) {
             if (isset($m[1]) && $m[1] != 'www') {
-                return 'https://' . $m[1] . 'medium.com/feed';
+                return 'https://' . $m[1] . '.medium.com/feed';
             }
             return false;
         }

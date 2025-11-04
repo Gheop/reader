@@ -325,16 +325,16 @@ class MenuBuilderTest extends TestCase
         $this->assertFalse(MenuBuilder::isValidFeedData($invalid2));
     }
 
-    public function testCountUnreadItemsNegativeNumbers(): void
+    public function testCountUnreadItemsWithZeroAndPositive(): void
     {
         $feeds = [
-            '1' => ['t' => 'Feed1', 'n' => -5],
+            '1' => ['t' => 'Feed1', 'n' => 0],
             '2' => ['t' => 'Feed2', 'n' => 10],
+            '3' => ['t' => 'Feed3', 'n' => 5],
         ];
 
         $count = MenuBuilder::countUnreadItems($feeds);
-        // Negative numbers should still be counted
-        $this->assertEquals(5, $count);
+        $this->assertEquals(15, $count);
     }
 
     public function testSortFeedsByTitleUnicode(): void

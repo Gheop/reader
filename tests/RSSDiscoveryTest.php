@@ -128,7 +128,7 @@ class RSSDiscoveryTest extends TestCase
         $url = 'https://testuser.medium.com/';
         $result = RSSDiscovery::getSpecialSiteFeedUrl($url);
 
-        $this->assertEquals('https://testusermedium.com/feed', $result);
+        $this->assertEquals('https://testuser.medium.com/feed', $result);
     }
 
     public function testGetSpecialSiteFeedUrlMediumWWW(): void
