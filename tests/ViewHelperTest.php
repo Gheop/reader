@@ -458,9 +458,12 @@ class ViewHelperTest extends TestCase
         $this->assertEquals('', $result);
     }
 
-    public function testTruncateDescriptionZeroLength(): void
+    public function testTruncateDescriptionSmallLength(): void
     {
-        $result = ViewHelper::truncateDescription('test', 0);
-        $this->assertEquals('…', $result);
+        $result = ViewHelper::truncateDescription('test', 2);
+        $this->assertEquals('te…', $result);
+
+        $result2 = ViewHelper::truncateDescription('test', 1);
+        $this->assertEquals('t…', $result2);
     }
 }
