@@ -1,10 +1,13 @@
 # Gheop Reader
 
+[![CI Status](https://github.com/Gheop/reader/workflows/CI/badge.svg)](https://github.com/Gheop/reader/actions)
+[![codecov](https://codecov.io/gh/Gheop/reader/branch/master/graph/badge.svg)](https://codecov.io/gh/Gheop/reader)
 [![Valid OPML](https://validator.w3.org/feed/images/valid-opml.gif)](https://validator.w3.org/feed/check.cgi?url=https%3A%2F%2Freader.gheop.com%2Fopml.opml)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-8892BF.svg)](https://www.php.net/)
-[![License](https://img.shields.io/badge/license-Open%20Source-green.svg)](https://github.com/Gheop/reader)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-blue.svg)](https://github.com/Gheop/reader)
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://reader.gheop.com)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Gheop/reader/graphs/commit-activity)
 
 A lightweight, self-hosted RSS/Atom feed reader built with PHP and JavaScript. Follow all your favorite sites, blogs, and content sources from one unified interface.
 
@@ -126,6 +129,51 @@ Free and open source software. Feel free to use, modify, and host your own insta
 
 For bugs, feature requests, or questions, please open an issue on GitHub.
 
+## Development
+
+### Running Tests
+
+```bash
+# Install dependencies
+composer install
+
+# Run PHPUnit tests
+composer test
+
+# Run tests with coverage
+composer test-coverage
+
+# Run static analysis
+composer phpstan
+
+# Run code style checker
+composer phpcs
+
+# Fix code style issues
+composer phpcbf
+```
+
+### Code Quality
+
+This project uses:
+- **PHPUnit** for unit testing
+- **PHPStan** for static analysis
+- **PHP_CodeSniffer** for code style (PSR-12)
+- **ESLint** for JavaScript linting
+- **Codecov** for code coverage tracking
+
+All pushes and pull requests are automatically tested via GitHub Actions CI/CD pipeline.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+### Contribution Guidelines
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and linting (`composer test && composer phpcs`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request

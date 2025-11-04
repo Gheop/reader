@@ -1,0 +1,40 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "script"
+  },
+  "globals": {
+    "$": "readonly",
+    "D": "readonly",
+    "DM": "readonly",
+    "m": "readonly",
+    "d": "readonly",
+    "id": "readonly",
+    "nb_title": "readonly",
+    "search_active": "readonly",
+    "search_value": "readonly",
+    "loadmore": "readonly",
+    "online": "readonly",
+    "favicon_badge": "readonly",
+    "Favico": "readonly",
+    "Intl": "readonly",
+    "IntersectionObserver": "readonly",
+    "customElements": "readonly",
+    "HTMLElement": "readonly",
+    "Notification": "readonly",
+    "DOMParser": "readonly",
+    "FormData": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-undef": "warn",
+    "no-console": "off",
+    "semi": ["error", "always"],
+    "quotes": ["warn", "single", { "avoidEscape": true }]
+  }
+}

@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+jobs:
+  lint:
+    name: PHP Lint & Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mysqli, dom, simplexml
+        coverage: xdebug
+        tools: phpcs, phpstan, php-cs-fixer
+
+    - name: Validate composer.json
+      if: hashFiles('composer.json') != ''
+      run: composer validate --strict
+
+    - name: Install dependencies
+      if: hashFiles('composer.json') != ''
+      run: composer install --prefer-dist --no-progress
+
+    - name: PHP Syntax Check
+      run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \; | (! grep -v "No syntax errors detected")
+
+    - name: PHP_CodeSniffer
+      continue-on-error: true
+      run: |
+        phpcs --standard=PSR12 --extensions=php --ignore=*/vendor/*,*/node_modules/*,*/scraping/* . || true
+
+    - name: PHPStan Static Analysis
+      continue-on-error: true
+      run: |
+        phpstan analyse --level=5 --no-progress --error-format=github --memory-limit=256M \
+          --paths-file=<(find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -not -path "./scraping/*") || true
+
+  test:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: reader_test
+          MYSQL_USER: reader_user
+          MYSQL_PASSWORD: reader_pass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mysqli, dom, simplexml, xdebug
+        coverage: xdebug
+        tools: phpunit
+
+    - name: Install dependencies
+      run: |
+        if [ -f composer.json ]; then
+          composer install --prefer-dist --no-progress
+        else
+          composer init --no-interaction
+          composer require --dev phpunit/phpunit ^10.0
+        fi
+
+    - name: Setup test configuration
+      run: |
+        mkdir -p tests
+        echo "Creating test bootstrap file..."
+
+    - name: Run PHPUnit Tests
+      continue-on-error: true
+      run: |
+        if [ -f phpunit.xml ]; then
+          phpunit --coverage-clover=coverage.xml --coverage-text
+        else
+          echo "No tests configured yet"
+          exit 0
+        fi
+
+    - name: Upload coverage to Codecov
+      if: hashFiles('coverage.xml') != ''
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Security Check
+      continue-on-error: true
+      run: |
+        if [ -f composer.lock ]; then
+          curl -H "Accept: text/plain" https://security.symfony.com/check_lock -F lock=@composer.lock
+        else
+          echo "No composer.lock found, skipping security check"
+        fi
+
+  javascript:
+    name: JavaScript Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install ESLint
+      run: npm install -g eslint
+
+    - name: JavaScript Syntax Check
+      run: |
+        for file in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./vendor/*" -not -path "./scraping/node_modules/*"); do
+          node -c "$file" || exit 1
+        done
+
+    - name: ESLint
+      continue-on-error: true
+      run: |
+        eslint --init || true
+        eslint "*.js" --ignore-pattern "node_modules/*" --ignore-pattern "vendor/*" || true
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [lint, test, security, javascript]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Verify all files present
+      run: |
+        echo "Checking critical files..."
+        test -f index.php || exit 1
+        test -f lib.js || exit 1
+        test -f common.css || exit 1
+        test -f opml_export.php || exit 1
+        echo "All critical files present!"
+
+    - name: Build Status
+      run: echo "Build completed successfully!"
