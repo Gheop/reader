@@ -1,4 +1,15 @@
 <?php
+/**
+ * clean_text_v2.php - Version SANS pré-échappement JSON
+ *
+ * Changement principal (ligne 180-181):
+ * - SUPPRIMÉ: Échappement de \ et " pour JSON
+ * - GARDÉ: Nettoyage HTML et normalisation
+ *
+ * Avec cette version, les descriptions sont stockées en HTML propre,
+ * permettant à view.php d'utiliser json_encode() nativement.
+ */
+
 function cutString($string, $start, $length, $endStr = '…') { //[&hellip]'){
   if( mb_strlen( $string ) <= $length ) return $string;
   $str = mb_substr( $string, $start, $length - mb_strlen( $endStr ) + 1, 'UTF-8');
@@ -30,7 +41,7 @@ function imgbase64($f) {
     }
     if($width > 1680) {
       //really more speed then imagick
-      if (`which vipsthumbnail`) { 
+      if (`which vipsthumbnail`) {
         exec('vipsthumbnail '.$tmpfile.' --size 1680x');
       }
       else {
@@ -39,7 +50,7 @@ function imgbase64($f) {
      $attr='width="1680px"';
     }
     if($height > 1024) {
-      if (`which vipsthumbnail`) { 
+      if (`which vipsthumbnail`) {
         exec('vipsthumbnail '.$tmpfile.' --size x1024');
       }
       else {
@@ -177,12 +188,24 @@ function clean_txt($v) {
   $q[]='/<span.*?>/s';
   $q[]='/<\/span>/s';
   $v = preg_replace($q,'<br />', $v);*/
-  $a = array('\\', '"', '<br>', '<br /><br />','<br><br>','<p>','<\p>','<b>','</b>');//,"\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");, '[', ']'
-  $b = array('\\\\', '\"', '<br />', '<br />','<br />','','<br />','','','');//"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b"); ,'\[','\]'
-//  $a = array( "\\", "\n", "\t", "\r", "\f", '"', '<br>', '<br /><br />','<br><br>','\u','/','<p>','<\p>','<b>','</b>', '{', '}',"'","\\",     "/",   "\"",  "\n",  "\r",  "\t", "\x08", "\x0c");
-//  $b = array('\\\\', '', '', '', '', '\"', '<br />', '<br />','<br />','','\/','<br />','','','', '{', '}','\'',"\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t",  "\\f",  "\\b");
+
+  // ============================================
+  // CHANGEMENT PRINCIPAL: Suppression de l'échappement JSON
+  // ============================================
+  // ANCIEN (clean_text.php):
+  // $a = array('\\', '"', '<br>', '<br /><br />','<br><br>','<p>','<\p>','<b>','</b>');
+  // $b = array('\\\\', '\"', '<br />', '<br />','<br />','','<br />','','','');
+  //
+  // NOUVEAU: On ne pré-échappe PLUS pour JSON
+  // Les \ et " restent tels quels dans le HTML
+  // json_encode() fera l'échappement automatiquement
+
+  $a = array('<br>', '<br /><br />','<br><br>','<p>','<\p>','<b>','</b>');
+  $b = array('<br />', '<br />','<br />','','<br />','','');
+
   $v = nl2br($v);
   $v = str_replace($a, $b, $v);
 
   return $v;
 }
+?>
