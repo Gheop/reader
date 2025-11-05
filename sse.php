@@ -31,6 +31,11 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 $userId = (int)$_SESSION['user_id'];
+$mysqli = $_SESSION['mysqli'];
+
+// IMPORTANT: Close session writing to prevent blocking other requests
+// SSE keeps connection open, but we don't need to write to session
+session_write_close();
 
 // Send initial connection success message
 echo "event: connected\n";
@@ -61,7 +66,7 @@ function getCurrentHash($mysqli, $userId, $counterColumn) {
 }
 
 // Initial hash
-$lastHash = getCurrentHash($_SESSION['mysqli'], $userId, $counterColumn);
+$lastHash = getCurrentHash($mysqli, $userId, $counterColumn);
 
 // Keep connection alive and check for changes every 2 seconds
 $maxDuration = 300; // 5 minutes max connection time
@@ -74,7 +79,7 @@ while (time() - $startTime < $maxDuration) {
     }
 
     // Check for changes
-    $currentHash = getCurrentHash($_SESSION['mysqli'], $userId, $counterColumn);
+    $currentHash = getCurrentHash($mysqli, $userId, $counterColumn);
 
     if ($currentHash !== $lastHash && $currentHash !== '') {
         // Data has changed, notify client
