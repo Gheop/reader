@@ -1180,11 +1180,21 @@ function getHTTPObject(action) {
 }
 
 function verif(k, v=0) {
-  if(v==1) (d[k].readblock == 0) ? d[k].readblock = 1 : d[k].readblock = 0; 
+  // Check if article still exists in data object
+  if (!d || !d[k]) {
+    console.warn('Article ' + k + ' not found in data object, skipping');
+    return;
+  }
+  if(v==1) (d[k].readblock == 0) ? d[k].readblock = 1 : d[k].readblock = 0;
   return (d[k].r == 0) ? unread(k) : read(k);
 }
 
 function unread(k, v=0) {
+	// Check if article still exists in data object
+	if (!d || !d[k]) {
+		console.warn('Article ' + k + ' not found in data object, skipping unread');
+		return;
+	}
 	unr = 1;
     if(v===0) d[k].readblock = 1;
   if(v===1) d[k].readblock = 0;
@@ -1209,6 +1219,11 @@ function unread(k, v=0) {
 }
 
 function read(k, v=0) {
+  // Check if article still exists in data object
+  if (!d || !d[k]) {
+    console.warn('Article ' + k + ' not found in data object, skipping read');
+    return;
+  }
   if (search_active == 1) return;
   //obligé sinon 2 read après un verif() ou un unread-read à la suite ... mais why ?
   if (d[k].readblock == 1) return;
