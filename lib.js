@@ -1206,6 +1206,11 @@ function i() {
    // animation:'slide'
   });
 
+  // Set "All" as selected by default
+  if ($('fall')) {
+    $('fall').classList.add('show');
+  }
+
   // Then load data
   loadData('all');
   startBackgroundSync(30);
