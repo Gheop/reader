@@ -173,6 +173,8 @@ function renderMenu(menuData) {
 }
 
 function renderArticles(articlesData, feedId) {
+  console.log('renderArticles called with feedId:', feedId);
+  console.log('articlesData keys:', Object.keys(articlesData).length);
   let page = '';
   cptReadArticle = 0;
   varscroll = 0;
@@ -181,11 +183,13 @@ function renderArticles(articlesData, feedId) {
   Now = new Date();
   for(let i in d) {
     if (feedId && feedId !== 'all' && d[i].f != feedId) {
+      console.log('Skipping article', i, 'feed:', d[i].f, 'looking for:', feedId);
       continue;
     }
     loadmore++;
     page += generateArticle(i);
   }
+  console.log('Generated', loadmore, 'articles');
   if(loadmore == 0) {
     page = '<article class="item1">\n\t<header>\n\t\t<h1 class="headline"><a class="title" target="_blank">Flux vide</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a class="website">Gheop Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">Pas de nouveaux articles.</div>\n\t<div class="action">&nbsp;&nbsp;</div>\n</article>';
   }
@@ -220,7 +224,7 @@ function stopBackgroundSync() {
 }
 
 function favicon(nb) {
-	if(nb >= 0) favicon_badge.badge(nb);
+	if(nb >= 0 && favicon_badge) favicon_badge.badge(nb);
   //  $('favico').href = "https://reader.gheop.com/favicon"+nb+".png";
 }
 
@@ -1023,16 +1027,19 @@ function konamistop() {
 */
 
 function i() {
-  loadData('all');
-  startBackgroundSync(30);
-  window.addEventListener('online', handleConnectionChange);
-  window.addEventListener('offline', handleConnectionChange);
-  window.onresize = scroll;
+  // Initialize favicon_badge first (needed by renderMenu)
   favicon_badge=new Favico({
     animation:'none'
    // animation:'slide'
-});
-//favicon_badge.badge(222);
+  });
+
+  // Then load data
+  loadData('all');
+  startBackgroundSync(30);
+
+  window.addEventListener('online', handleConnectionChange);
+  window.addEventListener('offline', handleConnectionChange);
+  window.onresize = scroll;
 
   inactivityTime();
   $('s').onfocus = function() {
