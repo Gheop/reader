@@ -369,16 +369,17 @@ function appendNewArticles(newArticlesData) {
 
   // 1. Find NEW articles and REACTIVATED articles (marked as unread elsewhere)
   for(var i in newArticlesData) {
-    if (!d || !d[i]) {
-      // This article is completely new
-      // Check if it should be displayed based on current filter
-      if (id === 'all' || newArticlesData[i].f == id) {
-        // Check if it exists in DOM as a read article
-        if ($(i) && $(i).className === 'item0') {
-          // Article exists in DOM but was read, now it's unread again
-          reactivatedArticles.push(i);
-        } else {
-          // Truly new article
+    // Check if it should be displayed based on current filter
+    if (id === 'all' || newArticlesData[i].f == id) {
+      // Check if it exists in DOM as a read article (item0)
+      if ($(i) && $(i).className === 'item0') {
+        // Article exists in DOM and is displayed as read, but it's in newArticlesData
+        // which only contains unread articles, so it was marked as unread elsewhere
+        reactivatedArticles.push(i);
+      } else if (!d || !d[i]) {
+        // This article is not in the current data object, so it's new
+        // But only add if it's not already in the DOM
+        if (!$(i)) {
           newArticles.push(i);
         }
       }
