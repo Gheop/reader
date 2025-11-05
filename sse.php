@@ -47,8 +47,8 @@ function getCurrentHash($mysqli, $userId, $counterColumn) {
     $result = $mysqli->query("
         SELECT SUM($counterColumn) as total,
                MAX(UNIX_TIMESTAMP(GREATEST(
-                   COALESCE((SELECT MAX(date_creation) FROM reader_item), '1970-01-01'),
-                   COALESCE((SELECT MAX(date_creation) FROM reader_unread_cache WHERE id_user = $userId), '1970-01-01')
+                   COALESCE((SELECT MAX(pubdate) FROM reader_item), '1970-01-01'),
+                   COALESCE((SELECT MAX(pubdate) FROM reader_unread_cache WHERE id_user = $userId), '1970-01-01')
                ))) as last_change
         FROM reader_flux
     ");
