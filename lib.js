@@ -361,9 +361,14 @@ function appendNewArticles(newArticlesData) {
         if (!hasArticlesForCurrentFeed) {
           console.log('Current feed is now empty, switching to "All"');
           // Update UI state
-          $('f' + id).classList.remove('show');
+          var oldFeed = $('f' + id);
+          if (oldFeed) {
+            oldFeed.classList.remove('show');
+          }
           id = 'all';
-          $('fall').classList.add('show');
+          if ($('fall')) {
+            $('fall').classList.add('show');
+          }
           // Force re-render with all articles
           renderArticles(d, 'all');
         }
