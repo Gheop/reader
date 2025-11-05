@@ -1288,8 +1288,26 @@ function read(k, v=0) {
   // Marquer immédiatement comme traité pour éviter les doubles appels
   d[k].r = 0;
   $(k).className = 'item0';
-  m[d[k].f].n--;
+
+  // Send request to server to mark as read
   myFetch('read.php', 'id='+k, 1);
+
+  // Update title counter
+  D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
+  if (nb_title < 0) nb_title = 0;
+  favicon(nb_title);
+  xhr = undefined;
+  readItems++;
+  progressBar();
+
+  // Check if feed exists in menu (it might not if it had 0 unread articles)
+  if (!m[d[k].f]) {
+    console.log('Feed', d[k].f, 'not in menu when marking as read, skipping menu update');
+    return;
+  }
+
+  // Update menu counter
+  m[d[k].f].n--;
   if (m[d[k].f].n > 0) {
      $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
       light('f' + d[k].f);
@@ -1298,13 +1316,6 @@ function read(k, v=0) {
       if (id == d[k].f) $('f' + d[k].f).className = "flux show";
       else $('f' + d[k].f).className = "flux";
   }
-
-  D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
-  if (nb_title < 0) nb_title = 0;
-  favicon(nb_title);
-  xhr = undefined;
-  readItems++;
-  progressBar();
 }
 
 function progressBar() {
