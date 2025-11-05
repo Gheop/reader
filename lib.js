@@ -391,10 +391,21 @@ function appendNewArticles(newArticlesData) {
 
   console.log('Found', newArticles.length, 'new articles and', removedArticles.length, 'removed articles for current view');
 
-  // Update global data - but keep locally modified articles
+  // Update global data - but keep articles that are currently in DOM
+  // This allows users to still interact with them (mark as unread, etc.)
+  if (d) {
+    for(var i in d) {
+      // If article is in DOM and not in new data, preserve it
+      if (!newArticlesData[i] && $(i)) {
+        newArticlesData[i] = d[i];
+        console.log('Preserving article in DOM:', i);
+      }
+    }
+  }
+
+  // Also preserve locally modified articles
   for(var i in locallyModifiedArticles) {
     if (d && d[i]) {
-      // Re-add locally modified articles to new data
       newArticlesData[i] = d[i];
       console.log('Preserving locally modified article', i);
     }
