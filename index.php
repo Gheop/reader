@@ -19,6 +19,7 @@ include('/www/conf.php');
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="screen.css" media="screen" title="Normal" /><!-- ?v=<?php echo time(); ?> -->
 <title>Gheop Reader</title>
 <script src="favico.min.js" defer></script>
+<script src="https://reader.gheop.com/api-cache.js" type="text/javascript" defer></script>
 <script src="https://reader.gheop.com/lib.js" type="text/javascript" defer></script><!-- ?v=<?php echo time(); ?> -->
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
