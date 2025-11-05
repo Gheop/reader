@@ -1,4 +1,5 @@
 <?php
+$start_time = microtime(true);
 include('/www/conf.php');
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 //$mysqli->set_charset("utf8") or die("Erreur lors du chargement du jeu de caractères utf8 : %s\n", $mysqli->error);
@@ -45,7 +46,9 @@ while($d = $r->fetch_row()) {
 	$e .= $d[0];
 }
 $e .= '}';
+$execution_time = round((microtime(true) - $start_time) * 1000, 2);
 header('Content-Type: application/json');
+header('X-Execution-Time: ' . $execution_time . 'ms');
 echo $e;
 
 // $r = $mysqli->query('SELECT CONCAT(\'{\',group_concat(CONCAT(\'"\',F.id,\'":\'),
