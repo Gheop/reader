@@ -343,6 +343,25 @@ function appendNewArticles(newArticlesData) {
       }
     });
     console.log('Removed', removedArticles.length, 'articles from DOM');
+
+    // Check if current feed is now empty and we're on a specific feed (not "all")
+    if (id !== 'all') {
+      // Wait for removal animation to complete, then check if feed is empty
+      setTimeout(() => {
+        var hasArticlesForCurrentFeed = false;
+        for(var i in d) {
+          if (d[i].f == id) {
+            hasArticlesForCurrentFeed = true;
+            break;
+          }
+        }
+
+        if (!hasArticlesForCurrentFeed) {
+          console.log('Current feed is now empty, switching to "All"');
+          view('all');
+        }
+      }, 550);
+    }
   }
 
   // Handle new articles (fade in and add to DOM)
