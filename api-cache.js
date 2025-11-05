@@ -74,12 +74,21 @@ function loadData(feedId, useCache = true) {
 
 function fetchAndUpdateData(feedId) {
   const url = feedId && feedId !== 'all' ? 'api.php?id=' + feedId : 'api.php';
+  console.log('Fetching data from:', url);
 
   fetch(url)
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('Data received:', data);
       if (data.menu && data.articles) {
-        console.log('Data loaded from server');
+        console.log('Menu items:', Object.keys(data.menu).length);
+        console.log('Articles:', Object.keys(data.articles).length);
 
         // Save to cache
         saveToCache(data);
@@ -87,6 +96,8 @@ function fetchAndUpdateData(feedId) {
         // Update display
         renderMenu(data.menu);
         renderArticles(data.articles, feedId || 'all');
+      } else {
+        console.error('Invalid data structure:', data);
       }
     })
     .catch(err => {
