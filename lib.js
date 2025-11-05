@@ -323,56 +323,49 @@ function appendNewArticles(newArticlesData) {
   // Update global data
   d = newArticlesData;
 
-  // Handle removed articles (fade out and remove from DOM)
+  // Handle removed articles (mark as read, don't remove from DOM to preserve scroll)
   if (removedArticles.length > 0) {
     removedArticles.forEach(function(articleId) {
       var article = $(articleId);
       if (article) {
-        // Fade out animation
-        article.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-        article.style.opacity = '0';
-        article.style.transform = 'translateX(-20px)';
+        // Just mark as read visually (item1 -> item0)
+        // Don't remove from DOM to avoid scroll position jump
+        article.className = 'item0';
 
-        // Remove from DOM after animation
-        setTimeout(() => {
-          if (article.parentNode) {
-            article.parentNode.removeChild(article);
-          }
-          loadmore--;
-        }, 500);
+        // Update data state
+        if (d[articleId]) {
+          d[articleId].r = 0;
+        }
       }
     });
-    console.log('Removed', removedArticles.length, 'articles from DOM');
+    console.log('Marked', removedArticles.length, 'articles as read (from other device)');
 
     // Check if current feed is now empty and we're on a specific feed (not "all")
     if (id !== 'all') {
-      // Wait for removal animation to complete, then check if feed is empty
-      setTimeout(() => {
-        var hasArticlesForCurrentFeed = false;
-        for(var i in d) {
-          if (d[i].f == id) {
-            hasArticlesForCurrentFeed = true;
-            break;
-          }
+      var hasUnreadArticlesForCurrentFeed = false;
+      for(var i in d) {
+        if (d[i].f == id) {
+          hasUnreadArticlesForCurrentFeed = true;
+          break;
         }
+      }
 
-        console.log('Checking if feed', id, 'is empty. Has articles:', hasArticlesForCurrentFeed);
+      console.log('Checking if feed', id, 'has unread articles:', hasUnreadArticlesForCurrentFeed);
 
-        if (!hasArticlesForCurrentFeed) {
-          console.log('Current feed is now empty, switching to "All"');
-          // Update UI state
-          var oldFeed = $('f' + id);
-          if (oldFeed) {
-            oldFeed.classList.remove('show');
-          }
-          id = 'all';
-          if ($('fall')) {
-            $('fall').classList.add('show');
-          }
-          // Force re-render with all articles
-          renderArticles(d, 'all');
+      if (!hasUnreadArticlesForCurrentFeed) {
+        console.log('Current feed has no more unread articles, switching to "All"');
+        // Update UI state
+        var oldFeed = $('f' + id);
+        if (oldFeed) {
+          oldFeed.classList.remove('show');
         }
-      }, 550);
+        id = 'all';
+        if ($('fall')) {
+          $('fall').classList.add('show');
+        }
+        // Force re-render with all articles
+        renderArticles(d, 'all');
+      }
     }
   }
 
