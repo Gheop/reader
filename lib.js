@@ -337,6 +337,8 @@ function scroll() {
 function oldScroll() {
     let count = 0;
     for(let i in d) {
+        // Skip if element not in DOM (filtered out)
+        if(!$(i)) continue;
         count++;
         if($(i).offsetTop <= DM.scrollTop) {
             if (d[i].r != 0) read(i);
@@ -361,6 +363,8 @@ function goPrev() {
   if (kona == 1 || !d) return;
   var previous = undefined;
 	for(var i in d) {
+		// Skip if element not in DOM (filtered out)
+		if(!$(i)) continue;
 		if($(i).offsetTop > DM.scrollTop - 10) {
 			if(previous) {DM.scrollTop = $(previous).offsetTop - 10;}
 			return;
@@ -373,12 +377,14 @@ function goPrev() {
 function goNext() {
 	if (kona == 1 || !d) return;
 	for(let i in d) {
+		// Skip if element not in DOM (filtered out)
+		if(!$(i)) continue;
 		if($(i).offsetTop > DM.scrollTop + 10) {
 			DM.scrollTop = $(i).offsetTop - 10;
 			return;
 		}
 	}
-	DM.scrollTop = $('addblank').offsetTop - 20;
+	if($('addblank')) DM.scrollTop = $('addblank').offsetTop - 20;
 	return;
 }
 
@@ -554,7 +560,7 @@ function unsubscribe(t, f) {
     for(var i in d) {
       if(d[i].f == f) {
         d[i].r = 0;
-        $(i).style.display='none';
+        if($(i)) $(i).style.display='none';
       }
     }
     if($('f' + f).className == 'fluxnew show') view('all'); //problème si la désincription mets trop de temps, on peut retrouver des articles pas encore enlevés ... voir pour passer par generateArticleS le jour ou ça sera fait.
