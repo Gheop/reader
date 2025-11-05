@@ -356,9 +356,16 @@ function appendNewArticles(newArticlesData) {
           }
         }
 
+        console.log('Checking if feed', id, 'is empty. Has articles:', hasArticlesForCurrentFeed);
+
         if (!hasArticlesForCurrentFeed) {
           console.log('Current feed is now empty, switching to "All"');
-          view('all');
+          // Update UI state
+          $('f' + id).classList.remove('show');
+          id = 'all';
+          $('fall').classList.add('show');
+          // Force re-render with all articles
+          renderArticles(d, 'all');
         }
       }, 550);
     }
