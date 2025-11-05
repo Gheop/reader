@@ -1252,9 +1252,16 @@ function unread(k, v=0) {
 
 	// Check if feed exists in menu (it might not if it had 0 unread articles)
 	if (!m[d[k].f]) {
-		// Feed doesn't exist in menu, need to reload menu data
-		console.log('Feed', d[k].f, 'not in menu, triggering background update');
-		fetchAndUpdateDataBackground();
+		// Feed doesn't exist in menu, wait for database to update then reload
+		console.log('Feed', d[k].f, 'not in menu, triggering delayed update');
+
+		// Wait 300ms to let the server update the database, then fetch updated data
+		// Don't create temporary entry - let the real data appear with proper animation
+		setTimeout(() => {
+			console.log('Fetching updated data after unread action on missing feed');
+			fetchAndUpdateDataBackground();
+		}, 300);
+
 		favicon(nb_title);
 		readItems--;
 		progressBar();
