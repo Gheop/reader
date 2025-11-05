@@ -153,9 +153,11 @@ function fetchAndUpdateData(feedId) {
 function renderMenu(menuData) {
   // Save old counters for comparison
   var oldCounters = {};
+  var oldFeedsVisible = {};
   if (m) {
     for(var i in m) {
       oldCounters[i] = m[i].n || 0;
+      oldFeedsVisible[i] = m[i].n > 0;
     }
   }
 
@@ -163,6 +165,7 @@ function renderMenu(menuData) {
   m = menuData;
   var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
   var changedFeeds = [];
+  var newFeeds = [];
 
   for(var i in m) {
     if (m[i].n > 0) {
@@ -173,6 +176,11 @@ function renderMenu(menuData) {
       if (oldCounters[i] !== undefined && oldCounters[i] !== m[i].n) {
         changedFeeds.push(i);
       }
+
+      // Check if this is a new feed (was hidden, now visible)
+      if (oldFeedsVisible[i] === false || oldFeedsVisible[i] === undefined) {
+        newFeeds.push(i);
+      }
     }
   }
 
@@ -182,9 +190,20 @@ function renderMenu(menuData) {
   }
   menuEl.insertAdjacentHTML('beforeend', menu);
 
-  // Apply blink effect to changed feeds
-  changedFeeds.forEach(function(feedId) {
+  // Apply fade-in animation to new feeds
+  newFeeds.forEach(function(feedId) {
     if($('f' + feedId)) {
+      $('f' + feedId).classList.add('fade-in-new');
+      // Remove class after animation
+      setTimeout(() => {
+        if($('f' + feedId)) $('f' + feedId).classList.remove('fade-in-new');
+      }, 600);
+    }
+  });
+
+  // Apply blink effect to changed feeds (but not new ones)
+  changedFeeds.forEach(function(feedId) {
+    if($('f' + feedId) && !newFeeds.includes(feedId)) {
       setTimeout(() => light('f' + feedId), 100);
     }
   });
@@ -302,6 +321,17 @@ function appendNewArticles(newArticlesData) {
 
       // Insert before addblank
       addBlank.insertAdjacentHTML('beforebegin', newPage);
+
+      // Apply fade-in animation to new articles
+      newArticles.forEach(function(articleId) {
+        if($(articleId)) {
+          $(articleId).classList.add('fade-in-new');
+          // Remove class after animation
+          setTimeout(() => {
+            if($(articleId)) $(articleId).classList.remove('fade-in-new');
+          }, 600);
+        }
+      });
 
       // Re-setup scroll observers for new articles
       scroll();
