@@ -293,6 +293,9 @@ function fetchAndUpdateDataBackground() {
 function appendNewArticles(newArticlesData) {
   // Find new articles that weren't in the previous data
   var newArticles = [];
+  var removedArticles = [];
+
+  // 1. Find NEW articles
   for(var i in newArticlesData) {
     if (!d || !d[i]) {
       // This article is new
@@ -303,11 +306,47 @@ function appendNewArticles(newArticlesData) {
     }
   }
 
-  console.log('Found', newArticles.length, 'new articles for current view');
+  // 2. Find REMOVED articles (marked as read elsewhere)
+  if (d) {
+    for(var i in d) {
+      if (!newArticlesData[i]) {
+        // This article was in old data but not in new data = marked as read elsewhere
+        if ($(i)) {
+          removedArticles.push(i);
+        }
+      }
+    }
+  }
 
+  console.log('Found', newArticles.length, 'new articles and', removedArticles.length, 'removed articles for current view');
+
+  // Update global data
+  d = newArticlesData;
+
+  // Handle removed articles (fade out and remove from DOM)
+  if (removedArticles.length > 0) {
+    removedArticles.forEach(function(articleId) {
+      var article = $(articleId);
+      if (article) {
+        // Fade out animation
+        article.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        article.style.opacity = '0';
+        article.style.transform = 'translateX(-20px)';
+
+        // Remove from DOM after animation
+        setTimeout(() => {
+          if (article.parentNode) {
+            article.parentNode.removeChild(article);
+          }
+          loadmore--;
+        }, 500);
+      }
+    });
+    console.log('Removed', removedArticles.length, 'articles from DOM');
+  }
+
+  // Handle new articles (fade in and add to DOM)
   if (newArticles.length > 0) {
-    // Update global data
-    d = newArticlesData;
     Now = new Date();
 
     // Append new articles to DOM
@@ -338,9 +377,6 @@ function appendNewArticles(newArticlesData) {
 
       console.log('Appended', newArticles.length, 'new articles to DOM');
     }
-  } else {
-    // No new articles, just update the data
-    d = newArticlesData;
   }
 }
 
