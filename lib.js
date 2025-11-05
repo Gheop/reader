@@ -262,19 +262,56 @@ function fetchAndUpdateDataBackground() {
         // Update menu (with blink effects)
         renderMenu(data.menu);
 
-        // Only update articles view if we're on "all", otherwise keep current filtered view
-        // The data is updated in cache, when user switches feeds they'll see fresh data
-        if (id === 'all') {
-          renderArticles(data.articles, 'all');
-        } else {
-          // Update global articles data but don't re-render (user is viewing a specific feed)
-          d = data.articles;
-        }
+        // Handle article updates
+        appendNewArticles(data.articles);
       }
     })
     .catch(err => {
       console.error('Background sync failed:', err);
     });
+}
+
+function appendNewArticles(newArticlesData) {
+  // Find new articles that weren't in the previous data
+  var newArticles = [];
+  for(var i in newArticlesData) {
+    if (!d || !d[i]) {
+      // This article is new
+      // Check if it should be displayed based on current filter
+      if (id === 'all' || newArticlesData[i].f == id) {
+        newArticles.push(i);
+      }
+    }
+  }
+
+  console.log('Found', newArticles.length, 'new articles for current view');
+
+  if (newArticles.length > 0) {
+    // Update global data
+    d = newArticlesData;
+    Now = new Date();
+
+    // Append new articles to DOM
+    var addBlank = $('addblank');
+    if (addBlank) {
+      var newPage = '';
+      newArticles.forEach(function(articleId) {
+        loadmore++;
+        newPage += generateArticle(articleId);
+      });
+
+      // Insert before addblank
+      addBlank.insertAdjacentHTML('beforebegin', newPage);
+
+      // Re-setup scroll observers for new articles
+      scroll();
+
+      console.log('Appended', newArticles.length, 'new articles to DOM');
+    }
+  } else {
+    // No new articles, just update the data
+    d = newArticlesData;
+  }
 }
 
 function stopBackgroundSync() {
