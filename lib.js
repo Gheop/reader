@@ -496,14 +496,17 @@ function view(i) {
   if ($('fsearch')) $('fsearch').className = "flux";
   search_active = 0;
 
-  // Use cached data if available
-  const cached = loadFromCache();
-  if (cached && cached.articles) {
-    renderArticles(cached.articles, i);
+  // Just filter and display articles from cache
+  // The background sync will update automatically every 30s
+  if (d && Object.keys(d).length > 0) {
+    renderArticles(d, i);
+  } else {
+    // No data in memory, try cache
+    const cached = loadFromCache();
+    if (cached && cached.articles) {
+      renderArticles(cached.articles, i);
+    }
   }
-
-  // Then fetch fresh data in background
-  fetchAndUpdateData(i);
 }
 
 function removelight(i) {
