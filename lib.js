@@ -1246,12 +1246,26 @@ function unread(k, v=0) {
 
 	if (nb_title < 0) nb_title = 0;
 	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
+
+	// Send request to server to mark as unread
+	myFetch('unread.php', 'id='+k, 1);
+
+	// Check if feed exists in menu (it might not if it had 0 unread articles)
+	if (!m[d[k].f]) {
+		// Feed doesn't exist in menu, need to reload menu data
+		console.log('Feed', d[k].f, 'not in menu, triggering background update');
+		fetchAndUpdateDataBackground();
+		favicon(nb_title);
+		readItems--;
+		progressBar();
+		return;
+	}
+
 	m[d[k].f].n++;
         $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
         $('f' + d[k].f).className = "fluxnew";
 	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
 	light('f' + d[k].f);
-  myFetch('unread.php', 'id='+k, 1);
 	favicon(nb_title);
 	readItems--;
 	progressBar();
