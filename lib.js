@@ -365,14 +365,22 @@ function appendNewArticles(newArticlesData) {
   // Find new articles that weren't in the previous data
   var newArticles = [];
   var removedArticles = [];
+  var reactivatedArticles = []; // Articles marked as unread elsewhere
 
-  // 1. Find NEW articles
+  // 1. Find NEW articles and REACTIVATED articles (marked as unread elsewhere)
   for(var i in newArticlesData) {
     if (!d || !d[i]) {
-      // This article is new
+      // This article is completely new
       // Check if it should be displayed based on current filter
       if (id === 'all' || newArticlesData[i].f == id) {
-        newArticles.push(i);
+        // Check if it exists in DOM as a read article
+        if ($(i) && $(i).className === 'item0') {
+          // Article exists in DOM but was read, now it's unread again
+          reactivatedArticles.push(i);
+        } else {
+          // Truly new article
+          newArticles.push(i);
+        }
       }
     }
   }
@@ -389,7 +397,7 @@ function appendNewArticles(newArticlesData) {
     }
   }
 
-  console.log('Found', newArticles.length, 'new articles and', removedArticles.length, 'removed articles for current view');
+  console.log('Found', newArticles.length, 'new articles,', reactivatedArticles.length, 'reactivated articles, and', removedArticles.length, 'removed articles for current view');
 
   // Update global data - but keep articles that are currently in DOM
   // This allows users to still interact with them (mark as unread, etc.)
@@ -462,6 +470,25 @@ function appendNewArticles(newArticlesData) {
         renderArticles(d, 'all');
       }
     }
+  }
+
+  // Handle reactivated articles (marked as unread elsewhere)
+  if (reactivatedArticles.length > 0) {
+    reactivatedArticles.forEach(function(articleId) {
+      var article = $(articleId);
+      if (article && article.className === 'item0') {
+        // Change from read (item0) to unread (item1)
+        article.className = 'item1';
+        console.log('Reactivated article', articleId, 'from read to unread');
+
+        // Add fade-in animation
+        article.classList.add('fade-in-new');
+        setTimeout(() => {
+          if($(articleId)) $(articleId).classList.remove('fade-in-new');
+        }, 600);
+      }
+    });
+    console.log('Reactivated', reactivatedArticles.length, 'articles');
   }
 
   // Handle new articles (fade in and add to DOM)
