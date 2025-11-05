@@ -22,6 +22,7 @@ var favicon_badge;
 var rtf;
 var syncInterval = null;
 var cacheVersion = 'v1';
+var locallyModifiedArticles = {}; // Track articles manually marked as unread
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 	const locale = navigator.language;
@@ -320,12 +321,25 @@ function appendNewArticles(newArticlesData) {
 
   console.log('Found', newArticles.length, 'new articles and', removedArticles.length, 'removed articles for current view');
 
-  // Update global data
+  // Update global data - but keep locally modified articles
+  for(var i in locallyModifiedArticles) {
+    if (d && d[i]) {
+      // Re-add locally modified articles to new data
+      newArticlesData[i] = d[i];
+      console.log('Preserving locally modified article', i);
+    }
+  }
   d = newArticlesData;
 
   // Handle removed articles (mark as read, don't remove from DOM to preserve scroll)
   if (removedArticles.length > 0) {
     removedArticles.forEach(function(articleId) {
+      // Skip articles that were manually modified locally
+      if (locallyModifiedArticles[articleId]) {
+        console.log('Skipping article', articleId, '- locally modified');
+        return;
+      }
+
       var article = $(articleId);
       if (article) {
         // Just mark as read visually (item1 -> item0)
@@ -1103,6 +1117,10 @@ function unread(k, v=0) {
 	if (d[k].r == 1 || $(k).className == 'item1') return;
 	d[k].r = 1;
 	$(k).className = 'item1';
+
+	// Track that this article was manually marked as unread
+	locallyModifiedArticles[k] = {state: 'unread', timestamp: Date.now()};
+
 	if (nb_title < 0) nb_title = 0;
 	D.title = 'Gheop Reader' + ((++nb_title > 0) ? ' (' + nb_title + ')' : '');
 	m[d[k].f].n++;
