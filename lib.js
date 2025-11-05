@@ -665,12 +665,26 @@ function updateStyle(elem) {
   .article-content > :last-child {
   margin-bottom: 0 !important;
 }
+  /* Prevent images, videos, iframes from overflowing */
+  .article-content img,
+  .article-content video,
+  .article-content iframe,
+  .article-content picture,
+  .article-content source {
+  max-width: 100% !important;
+  height: auto !important;
+}
+  /* Ensure pre/code blocks also don't overflow */
+  .article-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
   .spinner {
   margin: 20px auto;
   width: 20px;
   height: 20px;
-  border: 4px solid #111;         
-  border-top-color: #ff8b8b;      
+  border: 4px solid #111;
+  border-top-color: #ff8b8b;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
