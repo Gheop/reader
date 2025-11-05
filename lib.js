@@ -23,6 +23,7 @@ var rtf;
 var syncInterval = null;
 var cacheVersion = 'v1';
 var locallyModifiedArticles = {}; // Track articles manually marked as unread
+var eventSource = null; // SSE connection
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 	const locale = navigator.language;
@@ -257,12 +258,74 @@ function renderArticles(articlesData, feedId) {
   }
 }
 
+// ============================================================================
+// SERVER-SENT EVENTS (SSE) FOR REAL-TIME PUSH
+// ============================================================================
+
+function startSSEConnection() {
+  // Close existing connection if any
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+
+  // Check if browser supports EventSource
+  if (typeof EventSource === 'undefined') {
+    console.warn('SSE not supported, falling back to polling');
+    startBackgroundSync(30);
+    return;
+  }
+
+  console.log('Establishing SSE connection...');
+  eventSource = new EventSource('sse.php');
+
+  eventSource.addEventListener('connected', function(e) {
+    const data = JSON.parse(e.data);
+    console.log('SSE connected:', data);
+  });
+
+  eventSource.addEventListener('update', function(e) {
+    const data = JSON.parse(e.data);
+    console.log('SSE update received:', data);
+    // Data has changed, refresh in background
+    fetchAndUpdateDataBackground();
+  });
+
+  eventSource.addEventListener('heartbeat', function(e) {
+    const data = JSON.parse(e.data);
+    console.log('SSE heartbeat:', data.timestamp);
+  });
+
+  eventSource.addEventListener('timeout', function(e) {
+    console.log('SSE timeout, reconnecting...');
+    // Connection timed out, reconnect
+    setTimeout(() => startSSEConnection(), 1000);
+  });
+
+  eventSource.onerror = function(e) {
+    console.error('SSE error:', e);
+    eventSource.close();
+    eventSource = null;
+    // Try to reconnect after 5 seconds
+    setTimeout(() => startSSEConnection(), 5000);
+  };
+}
+
+function stopSSEConnection() {
+  if (eventSource) {
+    console.log('Closing SSE connection');
+    eventSource.close();
+    eventSource = null;
+  }
+}
+
+// Fallback to polling if SSE not available or fails
 function startBackgroundSync(intervalSeconds = 30) {
   if (syncInterval) {
     clearInterval(syncInterval);
   }
   syncInterval = setInterval(() => {
-    console.log('Background sync...');
+    console.log('Background sync (polling)...');
     // Always fetch all data, but keep current view
     fetchAndUpdateDataBackground();
   }, intervalSeconds * 1000);
@@ -455,10 +518,14 @@ function handleConnectionChange(event){
     if(event.type == "offline"){
       online = false;
       $('g').style.textDecoration='line-through';
+      // Close SSE connection when offline
+      stopSSEConnection();
     }
     if(event.type == "online"){
       online = true;
       $('g').style.textDecoration='none';
+      // Restart SSE connection when back online
+      startSSEConnection();
     }
 }
 
@@ -1276,10 +1343,13 @@ function i() {
 
   // Then load data
   loadData('all');
-  startBackgroundSync(30);
+
+  // Start SSE connection for real-time updates
+  startSSEConnection();
 
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
+  window.addEventListener('beforeunload', stopSSEConnection);
   window.onresize = scroll;
 
   inactivityTime();
