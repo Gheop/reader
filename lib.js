@@ -20,6 +20,8 @@ notif = false;
 var Now;
 var favicon_badge;
 var rtf;
+var syncInterval = null;
+var cacheVersion = 'v1';
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 	const locale = navigator.language;
@@ -55,6 +57,46 @@ var inactivityTime = function () {
 
 function $(i) {
   return D.getElementById(i);
+}
+
+// ============================================================================
+// LOCALSTORAGE CACHE MANAGEMENT
+// ============================================================================
+
+function saveToCache(data) {
+  try {
+    localStorage.setItem('reader_cache_' + cacheVersion, JSON.stringify(data));
+    localStorage.setItem('reader_cache_timestamp', Date.now());
+  } catch (e) {
+    console.error('Failed to save to localStorage:', e);
+  }
+}
+
+function loadFromCache() {
+  try {
+    const cached = localStorage.getItem('reader_cache_' + cacheVersion);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (e) {
+    console.error('Failed to load from localStorage:', e);
+  }
+  return null;
+}
+
+function getCacheAge() {
+  const timestamp = localStorage.getItem('reader_cache_timestamp');
+  if (!timestamp) return Infinity;
+  return Date.now() - parseInt(timestamp);
+}
+
+function clearCache() {
+  try {
+    localStorage.removeItem('reader_cache_' + cacheVersion);
+    localStorage.removeItem('reader_cache_timestamp');
+  } catch (e) {
+    console.error('Failed to clear cache:', e);
+  }
 }
 
 function favicon(nb) {
@@ -323,41 +365,21 @@ function updateStyle(elem) {
 }
 
 function view(i) {
-	myFetch('view.php', 'id='+i).then(result => {
-		let page = '';
-		cptReadArticle = 0;
-		varscroll = 0;
-		loadmore = 0;
-		d = result;
-		Now = new Date();
-		for(let i in d) {
-			loadmore++;
-      page += generateArticle(i);
-    }
-    if(loadmore == 0) {
-    	page = '<article class="item1">\n\t<header>\n\t\t<h1 class="headline"><a class="title" target="_blank">Flux vide</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a class="website">Gheop Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<div class="article-content">Pas de nouveaux articles.</div>\n\t<div class="action">&nbsp;&nbsp;</div>\n</article>';
-		}
-
-		page += '<div id="addblank">&nbsp;</div>';
-
-		DM.innerHTML = page;
-		DM.scrollTop = 0;
-
-		DM.addEventListener('DOMMouseScroll', scroll, false);
-		DM.onscroll = scroll;
-		DM.onmousewheel = scroll;
-		DM.scrollTop = 0;
-		if(loadmore > 0) {
-			if(loadmore) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
-			//lazyLoadImg();
-			scroll();
-		}
-	})
+  // Update UI state
   $('f' + id).classList.remove('show');
   id = i;
   $('f' + id).classList.add('show');
   if ($('fsearch')) $('fsearch').className = "flux";
   search_active = 0;
+
+  // Use cached data if available
+  const cached = loadFromCache();
+  if (cached && cached.articles) {
+    renderArticles(cached.articles, i);
+  }
+
+  // Then fetch fresh data in background
+  fetchAndUpdateData(i);
 }
 
 function removelight(i) {
@@ -881,8 +903,8 @@ function konamistop() {
 */
 
 function i() {
-  view('all');
-  menu();
+  loadData('all');
+  startBackgroundSync(30);
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
   window.onresize = scroll;
