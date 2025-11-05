@@ -209,6 +209,13 @@ function renderMenu(menuData) {
     }
   });
 
+  // Restore the 'show' class on currently selected feed
+  if (id === 'all' && $('fall')) {
+    $('fall').classList.add('show');
+  } else if (id !== 'all' && $('f' + id)) {
+    $('f' + id).classList.add('show');
+  }
+
   D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
   favicon(nb_title);
   totalItems = nb_title;
