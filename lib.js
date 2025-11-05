@@ -151,20 +151,44 @@ function fetchAndUpdateData(feedId) {
 }
 
 function renderMenu(menuData) {
+  // Save old counters for comparison
+  var oldCounters = {};
+  if (m) {
+    for(var i in m) {
+      oldCounters[i] = m[i].n || 0;
+    }
+  }
+
   nb_title = 0;
   m = menuData;
   var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+  var changedFeeds = [];
+
   for(var i in m) {
     if (m[i].n > 0) {
       menu += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">'  + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
       nb_title += m[i].n || 0;
+
+      // Check if counter changed
+      if (oldCounters[i] !== undefined && oldCounters[i] !== m[i].n) {
+        changedFeeds.push(i);
+      }
     }
   }
+
   const menuEl = $('menu');
   while (menuEl.children.length > 1) {
     menuEl.removeChild(menuEl.lastChild);
   }
   menuEl.insertAdjacentHTML('beforeend', menu);
+
+  // Apply blink effect to changed feeds
+  changedFeeds.forEach(function(feedId) {
+    if($('f' + feedId)) {
+      setTimeout(() => light('f' + feedId), 100);
+    }
+  });
+
   D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
   favicon(nb_title);
   totalItems = nb_title;
@@ -212,8 +236,45 @@ function startBackgroundSync(intervalSeconds = 30) {
   }
   syncInterval = setInterval(() => {
     console.log('Background sync...');
-    fetchAndUpdateData(id);
+    // Always fetch all data, but keep current view
+    fetchAndUpdateDataBackground();
   }, intervalSeconds * 1000);
+}
+
+function fetchAndUpdateDataBackground() {
+  const url = 'api.php'; // Always fetch all data
+  console.log('Background fetching data from:', url);
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.menu && data.articles) {
+        console.log('Background sync: Menu items:', Object.keys(data.menu).length, 'Articles:', Object.keys(data.articles).length);
+
+        // Save to cache
+        saveToCache(data);
+
+        // Update menu (with blink effects)
+        renderMenu(data.menu);
+
+        // Only update articles view if we're on "all", otherwise keep current filtered view
+        // The data is updated in cache, when user switches feeds they'll see fresh data
+        if (id === 'all') {
+          renderArticles(data.articles, 'all');
+        } else {
+          // Update global articles data but don't re-render (user is viewing a specific feed)
+          d = data.articles;
+        }
+      }
+    })
+    .catch(err => {
+      console.error('Background sync failed:', err);
+    });
 }
 
 function stopBackgroundSync() {
