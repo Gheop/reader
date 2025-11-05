@@ -824,10 +824,19 @@ function updateStyle(elem) {
 }
 
 function view(i) {
-  // Update UI state
-  $('f' + id).classList.remove('show');
+  // Update UI state - remove 'show' from old feed if it exists
+  var oldFeed = $('f' + id);
+  if (oldFeed) {
+    oldFeed.classList.remove('show');
+  }
+
   id = i;
-  $('f' + id).classList.add('show');
+
+  var newFeed = $('f' + id);
+  if (newFeed) {
+    newFeed.classList.add('show');
+  }
+
   if ($('fsearch')) $('fsearch').className = "flux";
   search_active = 0;
 
