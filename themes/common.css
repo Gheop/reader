@@ -225,17 +225,75 @@ li > input {
   font-size: 1rem;
 }
 
-/* Icône de changement de thème */
-#theme {
-  font-size: 0; /* Cacher le texte inséré par le serveur */
+/* Sélecteur de thème avec dropdown */
+#theme-selector {
+  position: relative;
+  display: inline-block;
 }
 
-#theme:before {
-  content: "\f186";  /* moon - thème sombre/clair */
+#theme-current {
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+#theme-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 5px 0;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 5px;
+}
+
+#theme-dropdown.theme-dropdown-hidden {
+  display: none;
+}
+
+#theme-dropdown a {
+  display: block;
+  padding: 8px 15px;
+  color: #333;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+#theme-dropdown a:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Icônes des thèmes */
+.theme-icon-light:before {
+  content: "\f185";  /* sun - thème clair */
   font-family: "Font Awesome 6 Free";
   font-weight: 400;
-  font-size: 1rem;
-  margin-right: 10px;
+  margin-right: 8px;
+}
+
+.theme-icon-dark:before {
+  content: "\f186";  /* moon - thème sombre */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-adaptive:before {
+  content: "\f017";  /* clock - thème adaptatif */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-smooth:before {
+  content: "\f5a4";  /* sunset - thème progressif */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
 }
 
 a {
@@ -608,16 +666,21 @@ input, textarea, button {
   margin-bottom: 5px;
 }
 
-/* Footer */
+/* Footer - barre de progression toujours visible */
 footer {
-  position: absolute;
-  height: 4px;
-  bottom: 0;
+  position: fixed !important;
+  height: 4px !important;
+  bottom: 0 !important;
   margin: 0;
-  left: 0;
-  right: 0;
+  left: 0 !important;
+  right: 0 !important;
   padding: 0;
   overflow: auto;
+  z-index: 1001 !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 a.liked {
