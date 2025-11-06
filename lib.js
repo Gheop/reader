@@ -639,6 +639,8 @@ function appendNewArticles(newArticlesData) {
       newArticles.forEach(function(articleId) {
         if($(articleId)) {
           $(articleId).classList.add('fade-in-new');
+          // Mark as protected from auto-read temporarily
+          $(articleId).dataset.newArticle = 'true';
           // Remove class after animation
           setTimeout(() => {
             if($(articleId)) $(articleId).classList.remove('fade-in-new');
@@ -648,6 +650,16 @@ function appendNewArticles(newArticlesData) {
 
       // Re-setup scroll observers for new articles
       scroll();
+
+      // Remove protection from auto-read after 2 seconds
+      // This gives user time to see the new articles before they're auto-marked as read
+      setTimeout(() => {
+        newArticles.forEach(function(articleId) {
+          if($(articleId)) {
+            delete $(articleId).dataset.newArticle;
+          }
+        });
+      }, 2000);
 
       console.log('Appended', newArticles.length, 'new articles to DOM');
     }
@@ -747,6 +759,10 @@ function scroll() {
                         // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
                         if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
                             let art = entry.target;
+                            // Skip if this is a newly added article (protected for 2 seconds)
+                            if (art.dataset.newArticle === 'true') {
+                                return;
+                            }
                             // Vérifier que l'article n'est pas déjà lu
                             if (d[art.id] && d[art.id].r !== 0) {
                                 // Marquer immédiatement comme traité avant d'appeler read()
