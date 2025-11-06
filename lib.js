@@ -938,10 +938,15 @@ function updateStyle(elem) {
   /* Prevent images, videos, iframes from overflowing */
   .article-content img,
   .article-content video,
-  .article-content iframe,
   .article-content picture,
   .article-content source {
   max-width: 100% !important;
+  height: auto !important;
+}
+  /* YouTube iframes need aspect ratio preservation */
+  .article-content iframe {
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9;
   height: auto !important;
 }
   /* Ensure pre/code blocks also don't overflow */
