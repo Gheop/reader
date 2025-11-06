@@ -111,7 +111,10 @@ function loadData(feedId, useCache = true) {
     if (cached && cached.menu && cached.articles) {
       console.log('Loading from cache (age: ' + Math.round(getCacheAge()/1000) + 's)');
       renderMenu(cached.menu);
-      renderArticles(cached.articles, feedId || 'all');
+      // Use current global 'id' if feedId is 'all' (reload scenario)
+      // This maintains the current feed view when reloading all data
+      var displayFeed = (feedId === 'all' && id !== 'all') ? id : (feedId || 'all');
+      renderArticles(cached.articles, displayFeed);
       setTimeout(() => fetchAndUpdateData(feedId), 100);
       return;
     }
@@ -137,9 +140,19 @@ function fetchAndUpdateData(feedId) {
       if (data.menu && data.articles) {
         console.log('Menu items:', Object.keys(data.menu).length);
         console.log('Articles:', Object.keys(data.articles).length);
-        saveToCache(data);
+
+        // Only save to cache if we loaded ALL articles (not filtered by feed)
+        // Otherwise we'd overwrite the cache with incomplete data
+        if (!feedId || feedId === 'all') {
+          saveToCache(data);
+        } else {
+          console.log('Skipping cache save for filtered feed', feedId);
+        }
+
         renderMenu(data.menu);
-        renderArticles(data.articles, feedId || 'all');
+        // Use current global 'id' if feedId is 'all' (reload scenario)
+        var displayFeed = (feedId === 'all' && id !== 'all') ? id : (feedId || 'all');
+        renderArticles(data.articles, displayFeed);
       } else {
         console.error('Invalid data structure:', data);
       }
@@ -877,10 +890,12 @@ function view(i) {
     }
   }
 
-  // If menu says there are articles but we don't have them in d, reload
+  // If menu says there are articles but we don't have them in d, reload ALL data
+  // We must load ALL articles, not just this feed, to keep d complete
   if (!hasArticlesForFeed && m && m[i] && m[i].n > 0) {
-    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, reloading');
-    loadData(i, true); // Load from cache first, then refresh
+    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, reloading all data');
+    loadData('all', true); // Load ALL articles to refresh d completely
+    // After load completes, articles will be filtered by current id automatically
     return;
   }
 
