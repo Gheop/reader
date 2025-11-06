@@ -49,17 +49,23 @@ $lastHash = '';
 
 // Function to get current state hash
 function getCurrentHash($mysqli, $userId, $counterColumn) {
-    $result = $mysqli->query("
+    // Note: $counterColumn is validated as one of two specific column names, safe to embed
+    $stmt = $mysqli->prepare("
         SELECT SUM($counterColumn) as total,
                MAX(UNIX_TIMESTAMP(GREATEST(
                    COALESCE((SELECT MAX(pubdate) FROM reader_item), '1970-01-01'),
-                   COALESCE((SELECT MAX(pubdate) FROM reader_unread_cache WHERE id_user = $userId), '1970-01-01')
+                   COALESCE((SELECT MAX(pubdate) FROM reader_unread_cache WHERE id_user = ?), '1970-01-01')
                ))) as last_change
         FROM reader_flux
     ");
 
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
     if ($result) {
         $data = $result->fetch_assoc();
+        $stmt->close();
         return md5($data['total'] . '_' . $data['last_change']);
     }
     return '';
