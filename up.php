@@ -7,7 +7,19 @@
 include('/www/conf.php');
 include('clean_text.php');
 
-// Security: Check authentication
+// Allow CLI execution for cron jobs (updates all feeds)
+if (php_sapi_name() === 'cli') {
+    // CLI mode: bypass authentication, initialize session
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    $_SESSION['user_id'] = 1; // Default user for CLI
+    if (!isset($_SESSION['mysqli'])) {
+        $_SESSION['mysqli'] = $mysqli;
+    }
+}
+
+// Security: Check authentication (web requests only)
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     http_response_code(403);
     die('Unauthorized access');
@@ -323,6 +335,13 @@ for($j = 0; $j < $i; $j++) {
             $title = clean_txt($title);
             $content = clean_txt($content);
             $author = clean_txt($author);
+
+            // Clean and ensure GUID is not null (use link as fallback)
+            if (isset($guid) && $guid) {
+                $guid = clean_txt($guid);
+            } else {
+                $guid = $link; // Use link as GUID if no GUID provided
+            }
 
             echo "MAJ<br />";
 
