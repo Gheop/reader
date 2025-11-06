@@ -512,6 +512,16 @@ function appendNewArticles(newArticlesData) {
 
   // Handle reactivated articles (marked as unread elsewhere)
   if (reactivatedArticles.length > 0) {
+    // Remove "Flux vide" message if it exists
+    var articles = DM.querySelectorAll('article');
+    articles.forEach(function(article) {
+      var titleLink = article.querySelector('.title');
+      if (titleLink && titleLink.textContent === 'Flux vide') {
+        console.log('Removing "Flux vide" message (reactivated articles)');
+        article.remove();
+      }
+    });
+
     reactivatedArticles.forEach(function(articleId) {
       var article = $(articleId);
       if (article && article.className === 'item0') {
@@ -532,6 +542,16 @@ function appendNewArticles(newArticlesData) {
   // Handle new articles (fade in and add to DOM)
   if (newArticles.length > 0) {
     Now = new Date();
+
+    // Remove "Flux vide" message if it exists
+    var articles = DM.querySelectorAll('article');
+    articles.forEach(function(article) {
+      var titleLink = article.querySelector('.title');
+      if (titleLink && titleLink.textContent === 'Flux vide') {
+        console.log('Removing "Flux vide" message');
+        article.remove();
+      }
+    });
 
     // Append new articles to DOM
     var addBlank = $('addblank');
