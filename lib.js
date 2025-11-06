@@ -935,7 +935,7 @@ function updateStyle(elem) {
   .article-content > :last-child {
   margin-bottom: 0 !important;
 }
-  /* Prevent images, videos, iframes from overflowing */
+  /* Prevent images, videos from overflowing */
   .article-content img,
   .article-content video,
   .article-content picture,
@@ -943,11 +943,12 @@ function updateStyle(elem) {
   max-width: 100% !important;
   height: auto !important;
 }
-  /* YouTube iframes need aspect ratio preservation */
+  /* YouTube iframes - wrapper approach for proper aspect ratio */
   .article-content iframe {
+  width: 100% !important;
   max-width: 100% !important;
   aspect-ratio: 16 / 9;
-  height: auto !important;
+  border: none;
 }
   /* Ensure pre/code blocks also don't overflow */
   .article-content pre {
