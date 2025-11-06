@@ -680,17 +680,17 @@ function favicon(nb) {
 
 function changeTheme(style) {
   if(imageObserver) imageObserver.disconnect();
-  const regTheme = RegExp('screen.css');
+  const regTheme = RegExp('light.css');
   const timestamp = Date.now();
   if(regTheme.test($('stylesheet').href)) {
-   $('stylesheet').href='dark.css?v=' + timestamp;
+   $('stylesheet').href='themes/dark.css?v=' + timestamp;
    $('theme').innerHTML='';
    localStorage.setItem('theme', 'dark');
   }
   else {
-    $('stylesheet').href='screen.css?v=' + timestamp;
+    $('stylesheet').href='themes/light.css?v=' + timestamp;
     $('theme').innerHTML='';
-    localStorage.setItem('theme', 'screen');
+    localStorage.setItem('theme', 'light');
   }
   setTimeout(scroll, 2000);
 }
@@ -1845,6 +1845,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') {
     const timestamp = Date.now();
-    $('stylesheet').href = 'dark.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
   }
 });
