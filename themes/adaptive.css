@@ -114,8 +114,14 @@ article ::selection {
 }
 
 /* Ajustements pour les éléments de navigation */
+.fluxnew, .flux {
+  color: var(--theme-text-body);
+  transition: color 0.5s ease;
+}
+
 .fluxnew:hover a, .flux:hover a {
   color: var(--theme-text-link);
+  transition: color 0.3s ease;
 }
 
 /* Ajustement des ombres de texte */

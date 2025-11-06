@@ -432,7 +432,9 @@ function fetchAndUpdateDataBackground() {
   const url = 'api.php'; // Always fetch all data
   console.log('Background fetching data from:', url);
 
-  fetch(url)
+  fetch(url, {
+    credentials: 'same-origin' // Include cookies for authentication
+  })
     .then(response => {
       if (!response.ok) {
         throw new Error('HTTP error ' + response.status);
