@@ -1843,8 +1843,19 @@ document.onload = i();
 // Charger le thème sauvegardé au démarrage
 window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
+  const timestamp = Date.now();
+  
   if (savedTheme === 'dark') {
-    const timestamp = Date.now();
+    // Utilisateur a choisi le thème sombre
     $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+  } else if (savedTheme === 'light') {
+    // Utilisateur a choisi le thème clair
+    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+  } else {
+    // Pas de préférence sauvegardée : utiliser prefers-color-scheme
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    }
+    // Sinon on garde light.css qui est déjà chargé par défaut
   }
 });
