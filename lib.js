@@ -685,10 +685,12 @@ function changeTheme(style) {
   if(regTheme.test($('stylesheet').href)) {
    $('stylesheet').href='dark.css?v=' + timestamp;
    $('theme').innerHTML='';
+   localStorage.setItem('theme', 'dark');
   }
   else {
     $('stylesheet').href='screen.css?v=' + timestamp;
     $('theme').innerHTML='';
+    localStorage.setItem('theme', 'screen');
   }
   setTimeout(scroll, 2000);
 }
@@ -1837,3 +1839,12 @@ document.onload = i();
 //i();
 
 
+
+// Charger le thème sauvegardé au démarrage
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    const timestamp = Date.now();
+    $('stylesheet').href = 'dark.css?v=' + timestamp;
+  }
+});
