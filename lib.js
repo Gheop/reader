@@ -220,7 +220,9 @@ function renderMenu(menuData) {
       }
 
       // Check if this is a new feed (was hidden, now visible)
-      if (oldFeedsVisible[i] === false || oldFeedsVisible[i] === undefined) {
+      // BUT don't treat preserved current feed as new (it was already visible)
+      var isPreservedCurrentFeed = (currentFeedData && i == id);
+      if ((oldFeedsVisible[i] === false || oldFeedsVisible[i] === undefined) && !isPreservedCurrentFeed) {
         newFeeds.push(i);
       }
     }
