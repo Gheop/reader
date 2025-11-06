@@ -680,18 +680,39 @@ function favicon(nb) {
 
 function changeTheme(style) {
   if(imageObserver) imageObserver.disconnect();
-  const regTheme = RegExp('light.css');
   const timestamp = Date.now();
-  if(regTheme.test($('stylesheet').href)) {
-   $('stylesheet').href='themes/dark.css?v=' + timestamp;
-   $('theme').innerHTML='';
-   localStorage.setItem('theme', 'dark');
+  const currentTheme = localStorage.getItem('theme') || 'auto';
+
+  let nextTheme;
+
+  // Cycle: light → dark → adaptive → light
+  if ($('stylesheet').href.includes('light.css')) {
+    nextTheme = 'dark';
+  } else if ($('stylesheet').href.includes('dark.css')) {
+    nextTheme = 'adaptive';
+  } else {
+    nextTheme = 'light';
   }
-  else {
-    $('stylesheet').href='themes/light.css?v=' + timestamp;
-    $('theme').innerHTML='';
+
+  // Appliquer le thème
+  if (nextTheme === 'light') {
+    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
     localStorage.setItem('theme', 'light');
+  } else if (nextTheme === 'dark') {
+    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    localStorage.setItem('theme', 'dark');
+  } else if (nextTheme === 'adaptive') {
+    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    localStorage.setItem('theme', 'adaptive');
+    // Démarrer le thème adaptatif après un court délai
+    setTimeout(() => {
+      if (window.startAdaptiveTheme) {
+        startAdaptiveTheme();
+      }
+    }, 100);
   }
+
+  $('theme').innerHTML = '';
   setTimeout(scroll, 2000);
 }
 
@@ -1844,13 +1865,22 @@ document.onload = i();
 window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
   const timestamp = Date.now();
-  
+
   if (savedTheme === 'dark') {
     // Utilisateur a choisi le thème sombre
     $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
   } else if (savedTheme === 'light') {
     // Utilisateur a choisi le thème clair
     $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+  } else if (savedTheme === 'adaptive') {
+    // Utilisateur a choisi le thème adaptatif
+    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    // Démarrer le thème adaptatif après un court délai
+    setTimeout(() => {
+      if (window.startAdaptiveTheme) {
+        startAdaptiveTheme();
+      }
+    }, 100);
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -1859,3 +1889,141 @@ window.addEventListener('DOMContentLoaded', () => {
     // Sinon on garde light.css qui est déjà chargé par défaut
   }
 });
+
+// ============================================================================
+// ADAPTIVE THEME - Color interpolation and time-based transitions
+// ============================================================================
+
+// Couleurs du thème clair (6h-10h → clair, 10h-16h → clair)
+const lightTheme = {
+  bgBody: '#ffffff',
+  bgMain: '#eeeeee',
+  bgItem: '#ffffff',
+  bgShow: '#eeeeee',
+  bgInput: '#ffffff',
+  textBody: '#333333',
+  textLink: '#444444',
+  textLight: '#888888',
+  shadowItem: 'rgba(68, 68, 68, 0.3)',
+  border: '#eeeeee'
+};
+
+// Couleurs du thème sombre (16h-20h → sombre, 20h-6h → sombre)
+const darkTheme = {
+  bgBody: '#1a1a1a',
+  bgMain: '#2b2b2b',
+  bgItem: '#3a3a3a',
+  bgShow: '#2b2b2b',
+  bgInput: '#333333',
+  textBody: '#d4d4d4',
+  textLink: '#aaaaaa',
+  textLight: '#888888',
+  shadowItem: 'rgba(0, 0, 0, 0.5)',
+  border: '#4a4a4a'
+};
+
+// Interpoler entre deux valeurs hex ou rgba
+function interpolateColor(color1, color2, factor) {
+  // Si c'est rgba
+  if (color1.startsWith('rgba')) {
+    const rgba1 = color1.match(/[\d.]+/g).map(Number);
+    const rgba2 = color2.match(/[\d.]+/g).map(Number);
+    const r = Math.round(rgba1[0] + (rgba2[0] - rgba1[0]) * factor);
+    const g = Math.round(rgba1[1] + (rgba2[1] - rgba1[1]) * factor);
+    const b = Math.round(rgba1[2] + (rgba2[2] - rgba1[2]) * factor);
+    const a = rgba1[3] + (rgba2[3] - rgba1[3]) * factor;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  // Si c'est hex
+  const hex1 = color1.replace('#', '');
+  const hex2 = color2.replace('#', '');
+
+  const r1 = parseInt(hex1.substr(0, 2), 16);
+  const g1 = parseInt(hex1.substr(2, 2), 16);
+  const b1 = parseInt(hex1.substr(4, 2), 16);
+
+  const r2 = parseInt(hex2.substr(0, 2), 16);
+  const g2 = parseInt(hex2.substr(2, 2), 16);
+  const b2 = parseInt(hex2.substr(4, 2), 16);
+
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Calculer l'intensité du thème selon l'heure
+function calculateThemeIntensity() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+
+  // 6h-10h : transition de sombre (1) à clair (0)
+  const morningStart = 6 * 60;  // 6h00 = 360 min
+  const morningEnd = 10 * 60;   // 10h00 = 600 min
+
+  // 16h-20h : transition de clair (0) à sombre (1)
+  const eveningStart = 16 * 60; // 16h00 = 960 min
+  const eveningEnd = 20 * 60;   // 20h00 = 1200 min
+
+  let intensity;
+
+  if (totalMinutes >= morningStart && totalMinutes < morningEnd) {
+    // 6h-10h : transition progressive de 1 (sombre) à 0 (clair)
+    const progress = (totalMinutes - morningStart) / (morningEnd - morningStart);
+    intensity = 1 - progress; // Diminue de 1 à 0
+  } else if (totalMinutes >= morningEnd && totalMinutes < eveningStart) {
+    // 10h-16h : reste clair
+    intensity = 0;
+  } else if (totalMinutes >= eveningStart && totalMinutes < eveningEnd) {
+    // 16h-20h : transition progressive de 0 (clair) à 1 (sombre)
+    const progress = (totalMinutes - eveningStart) / (eveningEnd - eveningStart);
+    intensity = progress; // Augmente de 0 à 1
+  } else {
+    // 20h-6h : reste sombre
+    intensity = 1;
+  }
+
+  return intensity;
+}
+
+// Appliquer le thème adaptatif
+function applyAdaptiveTheme() {
+  const intensity = calculateThemeIntensity();
+  const root = document.documentElement;
+
+  // Interpoler toutes les couleurs
+  root.style.setProperty('--adaptive-bg-body', interpolateColor(lightTheme.bgBody, darkTheme.bgBody, intensity));
+  root.style.setProperty('--adaptive-bg-main', interpolateColor(lightTheme.bgMain, darkTheme.bgMain, intensity));
+  root.style.setProperty('--adaptive-bg-item', interpolateColor(lightTheme.bgItem, darkTheme.bgItem, intensity));
+  root.style.setProperty('--adaptive-bg-show', interpolateColor(lightTheme.bgShow, darkTheme.bgShow, intensity));
+  root.style.setProperty('--adaptive-bg-input', interpolateColor(lightTheme.bgInput, darkTheme.bgInput, intensity));
+  root.style.setProperty('--adaptive-text-body', interpolateColor(lightTheme.textBody, darkTheme.textBody, intensity));
+  root.style.setProperty('--adaptive-text-link', interpolateColor(lightTheme.textLink, darkTheme.textLink, intensity));
+  root.style.setProperty('--adaptive-text-light', interpolateColor(lightTheme.textLight, darkTheme.textLight, intensity));
+  root.style.setProperty('--adaptive-shadow-item', lightTheme.shadowItem); // On garde rgba tel quel pour shadowItem
+  root.style.setProperty('--adaptive-border', interpolateColor(lightTheme.border, darkTheme.border, intensity));
+
+  // Mettre à jour l'intensité
+  root.style.setProperty('--theme-intensity', intensity);
+
+  // Log pour debug
+  const now = new Date();
+  console.log(`Adaptive theme: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} - intensity: ${intensity.toFixed(2)}`);
+}
+
+// Démarrer le thème adaptatif
+function startAdaptiveTheme() {
+  // Appliquer immédiatement
+  applyAdaptiveTheme();
+
+  // Mettre à jour toutes les 5 minutes
+  setInterval(applyAdaptiveTheme, 5 * 60 * 1000);
+}
+
+// Exporter pour utilisation globale
+window.startAdaptiveTheme = startAdaptiveTheme;
+window.applyAdaptiveTheme = applyAdaptiveTheme;
