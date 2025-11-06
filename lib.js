@@ -943,11 +943,12 @@ function updateStyle(elem) {
   max-width: 100% !important;
   height: auto !important;
 }
-  /* YouTube iframes - wrapper approach for proper aspect ratio */
+  /* YouTube iframes - maintain 16:9 aspect ratio */
   .article-content iframe {
   width: 100% !important;
   max-width: 100% !important;
-  aspect-ratio: 16 / 9;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
   border: none;
 }
   /* Ensure pre/code blocks also don't overflow */
