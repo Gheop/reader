@@ -197,6 +197,7 @@ function renderMenu(menuData) {
   var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
   var changedFeeds = [];
   var newFeeds = [];
+  var feedsToShow = {};
 
   for(var i in m) {
     // Show feed if: has unread articles OR is currently selected (even if empty)
@@ -204,6 +205,8 @@ function renderMenu(menuData) {
     var shouldShow = (m[i].n > 0) || isCurrentFeed;
 
     if (shouldShow) {
+      feedsToShow[i] = true;
+
       // Use different class for empty but selected feed
       var feedClass = (m[i].n > 0) ? 'fluxnew' : 'flux';
       var counterDisplay = (m[i].n > 0) ? '<span class="nb_flux"> ' + m[i].n + '</span>' : '';
@@ -223,11 +226,52 @@ function renderMenu(menuData) {
     }
   }
 
-  const menuEl = $('menu');
-  while (menuEl.children.length > 1) {
-    menuEl.removeChild(menuEl.lastChild);
+  // Check if there are structural changes (new feeds or feeds disappeared)
+  var structuralChanges = newFeeds.length > 0;
+  if (!structuralChanges && oldFeedsVisible) {
+    // Check if any old visible feed is now hidden
+    for(var i in oldFeedsVisible) {
+      if (oldFeedsVisible[i] && !feedsToShow[i]) {
+        structuralChanges = true;
+        break;
+      }
+    }
   }
-  menuEl.insertAdjacentHTML('beforeend', menu);
+
+  const menuEl = $('menu');
+
+  // Only rebuild menu if there are structural changes or it's the first render
+  if (structuralChanges || menuEl.children.length <= 1) {
+    while (menuEl.children.length > 1) {
+      menuEl.removeChild(menuEl.lastChild);
+    }
+    menuEl.insertAdjacentHTML('beforeend', menu);
+  } else {
+    // Just update counters for existing feeds (no rebuild)
+    for(var i in changedFeeds) {
+      var feedId = changedFeeds[i];
+      var feedEl = $('f' + feedId);
+      if (feedEl) {
+        var counterSpan = feedEl.querySelector('.nb_flux');
+        if (m[feedId].n > 0) {
+          if (counterSpan) {
+            counterSpan.textContent = ' ' + m[feedId].n;
+          } else {
+            // Counter didn't exist, add it
+            var titleText = feedEl.firstChild;
+            feedEl.insertAdjacentHTML('afterbegin', feedEl.textContent.split('<span')[0] + '<span class="nb_flux"> ' + m[feedId].n + '</span>');
+          }
+          feedEl.className = 'fluxnew';
+        } else {
+          // Remove counter if it exists
+          if (counterSpan) {
+            counterSpan.remove();
+          }
+          feedEl.className = 'flux';
+        }
+      }
+    }
+  }
 
   // Apply fade-in animation to new feeds
   newFeeds.forEach(function(feedId) {
