@@ -1907,7 +1907,7 @@ const lightTheme = {
   textLink: '#2a2a2a',      // Plus foncé pour meilleur contraste
   textLight: '#666666',     // Plus foncé pour meilleur contraste
   textWhite: '#333333',     // Gris foncé au lieu de blanc pur (pour .show)
-  shadowItem: 'rgba(68, 68, 68, 0.3)',
+  shadowItem: 'rgba(0, 0, 0, 0.15)',
   border: '#dddddd'         // Bordures plus visibles
 };
 
