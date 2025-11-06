@@ -1999,20 +1999,12 @@ function applyAdaptiveTheme() {
   const rawIntensity = calculateThemeIntensity();
   const root = document.documentElement;
 
-  // Utiliser une courbe pour maintenir le contraste pendant les transitions
-  // Au lieu d'interpoler linéairement, on applique un seuil :
-  // - Si rawIntensity < 0.35 → thème clair (intensity = 0)
-  // - Si rawIntensity > 0.65 → thème sombre (intensity = 1)
-  // - Entre 0.35 et 0.65 → transition rapide
-  let intensity;
-  if (rawIntensity < 0.35) {
-    intensity = 0;
-  } else if (rawIntensity > 0.65) {
-    intensity = 1;
-  } else {
-    // Transition rapide entre 0.35 et 0.65
-    intensity = (rawIntensity - 0.35) / 0.3;
-  }
+  // Utiliser un seuil strict pour éviter les zones de faible contraste
+  // Changement brusque mais CSS transitions (0.5s) le rendent fluide visuellement
+  // - Si rawIntensity <= 0.5 → thème clair complet (intensity = 0)
+  // - Si rawIntensity > 0.5 → thème sombre complet (intensity = 1)
+  // Cela garantit toujours un bon contraste
+  let intensity = rawIntensity <= 0.5 ? 0 : 1;
 
   // Interpoler toutes les couleurs
   root.style.setProperty('--adaptive-bg-body', interpolateColor(lightTheme.bgBody, darkTheme.bgBody, intensity));
@@ -2097,15 +2089,8 @@ window.testAdaptiveThemeAt = function(hours, minutes = 0) {
     phase = '🌙 Nuit (sombre)';
   }
 
-  // Appliquer le seuil pour maintenir le contraste
-  let intensity;
-  if (rawIntensity < 0.35) {
-    intensity = 0;
-  } else if (rawIntensity > 0.65) {
-    intensity = 1;
-  } else {
-    intensity = (rawIntensity - 0.35) / 0.3;
-  }
+  // Appliquer le même seuil strict que dans applyAdaptiveTheme()
+  let intensity = rawIntensity <= 0.5 ? 0 : 1;
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`🕐 Test à ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
