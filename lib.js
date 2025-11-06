@@ -232,6 +232,15 @@ function renderArticles(articlesData, feedId) {
   varscroll = 0;
   loadmore = 0;
   d = articlesData;
+
+  // Initialize read state for articles if not already set (first load from API)
+  for(let i in d) {
+    if (d[i].r === undefined) {
+      d[i].r = 1; // Articles from API are unread
+      d[i].readblock = 0;
+    }
+  }
+
   Now = new Date();
   for(let i in d) {
     if (feedId && feedId !== 'all' && d[i].f != feedId) {
@@ -405,25 +414,35 @@ function appendNewArticles(newArticlesData) {
 
   console.log('Found', newArticles.length, 'new articles,', reactivatedArticles.length, 'reactivated articles, and', removedArticles.length, 'removed articles for current view');
 
-  // Update global data - but keep articles that are currently in DOM
-  // This allows users to still interact with them (mark as unread, etc.)
-  if (d) {
-    for(var i in d) {
-      // If article is in DOM and not in new data, preserve it
-      if (!newArticlesData[i] && $(i)) {
-        newArticlesData[i] = d[i];
-        console.log('Preserving article in DOM:', i);
-      }
-    }
+  // Initialize read state for all articles from API (they are all unread)
+  for(var i in newArticlesData) {
+    newArticlesData[i].r = 1; // All articles from API are unread
+    newArticlesData[i].readblock = 0;
   }
 
-  // Also preserve locally modified articles
+  // Preserve locally modified articles FIRST (they have priority)
   for(var i in locallyModifiedArticles) {
     if (d && d[i]) {
       newArticlesData[i] = d[i];
       console.log('Preserving locally modified article', i);
     }
   }
+
+  // Then preserve read articles that are in DOM (but not locally modified or in newArticlesData)
+  // This allows users to still interact with them (mark as unread, etc.)
+  if (d) {
+    for(var i in d) {
+      // Only preserve if:
+      // 1. Article is NOT in new data (it's read according to server)
+      // 2. Article is in DOM
+      // 3. Article was NOT locally modified (already handled above)
+      if (!newArticlesData[i] && $(i) && !locallyModifiedArticles[i]) {
+        newArticlesData[i] = d[i];
+        console.log('Preserving read article in DOM:', i);
+      }
+    }
+  }
+
   d = newArticlesData;
 
   // Handle removed articles (mark as read, don't remove from DOM to preserve scroll)
