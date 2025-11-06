@@ -238,6 +238,11 @@ function renderArticles(articlesData, feedId) {
       console.log('Skipping article', i, 'feed:', d[i].f, 'looking for:', feedId);
       continue;
     }
+    // Only display unread articles (skip read articles preserved from previous sync)
+    if (d[i].r === 0) {
+      console.log('Skipping read article', i);
+      continue;
+    }
     loadmore++;
     page += generateArticle(i);
   }
