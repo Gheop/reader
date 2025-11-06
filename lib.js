@@ -681,12 +681,13 @@ function favicon(nb) {
 function changeTheme(style) {
   if(imageObserver) imageObserver.disconnect();
   const regTheme = RegExp('screen.css');
+  const timestamp = Date.now();
   if(regTheme.test($('stylesheet').href)) {
-   $('stylesheet').href='dark.css';
+   $('stylesheet').href='dark.css?v=' + timestamp;
    $('theme').innerHTML='';
   }
   else {
-    $('stylesheet').href='screen.css';
+    $('stylesheet').href='screen.css?v=' + timestamp;
     $('theme').innerHTML='';
   }
   setTimeout(scroll, 2000);
