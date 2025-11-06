@@ -864,8 +864,28 @@ function view(i) {
   if ($('fsearch')) $('fsearch').className = "flux";
   search_active = 0;
 
+  // Check if we have articles for this feed
+  var hasArticlesForFeed = false;
+  if (d) {
+    for(var articleId in d) {
+      if (i === 'all' || d[articleId].f == i) {
+        if (d[articleId].r === 1) { // Only count unread articles
+          hasArticlesForFeed = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // If menu says there are articles but we don't have them in d, reload
+  if (!hasArticlesForFeed && m && m[i] && m[i].n > 0) {
+    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, reloading');
+    loadData(i, true); // Load from cache first, then refresh
+    return;
+  }
+
   // Just filter and display articles from cache
-  // The background sync will update automatically every 30s
+  // The background sync will update automatically
   if (d && Object.keys(d).length > 0) {
     renderArticles(d, i);
   } else {
