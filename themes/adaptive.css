@@ -9,18 +9,31 @@
   /* Intensité du thème : 0 = clair, 1 = sombre */
   --theme-intensity: 0;
 
-  /* Couleurs interpolées dynamiquement */
-  --theme-bg-body: var(--adaptive-bg-body);
-  --theme-bg-main: var(--adaptive-bg-main);
-  --theme-bg-item: var(--adaptive-bg-item);
-  --theme-bg-show: var(--adaptive-bg-show);
-  --theme-bg-input: var(--adaptive-bg-input);
-  --theme-text-body: var(--adaptive-text-body);
-  --theme-text-link: var(--adaptive-text-link);
-  --theme-text-light: var(--adaptive-text-light);
-  --theme-shadow-item: var(--adaptive-shadow-item);
-  --theme-border: var(--adaptive-border);
-  --theme-text-white: var(--adaptive-text-white);
+  /* Couleurs par défaut (mode clair) - seront écrasées par JavaScript */
+  --theme-bg-body: #ffffff;
+  --theme-bg-main: #eeeeee;
+  --theme-bg-item: #ffffff;
+  --theme-bg-show: #eeeeee;
+  --theme-bg-input: #ffffff;
+  --theme-text-body: #1a1a1a;
+  --theme-text-link: #2a2a2a;
+  --theme-text-light: #666666;
+  --theme-shadow-item: rgba(0, 0, 0, 0.15);
+  --theme-border: #dddddd;
+  --theme-text-white: #ffffff;
+
+  /* Variables adaptatives (écrasées par JavaScript) */
+  --adaptive-bg-body: var(--theme-bg-body);
+  --adaptive-bg-main: var(--theme-bg-main);
+  --adaptive-bg-item: var(--theme-bg-item);
+  --adaptive-bg-show: var(--theme-bg-show);
+  --adaptive-bg-input: var(--theme-bg-input);
+  --adaptive-text-body: var(--theme-text-body);
+  --adaptive-text-link: var(--theme-text-link);
+  --adaptive-text-light: var(--theme-text-light);
+  --adaptive-shadow-item: var(--theme-shadow-item);
+  --adaptive-border: var(--theme-border);
+  --adaptive-text-white: var(--theme-text-white);
 }
 
 /* Body */
@@ -44,7 +57,7 @@ a {
 
 /* Layout */
 main {
-  background: var(--theme-bg-main);
+  background: var(--theme-bg-show);
   transition: background-color 0.5s ease;
 }
 
@@ -163,7 +176,21 @@ article ::selection {
   transition: color 0.5s ease;
 }
 
-/* Icône du thème - affiche clock pour mode adaptatif */
-#theme:before {
-  content: "\f017" !important;  /* clock - thème adaptatif */
+/* L'icône du thème est gérée par updateThemeIcon() dans lib.js */
+
+/* Dropdown menu du sélecteur de thème - s'adapte au thème actif */
+#theme-dropdown {
+  background: var(--theme-bg-item) !important;
+  border-color: var(--theme-border) !important;
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+#theme-dropdown a {
+  color: var(--theme-text-body) !important;
+  transition: color 0.5s ease;
+}
+
+#theme-dropdown a:hover {
+  background: var(--theme-bg-show) !important;
+  transition: background-color 0.2s ease;
 }

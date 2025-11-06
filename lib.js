@@ -725,9 +725,86 @@ function changeTheme(style) {
     }, 100);
   }
 
-  $('theme').innerHTML = '';
+  updateThemeIcon();
   setTimeout(scroll, 2000);
 }
+
+function toggleThemeDropdown() {
+  const dropdown = $('theme-dropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('theme-dropdown-hidden');
+  }
+}
+
+function selectTheme(themeName) {
+  const dropdown = $('theme-dropdown');
+  if (dropdown) {
+    dropdown.classList.add('theme-dropdown-hidden');
+  }
+
+  if(imageObserver) imageObserver.disconnect();
+  const timestamp = Date.now();
+
+  // Appliquer le thème sélectionné
+  if (themeName === 'light') {
+    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+    localStorage.setItem('theme', 'light');
+  } else if (themeName === 'dark') {
+    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    localStorage.setItem('theme', 'dark');
+  } else if (themeName === 'adaptive') {
+    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    localStorage.setItem('theme', 'adaptive');
+    // Démarrer le thème adaptatif après un court délai
+    setTimeout(() => {
+      if (window.startAdaptiveTheme) {
+        startAdaptiveTheme();
+      }
+    }, 100);
+  } else if (themeName === 'smooth') {
+    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    localStorage.setItem('theme', 'smooth');
+    // Démarrer le thème smooth après un court délai
+    setTimeout(() => {
+      if (window.startSmoothAdaptiveTheme) {
+        startSmoothAdaptiveTheme();
+      }
+    }, 100);
+  }
+
+  updateThemeIcon();
+  setTimeout(scroll, 2000);
+}
+
+function updateThemeIcon() {
+  const themeCurrent = $('theme-current');
+  if (!themeCurrent) return;
+
+  const stylesheet = $('stylesheet').href;
+  let iconClass = '';
+
+  if (stylesheet.includes('light.css')) {
+    iconClass = 'theme-icon-light';
+  } else if (stylesheet.includes('dark.css')) {
+    iconClass = 'theme-icon-dark';
+  } else if (stylesheet.includes('adaptive.css')) {
+    iconClass = 'theme-icon-adaptive';
+  } else if (stylesheet.includes('adaptive-smooth.css')) {
+    iconClass = 'theme-icon-smooth';
+  }
+
+  themeCurrent.innerHTML = '<i class="' + iconClass + '"></i>';
+}
+
+// Fermer le dropdown si on clique ailleurs
+document.addEventListener('click', function(event) {
+  const themeSelector = $('theme-selector');
+  const dropdown = $('theme-dropdown');
+
+  if (themeSelector && dropdown && !themeSelector.contains(event.target)) {
+    dropdown.classList.add('theme-dropdown-hidden');
+  }
+});
 
 function handleConnectionChange(event){
     if(event.type == "offline"){
@@ -1544,8 +1621,22 @@ function read(k, v=0) {
 }
 
 function progressBar() {
-  let perc = (readItems/totalItems)*100;
-  document.getElementsByTagName("footer")[0].style.background = '-moz-linear-gradient(left, #aaa 0%, #aaa '+perc+'%, white '+perc+'%, white 100%';
+  const footer = document.getElementsByTagName("footer")[0];
+  if (!footer) return;
+
+  // Gérer le cas où totalItems est 0 ou undefined
+  if (!totalItems || totalItems === 0) {
+    footer.setAttribute('style', 'background: rgba(0,0,0,0.1) !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; height: 4px !important; z-index: 1001 !important; display: block !important; visibility: visible !important; opacity: 1 !important;');
+    return;
+  }
+
+  let perc = ((readItems || 0) / totalItems) * 100;
+  if (perc > 100) perc = 100;
+  if (perc < 0) perc = 0;
+
+  // Utiliser setAttribute pour forcer tous les styles avec !important
+  const gradient = 'linear-gradient(to right, #aaa 0%, #aaa '+perc+'%, rgba(0,0,0,0.1) '+perc+'%, rgba(0,0,0,0.1) 100%)';
+  footer.setAttribute('style', 'background: '+gradient+' !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; height: 4px !important; z-index: 1001 !important; display: block !important; visibility: visible !important; opacity: 1 !important;');
 }
 
 var pressedKeys = [],
@@ -1910,6 +2001,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     // Sinon on garde light.css qui est déjà chargé par défaut
   }
+
+  // Mettre à jour l'icône du thème après un court délai pour s'assurer que le DOM est prêt
+  setTimeout(() => {
+    if (window.updateThemeIcon) {
+      updateThemeIcon();
+    }
+  }, 100);
 });
 
 // ============================================================================
@@ -2067,7 +2165,7 @@ window.applyAdaptiveTheme = applyAdaptiveTheme;
 // Palette "chaude" avec GRAND contraste à tous les stades
 // Astuce : On garde les extrêmes très éloignés pour que le milieu reste lisible
 const smoothLightTheme = {
-  bgBody: '#fffef9',        // Blanc cassé très clair (presque blanc)
+  bgBody: '#faf7ef',        // Beige très clair (même que bgMain)
   bgMain: '#faf7ef',        // Beige très clair
   bgItem: '#ffffff',        // Blanc pur pour les cartes
   bgShow: '#eae4d5',        // Beige moyen
@@ -2279,6 +2377,11 @@ window.addEventListener('DOMContentLoaded', () => {
       console.log('  testAllHours()               - Voir l\'intensité sur 24h');
       console.log('');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+
+    // Initialiser le footer dès le chargement de la page
+    if (window.progressBar) {
+      progressBar();
     }
   }, 500);
 });

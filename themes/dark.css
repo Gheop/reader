@@ -129,9 +129,20 @@ article ::selection {
   border-color: #4a4a4a;
 }
 
-/* Icône du thème - affiche le soleil en mode sombre */
-#theme:before {
-  content: "\f185" !important;  /* sun - pour passer au thème clair */
+/* L'icône du thème est gérée par updateThemeIcon() dans lib.js */
+
+/* Dropdown menu du sélecteur de thème - adapté au mode sombre */
+#theme-dropdown {
+  background: rgba(42, 42, 42, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#theme-dropdown a {
+  color: #e0e0e0 !important;
+}
+
+#theme-dropdown a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Messages d'erreur - ajustement pour le sombre */

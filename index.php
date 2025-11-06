@@ -45,7 +45,15 @@ if(!isset($_SESSION['pseudo'])) {
    else if(isset($_GET['a']) && $_GET['a'] == 'destroy') include('../destroy.php');
 ?>
 <div id="register">
-  <a id='theme' href="" onclick="changeTheme();return false;"></a>
+  <div id="theme-selector">
+    <a id="theme-current" href="#" onclick="toggleThemeDropdown();return false;"></a>
+    <div id="theme-dropdown" class="theme-dropdown-hidden">
+      <a href="#" onclick="selectTheme('light');return false;" data-theme="light"><i class="theme-icon-light"></i> Clair</a>
+      <a href="#" onclick="selectTheme('dark');return false;" data-theme="dark"><i class="theme-icon-dark"></i> Sombre</a>
+      <a href="#" onclick="selectTheme('adaptive');return false;" data-theme="adaptive"><i class="theme-icon-adaptive"></i> Adaptatif</a>
+      <a href="#" onclick="selectTheme('smooth');return false;" data-theme="smooth"><i class="theme-icon-smooth"></i> Progressif</a>
+    </div>
+  </div>
 <?php
 if(!isset($_SESSION['pseudo'])) {
   echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="http://www.gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
@@ -92,8 +100,7 @@ echo '<nav>
   <div id="menu-resizer"></div>
 <main>
 </main>
-<footer>
-</footer>';
+<footer>&nbsp;</footer>';
 //<script type="text/javascript" nonce="EDNnf03nceIOfn39fn3e9h3sdfa">i();</script>';
 }
 else {
