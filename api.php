@@ -29,10 +29,9 @@ if (isset($_GET['nb']) && is_numeric($_GET['nb'])) {
 }
 
 // Feed filter for articles
-$feedFilter = '';
+$feedId = null;
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $feedId = (int)$_GET['id'];
-    $feedFilter = 'AND C.id_flux = '.$feedId;
 }
 
 // ============================================================================
@@ -41,6 +40,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 $counterColumn = $userId == 1 ? 'unread_count_user_1' : 'unread_count_user_2';
 
+// Use prepared statement for menu query
 $menuSql = "
     SELECT
         F.id,
@@ -50,12 +50,15 @@ $menuSql = "
         F.link
     FROM reader_flux F
     INNER JOIN reader_user_flux UF ON UF.id_flux = F.id
-    WHERE UF.id_user = $userId
+    WHERE UF.id_user = ?
         AND F.$counterColumn > 0
     ORDER BY F.title ASC
 ";
 
-$menuResult = $_SESSION['mysqli']->query($menuSql);
+$stmt = $_SESSION['mysqli']->prepare($menuSql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$menuResult = $stmt->get_result();
 
 if (!$menuResult) {
     error_log('Menu query failed: ' . $_SESSION['mysqli']->error);
@@ -84,28 +87,57 @@ $menuJson .= '}';
 // QUERY 2: ARTICLES DATA (unread items)
 // ============================================================================
 
-$articlesSql = "
-    SELECT
-        I.id,
-        I.title,
-        I.pubdate,
-        I.author,
-        I.description,
-        I.link,
-        I.id_flux,
-        F.title as feed_title,
-        F.description as feed_description,
-        F.link as feed_link
-    FROM reader_unread_cache C
-    INNER JOIN reader_item I ON C.id_item = I.id
-    INNER JOIN reader_flux F ON I.id_flux = F.id
-    WHERE C.id_user = $userId
-        $feedFilter
-    ORDER BY I.pubdate DESC
-    LIMIT $limit
-";
+// Build query dynamically based on feed filter
+if ($feedId !== null) {
+    $articlesSql = "
+        SELECT
+            I.id,
+            I.title,
+            I.pubdate,
+            I.author,
+            I.description,
+            I.link,
+            I.id_flux,
+            F.title as feed_title,
+            F.description as feed_description,
+            F.link as feed_link
+        FROM reader_unread_cache C
+        INNER JOIN reader_item I ON C.id_item = I.id
+        INNER JOIN reader_flux F ON I.id_flux = F.id
+        WHERE C.id_user = ? AND C.id_flux = ?
+        ORDER BY I.pubdate DESC
+        LIMIT ?
+    ";
 
-$articlesResult = $_SESSION['mysqli']->query($articlesSql);
+    $stmt = $_SESSION['mysqli']->prepare($articlesSql);
+    $stmt->bind_param("iii", $userId, $feedId, $limit);
+} else {
+    $articlesSql = "
+        SELECT
+            I.id,
+            I.title,
+            I.pubdate,
+            I.author,
+            I.description,
+            I.link,
+            I.id_flux,
+            F.title as feed_title,
+            F.description as feed_description,
+            F.link as feed_link
+        FROM reader_unread_cache C
+        INNER JOIN reader_item I ON C.id_item = I.id
+        INNER JOIN reader_flux F ON I.id_flux = F.id
+        WHERE C.id_user = ?
+        ORDER BY I.pubdate DESC
+        LIMIT ?
+    ";
+
+    $stmt = $_SESSION['mysqli']->prepare($articlesSql);
+    $stmt->bind_param("ii", $userId, $limit);
+}
+
+$stmt->execute();
+$articlesResult = $stmt->get_result();
 
 if (!$articlesResult) {
     error_log('Articles query failed: ' . $_SESSION['mysqli']->error);
