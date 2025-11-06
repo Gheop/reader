@@ -20,6 +20,7 @@
   --theme-text-light: var(--adaptive-text-light);
   --theme-shadow-item: var(--adaptive-shadow-item);
   --theme-border: var(--adaptive-border);
+  --theme-text-white: var(--adaptive-text-white);
 }
 
 /* Body */
@@ -71,15 +72,15 @@ main {
 }
 
 .show {
-  color: var(--color-text-white);
+  color: var(--theme-text-white);
   background: var(--theme-bg-show);
   border-bottom-left-radius: var(--border-radius-sm);
   border-top-left-radius: var(--border-radius-sm);
   display: block;
-  text-shadow: 1px 0px 1px #000, -1px 0px 1px #000;
+  text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.3), -1px 0px 1px rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.1);
-  transition: background-color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease, text-shadow 0.5s ease;
 }
 
 /* Formulaires */

@@ -1899,13 +1899,14 @@ const lightTheme = {
   bgBody: '#ffffff',
   bgMain: '#eeeeee',
   bgItem: '#ffffff',
-  bgShow: '#eeeeee',
+  bgShow: '#e8e8e8',
   bgInput: '#ffffff',
-  textBody: '#333333',
-  textLink: '#444444',
-  textLight: '#888888',
+  textBody: '#1a1a1a',      // Plus foncé pour meilleur contraste
+  textLink: '#2a2a2a',      // Plus foncé pour meilleur contraste
+  textLight: '#666666',     // Plus foncé pour meilleur contraste
+  textWhite: '#333333',     // Gris foncé au lieu de blanc pur (pour .show)
   shadowItem: 'rgba(68, 68, 68, 0.3)',
-  border: '#eeeeee'
+  border: '#dddddd'         // Bordures plus visibles
 };
 
 // Couleurs du thème sombre (16h-20h → sombre, 20h-6h → sombre)
@@ -1915,9 +1916,10 @@ const darkTheme = {
   bgItem: '#3a3a3a',
   bgShow: '#2b2b2b',
   bgInput: '#333333',
-  textBody: '#d4d4d4',
-  textLink: '#aaaaaa',
-  textLight: '#888888',
+  textBody: '#e0e0e0',      // Plus clair pour meilleur contraste
+  textLink: '#b8b8b8',      // Plus clair pour meilleur contraste
+  textLight: '#999999',     // Plus clair pour meilleur contraste
+  textWhite: '#f5f5f5',     // Blanc cassé au lieu de blanc pur
   shadowItem: 'rgba(0, 0, 0, 0.5)',
   border: '#4a4a4a'
 };
@@ -1992,8 +1994,23 @@ function calculateThemeIntensity() {
 
 // Appliquer le thème adaptatif
 function applyAdaptiveTheme() {
-  const intensity = calculateThemeIntensity();
+  const rawIntensity = calculateThemeIntensity();
   const root = document.documentElement;
+
+  // Utiliser une courbe pour maintenir le contraste pendant les transitions
+  // Au lieu d'interpoler linéairement, on applique un seuil :
+  // - Si rawIntensity < 0.35 → thème clair (intensity = 0)
+  // - Si rawIntensity > 0.65 → thème sombre (intensity = 1)
+  // - Entre 0.35 et 0.65 → transition rapide
+  let intensity;
+  if (rawIntensity < 0.35) {
+    intensity = 0;
+  } else if (rawIntensity > 0.65) {
+    intensity = 1;
+  } else {
+    // Transition rapide entre 0.35 et 0.65
+    intensity = (rawIntensity - 0.35) / 0.3;
+  }
 
   // Interpoler toutes les couleurs
   root.style.setProperty('--adaptive-bg-body', interpolateColor(lightTheme.bgBody, darkTheme.bgBody, intensity));
@@ -2004,7 +2021,8 @@ function applyAdaptiveTheme() {
   root.style.setProperty('--adaptive-text-body', interpolateColor(lightTheme.textBody, darkTheme.textBody, intensity));
   root.style.setProperty('--adaptive-text-link', interpolateColor(lightTheme.textLink, darkTheme.textLink, intensity));
   root.style.setProperty('--adaptive-text-light', interpolateColor(lightTheme.textLight, darkTheme.textLight, intensity));
-  root.style.setProperty('--adaptive-shadow-item', lightTheme.shadowItem); // On garde rgba tel quel pour shadowItem
+  root.style.setProperty('--adaptive-text-white', interpolateColor(lightTheme.textWhite, darkTheme.textWhite, intensity));
+  root.style.setProperty('--adaptive-shadow-item', interpolateColor(lightTheme.shadowItem, darkTheme.shadowItem, intensity));
   root.style.setProperty('--adaptive-border', interpolateColor(lightTheme.border, darkTheme.border, intensity));
 
   // Mettre à jour l'intensité
@@ -2012,7 +2030,7 @@ function applyAdaptiveTheme() {
 
   // Log pour debug
   const now = new Date();
-  console.log(`Adaptive theme: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} - intensity: ${intensity.toFixed(2)}`);
+  console.log(`Adaptive theme: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} - raw: ${rawIntensity.toFixed(2)}, adjusted: ${intensity.toFixed(2)}`);
 }
 
 // Démarrer le thème adaptatif
@@ -2058,23 +2076,33 @@ window.testAdaptiveThemeAt = function(hours, minutes = 0) {
   const eveningStart = 16 * 60;
   const eveningEnd = 20 * 60;
 
-  let intensity;
+  let rawIntensity;
   let phase;
 
   if (totalMinutes >= morningStart && totalMinutes < morningEnd) {
     const progress = (totalMinutes - morningStart) / (morningEnd - morningStart);
-    intensity = 1 - progress;
+    rawIntensity = 1 - progress;
     phase = '🌅 Transition matin (sombre → clair)';
   } else if (totalMinutes >= morningEnd && totalMinutes < eveningStart) {
-    intensity = 0;
+    rawIntensity = 0;
     phase = '☀️  Jour (clair)';
   } else if (totalMinutes >= eveningStart && totalMinutes < eveningEnd) {
     const progress = (totalMinutes - eveningStart) / (eveningEnd - eveningStart);
-    intensity = progress;
+    rawIntensity = progress;
     phase = '🌆 Transition soir (clair → sombre)';
   } else {
-    intensity = 1;
+    rawIntensity = 1;
     phase = '🌙 Nuit (sombre)';
+  }
+
+  // Appliquer le seuil pour maintenir le contraste
+  let intensity;
+  if (rawIntensity < 0.35) {
+    intensity = 0;
+  } else if (rawIntensity > 0.65) {
+    intensity = 1;
+  } else {
+    intensity = (rawIntensity - 0.35) / 0.3;
   }
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -2093,6 +2121,7 @@ window.testAdaptiveThemeAt = function(hours, minutes = 0) {
   root.style.setProperty('--adaptive-text-body', interpolateColor(lightTheme.textBody, darkTheme.textBody, intensity));
   root.style.setProperty('--adaptive-text-link', interpolateColor(lightTheme.textLink, darkTheme.textLink, intensity));
   root.style.setProperty('--adaptive-text-light', interpolateColor(lightTheme.textLight, darkTheme.textLight, intensity));
+  root.style.setProperty('--adaptive-text-white', interpolateColor(lightTheme.textWhite, darkTheme.textWhite, intensity));
   root.style.setProperty('--adaptive-shadow-item', interpolateColor(lightTheme.shadowItem, darkTheme.shadowItem, intensity));
   root.style.setProperty('--adaptive-border', interpolateColor(lightTheme.border, darkTheme.border, intensity));
   root.style.setProperty('--theme-intensity', intensity);
