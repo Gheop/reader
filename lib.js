@@ -2027,3 +2027,152 @@ function startAdaptiveTheme() {
 // Exporter pour utilisation globale
 window.startAdaptiveTheme = startAdaptiveTheme;
 window.applyAdaptiveTheme = applyAdaptiveTheme;
+
+// ============================================================================
+// DEBUG FUNCTIONS - Test adaptive theme at different times
+// ============================================================================
+
+// Fonction de test pour simuler une heure spécifique
+window.testAdaptiveThemeAt = function(hours, minutes = 0) {
+  if (typeof hours !== 'number' || hours < 0 || hours > 23) {
+    console.error('❌ Heure invalide. Utilisez un nombre entre 0 et 23.');
+    console.log('💡 Exemple: testAdaptiveThemeAt(8, 30) pour tester à 8h30');
+    return;
+  }
+
+  if (typeof minutes !== 'number' || minutes < 0 || minutes > 59) {
+    console.error('❌ Minutes invalides. Utilisez un nombre entre 0 et 59.');
+    return;
+  }
+
+  // Vérifier qu'on est bien en mode adaptatif
+  if (!$('stylesheet').href.includes('adaptive.css')) {
+    console.warn('⚠️  Le thème adaptatif n\'est pas activé. Changez de thème d\'abord !');
+    console.log('💡 Cliquez sur l\'icône de thème pour cycler jusqu\'au mode adaptatif (icône horloge)');
+    return;
+  }
+
+  const totalMinutes = hours * 60 + minutes;
+  const morningStart = 6 * 60;
+  const morningEnd = 10 * 60;
+  const eveningStart = 16 * 60;
+  const eveningEnd = 20 * 60;
+
+  let intensity;
+  let phase;
+
+  if (totalMinutes >= morningStart && totalMinutes < morningEnd) {
+    const progress = (totalMinutes - morningStart) / (morningEnd - morningStart);
+    intensity = 1 - progress;
+    phase = '🌅 Transition matin (sombre → clair)';
+  } else if (totalMinutes >= morningEnd && totalMinutes < eveningStart) {
+    intensity = 0;
+    phase = '☀️  Jour (clair)';
+  } else if (totalMinutes >= eveningStart && totalMinutes < eveningEnd) {
+    const progress = (totalMinutes - eveningStart) / (eveningEnd - eveningStart);
+    intensity = progress;
+    phase = '🌆 Transition soir (clair → sombre)';
+  } else {
+    intensity = 1;
+    phase = '🌙 Nuit (sombre)';
+  }
+
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`🕐 Test à ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
+  console.log(`📊 Intensité: ${intensity.toFixed(2)} (0=clair, 1=sombre)`);
+  console.log(`🎨 Phase: ${phase}`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  // Appliquer les couleurs
+  const root = document.documentElement;
+  root.style.setProperty('--adaptive-bg-body', interpolateColor(lightTheme.bgBody, darkTheme.bgBody, intensity));
+  root.style.setProperty('--adaptive-bg-main', interpolateColor(lightTheme.bgMain, darkTheme.bgMain, intensity));
+  root.style.setProperty('--adaptive-bg-item', interpolateColor(lightTheme.bgItem, darkTheme.bgItem, intensity));
+  root.style.setProperty('--adaptive-bg-show', interpolateColor(lightTheme.bgShow, darkTheme.bgShow, intensity));
+  root.style.setProperty('--adaptive-bg-input', interpolateColor(lightTheme.bgInput, darkTheme.bgInput, intensity));
+  root.style.setProperty('--adaptive-text-body', interpolateColor(lightTheme.textBody, darkTheme.textBody, intensity));
+  root.style.setProperty('--adaptive-text-link', interpolateColor(lightTheme.textLink, darkTheme.textLink, intensity));
+  root.style.setProperty('--adaptive-text-light', interpolateColor(lightTheme.textLight, darkTheme.textLight, intensity));
+  root.style.setProperty('--adaptive-shadow-item', interpolateColor(lightTheme.shadowItem, darkTheme.shadowItem, intensity));
+  root.style.setProperty('--adaptive-border', interpolateColor(lightTheme.border, darkTheme.border, intensity));
+  root.style.setProperty('--theme-intensity', intensity);
+
+  console.log('✅ Thème appliqué ! Regardez les changements dans l\'interface.');
+  console.log('');
+  console.log('💡 Astuce: Testez rapidement plusieurs heures:');
+  console.log('   testAllHours()  - Affiche l\'intensité pour toutes les heures');
+  console.log('   testAdaptiveThemeAt(6)   - Matin (début transition)');
+  console.log('   testAdaptiveThemeAt(8)   - Matin (milieu)');
+  console.log('   testAdaptiveThemeAt(14)  - Jour');
+  console.log('   testAdaptiveThemeAt(18)  - Soir (milieu transition)');
+  console.log('   testAdaptiveThemeAt(22)  - Nuit');
+};
+
+// Fonction pour tester toutes les heures de la journée
+window.testAllHours = function() {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('📊 INTENSITÉ DU THÈME ADAPTATIF SUR 24 HEURES');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('');
+
+  const morningStart = 6 * 60;
+  const morningEnd = 10 * 60;
+  const eveningStart = 16 * 60;
+  const eveningEnd = 20 * 60;
+
+  for (let h = 0; h < 24; h++) {
+    const totalMinutes = h * 60;
+    let intensity;
+    let bar = '';
+    let phase = '';
+
+    if (totalMinutes >= morningStart && totalMinutes < morningEnd) {
+      const progress = (totalMinutes - morningStart) / (morningEnd - morningStart);
+      intensity = 1 - progress;
+      phase = '🌅';
+    } else if (totalMinutes >= morningEnd && totalMinutes < eveningStart) {
+      intensity = 0;
+      phase = '☀️ ';
+    } else if (totalMinutes >= eveningStart && totalMinutes < eveningEnd) {
+      const progress = (totalMinutes - eveningStart) / (eveningEnd - eveningStart);
+      intensity = progress;
+      phase = '🌆';
+    } else {
+      intensity = 1;
+      phase = '🌙';
+    }
+
+    // Créer une barre visuelle
+    const barLength = Math.round(intensity * 20);
+    const lightLength = 20 - barLength;
+    bar = '█'.repeat(barLength) + '░'.repeat(lightLength);
+
+    console.log(`${phase} ${String(h).padStart(2, '0')}h  [${bar}] ${intensity.toFixed(2)}`);
+  }
+
+  console.log('');
+  console.log('Légende: 0.00 = clair maximum, 1.00 = sombre maximum');
+  console.log('🌙 Nuit  |  🌅 Transition matin  |  ☀️  Jour  |  🌆 Transition soir');
+  console.log('');
+  console.log('💡 Pour tester une heure: testAdaptiveThemeAt(14) ou testAdaptiveThemeAt(18, 30)');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+};
+
+// Message d'aide au démarrage (seulement en mode adaptatif)
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if ($('stylesheet') && $('stylesheet').href.includes('adaptive.css')) {
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🎨 THÈME ADAPTATIF ACTIF');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('');
+      console.log('📝 Commandes disponibles dans la console:');
+      console.log('');
+      console.log('  testAdaptiveThemeAt(14)      - Tester le thème à 14h');
+      console.log('  testAdaptiveThemeAt(18, 30)  - Tester le thème à 18h30');
+      console.log('  testAllHours()               - Voir l\'intensité sur 24h');
+      console.log('');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+  }, 500);
+});
