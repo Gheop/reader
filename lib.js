@@ -177,7 +177,23 @@ function renderMenu(menuData) {
   }
 
   nb_title = 0;
+
+  // Preserve currently selected feed info if it's not in new menu data
+  // (happens when all articles are read but feed is still selected)
+  var currentFeedData = null;
+  if (id !== 'all' && m && m[id] && !menuData[id]) {
+    currentFeedData = m[id];
+    console.log('Preserving currently selected feed', id, 'in menu');
+  }
+
   m = menuData;
+
+  // Restore preserved feed
+  if (currentFeedData) {
+    m[id] = currentFeedData;
+    m[id].n = 0; // Ensure counter is 0
+  }
+
   var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
   var changedFeeds = [];
   var newFeeds = [];
