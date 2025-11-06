@@ -687,11 +687,13 @@ function changeTheme(style) {
 
   let nextTheme;
 
-  // Cycle: light → dark → adaptive → light
+  // Cycle: light → dark → adaptive → smooth → light
   if ($('stylesheet').href.includes('light.css')) {
     nextTheme = 'dark';
   } else if ($('stylesheet').href.includes('dark.css')) {
     nextTheme = 'adaptive';
+  } else if ($('stylesheet').href.includes('adaptive.css')) {
+    nextTheme = 'smooth';
   } else {
     nextTheme = 'light';
   }
@@ -710,6 +712,15 @@ function changeTheme(style) {
     setTimeout(() => {
       if (window.startAdaptiveTheme) {
         startAdaptiveTheme();
+      }
+    }, 100);
+  } else if (nextTheme === 'smooth') {
+    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    localStorage.setItem('theme', 'smooth');
+    // Démarrer le thème smooth après un court délai
+    setTimeout(() => {
+      if (window.startSmoothAdaptiveTheme) {
+        startSmoothAdaptiveTheme();
       }
     }, 100);
   }
@@ -1883,6 +1894,15 @@ window.addEventListener('DOMContentLoaded', () => {
         startAdaptiveTheme();
       }
     }, 100);
+  } else if (savedTheme === 'smooth') {
+    // Utilisateur a choisi le thème smooth progressif
+    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    // Démarrer le thème smooth après un court délai
+    setTimeout(() => {
+      if (window.startSmoothAdaptiveTheme) {
+        startSmoothAdaptiveTheme();
+      }
+    }, 100);
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -2039,6 +2059,76 @@ function startAdaptiveTheme() {
 // Exporter pour utilisation globale
 window.startAdaptiveTheme = startAdaptiveTheme;
 window.applyAdaptiveTheme = applyAdaptiveTheme;
+
+// ============================================================================
+// ADAPTIVE SMOOTH THEME - Continuous smooth transitions with warm colors
+// ============================================================================
+
+// Palette "chaude" avec GRAND contraste à tous les stades
+// Astuce : On garde les extrêmes très éloignés pour que le milieu reste lisible
+const smoothLightTheme = {
+  bgBody: '#fffef9',        // Blanc cassé très clair (presque blanc)
+  bgMain: '#faf7ef',        // Beige très clair
+  bgItem: '#ffffff',        // Blanc pur pour les cartes
+  bgShow: '#eae4d5',        // Beige moyen
+  bgInput: '#ffffff',       // Blanc
+  textBody: '#1a0f08',      // Brun presque noir (TRÈS foncé)
+  textLink: '#7a3e0a',      // Brun orangé foncé
+  textLight: '#5c4a3a',     // Brun moyen
+  shadowItem: 'rgba(101, 67, 33, 0.15)',
+  border: '#d4caba',        // Beige
+  accent: '#c65d1f'         // Orange vif
+};
+
+const smoothDarkTheme = {
+  bgBody: '#0f0b08',        // Brun presque noir (TRÈS sombre)
+  bgMain: '#1f1812',        // Brun très sombre
+  bgItem: '#2f2519',        // Brun sombre
+  bgShow: '#1f1812',        // Brun très sombre
+  bgInput: '#292016',       // Brun sombre
+  textBody: '#fff9ed',      // Beige presque blanc (TRÈS clair)
+  textLink: '#ffb366',      // Orange clair
+  textLight: '#d4c4ae',     // Beige clair
+  shadowItem: 'rgba(0, 0, 0, 0.5)',
+  border: '#4a3f2f',        // Brun moyen
+  accent: '#ff9966'         // Orange corail
+};
+
+// Fonction d'application pour smooth theme (avec interpolation continue)
+function applySmoothAdaptiveTheme() {
+  const rawIntensity = calculateThemeIntensity();
+  const root = document.documentElement;
+
+  // Pour smooth : on garde l'interpolation progressive (pas de seuil)
+  // L'astuce est dans la palette de couleurs qui garde toujours du contraste
+  const intensity = rawIntensity;
+
+  // Interpoler toutes les couleurs
+  root.style.setProperty('--adaptive-bg-body', interpolateColor(smoothLightTheme.bgBody, smoothDarkTheme.bgBody, intensity));
+  root.style.setProperty('--adaptive-bg-main', interpolateColor(smoothLightTheme.bgMain, smoothDarkTheme.bgMain, intensity));
+  root.style.setProperty('--adaptive-bg-item', interpolateColor(smoothLightTheme.bgItem, smoothDarkTheme.bgItem, intensity));
+  root.style.setProperty('--adaptive-bg-show', interpolateColor(smoothLightTheme.bgShow, smoothDarkTheme.bgShow, intensity));
+  root.style.setProperty('--adaptive-bg-input', interpolateColor(smoothLightTheme.bgInput, smoothDarkTheme.bgInput, intensity));
+  root.style.setProperty('--adaptive-text-body', interpolateColor(smoothLightTheme.textBody, smoothDarkTheme.textBody, intensity));
+  root.style.setProperty('--adaptive-text-link', interpolateColor(smoothLightTheme.textLink, smoothDarkTheme.textLink, intensity));
+  root.style.setProperty('--adaptive-text-light', interpolateColor(smoothLightTheme.textLight, smoothDarkTheme.textLight, intensity));
+  root.style.setProperty('--adaptive-shadow-item', interpolateColor(smoothLightTheme.shadowItem, smoothDarkTheme.shadowItem, intensity));
+  root.style.setProperty('--adaptive-border', interpolateColor(smoothLightTheme.border, smoothDarkTheme.border, intensity));
+  root.style.setProperty('--adaptive-accent', interpolateColor(smoothLightTheme.accent, smoothDarkTheme.accent, intensity));
+
+  root.style.setProperty('--theme-intensity', intensity);
+
+  const now = new Date();
+  console.log(`Smooth adaptive theme: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} - intensity: ${intensity.toFixed(2)} (progressive)`);
+}
+
+function startSmoothAdaptiveTheme() {
+  applySmoothAdaptiveTheme();
+  setInterval(applySmoothAdaptiveTheme, 5 * 60 * 1000);
+}
+
+window.startSmoothAdaptiveTheme = startSmoothAdaptiveTheme;
+window.applySmoothAdaptiveTheme = applySmoothAdaptiveTheme;
 
 // ============================================================================
 // DEBUG FUNCTIONS - Test adaptive theme at different times
