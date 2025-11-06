@@ -1,323 +1,352 @@
 <?php
+/**
+ * RSS Feed Update Script
+ * Fetches and updates RSS feeds using curl multi-handle for parallel requests
+ */
+
 include('/www/conf.php');
 include('clean_text.php');
+
+// Security: Check authentication
+if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
+    http_response_code(403);
+    die('Unauthorized access');
+}
+
 ini_set('max_execution_time', '500');
 $mysqli = $_SESSION['mysqli'];
-//$_GET['id'] = 1341;
-$extra ='';
-	if(isset($_GET['id']) && is_numeric($_GET['id'])) $extra = ' where id='.$_GET['id'];
-	$DEBUG = 0;
-	if(isset($_GET['debug'])) {
-		$DEBUG = 1;
-		if(isset($_GET['id']) && is_numeric($_GET['id'])) {
-			$mysqli->query("delete from reader_item where id_flux=$_GET[id];") or die($mysqli->error);
-			$mysqli->query("delete FROM reader_user_item where id_item not in (select id from reader_item);") or die($mysqli->error);
-		}
-	}
 
-
-function get_links() {
-	global $mysqli, $extra;
-	$r = $mysqli->query('select id, rss from reader_flux'.$extra.' order BY RAND();') or die($mysqli->error);
-	return $r;
+// Parse and validate parameters
+$extra = '';
+$feedId = null;
+if(isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $feedId = (int)$_GET['id'];
+    $extra = ' WHERE id = ' . $feedId;
 }
 
-function get_title() {
+$DEBUG = isset($_GET['debug']) ? 1 : 0;
 
+// Debug mode: clean existing items for the feed
+if($DEBUG && $feedId) {
+    $mysqli->query("DELETE FROM reader_item WHERE id_flux = $feedId") or die($mysqli->error);
+    $mysqli->query("DELETE FROM reader_user_item WHERE id_item NOT IN (SELECT id FROM reader_item)") or die($mysqli->error);
 }
 
+/**
+ * Get RSS feed links from database
+ */
+function get_links($mysqli, $extra) {
+    $query = 'SELECT id, rss FROM reader_flux' . $extra . ' ORDER BY RAND()';
+    $result = $mysqli->query($query) or die($mysqli->error);
+    return $result;
+}
+
+/**
+ * Complete relative URLs with base URL
+ */
 function complete_link($link, $linkmaster) {
-	if(isset($link) && !preg_match('/^https?:\/\//',$link)) {
-		if(substr($link,0,1) == '/')  {
-			$pu = parse_url($linkmaster);
-			if(!isset($pu['scheme'])) $pu['scheme'] = 'https';
-			if(substr($link,1,1) == '/') {
-				$link = $pu['scheme'].':'.$link;
-			} else {
-				$link = $pu['scheme'].'://'.$pu['host'].$link;
-			}
-		} else {
-			$link = $linkmaster.'/'.$link;
-		}
-	}
-return $link;
+    if(isset($link) && !preg_match('/^https?:\/\//', $link)) {
+        if(substr($link, 0, 1) == '/') {
+            $pu = parse_url($linkmaster);
+            if(!isset($pu['scheme'])) $pu['scheme'] = 'https';
+            if(substr($link, 1, 1) == '/') {
+                // Protocol-relative URL
+                $link = $pu['scheme'] . ':' . $link;
+            } else {
+                // Absolute path
+                $link = $pu['scheme'] . '://' . $pu['host'] . $link;
+            }
+        } else {
+            // Relative path
+            $link = rtrim($linkmaster, '/') . '/' . $link;
+        }
+    }
+    return $link;
 }
 
-function get_flux($r) {
-
-}
-
+// Fetch feed URLs
 $r = get_links($mysqli, $extra);
 $mh = curl_multi_init();
 $ch = array();
-$dd = array();
-$urlorigin = array();
-$query = '';
+$feedIds = array();
+$urlOrigins = array();
 $i = 0;
+
+// Initialize curl handles for parallel requests
 while($d = $r->fetch_array()) {
-	$ch[$i] = curl_init();
-	curl_setopt_array($ch[$i],
-		Array(
-			CURLOPT_URL => $d[1],
-			//CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
-			CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-			CURLOPT_TIMEOUT => 120,
-			CURLOPT_CONNECTTIMEOUT => 120,
-			CURLOPT_RETURNTRANSFER => TRUE,
-			CURLOPT_ENCODING => 'UTF-8',
-            CURLOPT_SSL_VERIFYPEER => FALSE,
-            CURLOPT_SSL_VERIFYHOST => FALSE,
-            CURLOPT_FOLLOWLOCATION => TRUE,
-            CURLOPT_MAXREDIRS => 3
-			)
-		);
-	curl_multi_add_handle($mh, $ch[$i]);
-	$dd[$i] = $d[0];
-	$urlorigin[$i] = $d[1];
-	$i++;
+    $ch[$i] = curl_init();
+    curl_setopt_array($ch[$i], array(
+        CURLOPT_URL => $d[1],
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_CONNECTTIMEOUT => 30,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => 'UTF-8',
+        CURLOPT_SSL_VERIFYPEER => true,  // Security: Enable SSL verification
+        CURLOPT_SSL_VERIFYHOST => 2,     // Security: Verify hostname
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 3
+    ));
+    curl_multi_add_handle($mh, $ch[$i]);
+    $feedIds[$i] = $d[0];
+    $urlOrigins[$i] = $d[1];
+    $i++;
 }
 
-$running=null;
-
-/*do {
-	curl_multi_exec($mh,$running);
-	//usleep (1000);
-} while ($running > 0);
-*/
-
-//execute the multi handle
+// Execute all curl handles in parallel
 do {
     $status = curl_multi_exec($mh, $active);
     if ($active) {
-        // Wait a short time for more activity
         curl_multi_select($mh);
     }
 } while ($active && $status == CURLM_OK);
 
+// Process each feed
+for($j = 0; $j < $i; $j++) {
+    echo "\n" . $feedIds[$j] . " : ";
 
-//$test = 'https://news.google.fr/news?cf=all&hl=fr&pz=1&ned=fr&topic=h&num=3&output=rss';
-for($j=0;$j<$i;$j++) {
-	echo "\n$dd[$j] : ";
-	$tt = $mysqli->query("select link, title, rss from reader_flux where id=".$dd[$j].";") or die($mysqli->error);
-	if(!isset($tt)) contine;
-	$ttt = $tt->fetch_array();
-//	print "<h2><a href=\"$ttt[0]\">$ttt[1]</a> (<a href=\"$ttt[2]\">rss</a>)</h2>";
-	//if($DEBUG) libxml_use_internal_errors(true);
-	//if($DEBUG) var_dump(curl_multi_getcontent($ch[$j]));
+    // Get feed metadata
+    $stmt = $mysqli->prepare("SELECT link, title, rss FROM reader_flux WHERE id = ?");
+    $stmt->bind_param("i", $feedIds[$j]);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
+    if(!$result || $result->num_rows == 0) {
+        continue;
+    }
 
-	$xml = trim(curl_multi_getcontent($ch[$j]));
-		//$xml = preg_replace('/(url=".*)\?.*"/s', 'url="\\1', $xml);
-	$xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);
-	$xml = preg_replace('/url="(.*?\.(jpg|png|gif))\?.*?"/s', 'url="'.htmlspecialchars('\\1',ENT_XML1, 'UTF-8',true).'"' , $xml);
-	$xml = preg_replace('/type=""/s', '' , $xml);
-//$xml = htmlspecialchars($xml,ENT_XML1, 'UTF-8',true);
-// echo $xml;
-// die;
-// $xml = tidy_repair_string($xml, array(
-	//     'output-xml' => true,
-	//     'input-xml' => true
-	// ));
-$rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-//$rss = @simplexml_load_string($xml, null, LIBXML_NOCDATA);
-	//$rss = simplexml_load_file($url, null, LIBXML_NOCDATA);
-//$namespaces = $rss->getNamespaces(true);
-// $media_content = $rss->entry->item[0]->children($namespaces['media']);
-// foreach($media_content->group->content as $i){
-//     var_dump((string)$i->attributes()->url);
-// }
-// die;
-	//$rss = $xml->asXML();
-	// echo '<pre>';
-	// print_r($rss);
-	// die;
-// 	$rss = new DomDocument();
-// 	$rss->recover=true;
-// 	$rss->loadXML(trim(curl_multi_getcontent($ch[$j])));
-// $rss = $rss->saveXML();
+    $feedMeta = $result->fetch_array();
 
-	$redirectURL = curl_getinfo($ch[$j],CURLINFO_EFFECTIVE_URL );
-/*	echo '<h1>'.$urlorigin[$j].'</h1>';
-	echo '<h1>'.$redirectURL.'</h1>';*/
-	if($urlorigin[$j] != $redirectURL) {
-		$mysqli->query("update reader_flux set rss='$redirectURL' where id=$dd[$j];") or die($mysqli->error);
-	}
-//echo "OK!<br />";
-	if (!$rss and $DEBUG) {
-		foreach (libxml_get_errors() as $error) {
-			var_dump( $error );
-        // gérer les erreurs ici
-		}
-		echo '<pre>';
-		print_r($rss);
-		print curl_multi_getcontent($ch[$j]);
-		echo '</pre>';
-		libxml_clear_errors();
-	}
- //if($DEBUG) $rss = simplexml_load_string(trim($test), 'SimpleXMLElement', LIBXML_NOCDATA);
-/*	if($DEBUG) echo '<pre>';
-	if($DEBUG) print_r($rss);
-	if($DEBUG) echo '</pre>';*/
-	if(empty($rss)) {
-		echo 'Flux vide!<br />\n';
+    // Parse XML content
+    $xml = trim(curl_multi_getcontent($ch[$j]));
 
-		continue;
-	}
-	$title=null;
-	$title = (isset($rss->title))?$rss->title:$rss->channel->title;
-	if(!isset($title)) {
-		echo "pas de titre!";
-		if($DEBUG) echo '<pre>';
-		if($DEBUG) print_r($rss);
-		if($DEBUG) echo '</pre>';
-		continue;
-	}
-	echo "$title : ";
-	$linkmaster = null;
-	if($rss->channel->link) $linkmaster = $rss->channel->link;
-	elseif($rss->link[0]['href']) $linkmaster = $rss->link[0]['href'];
+    // Clean XML: remove content after closing RSS tag, fix malformed URLs
+    $xml = preg_replace('/^(.*<\/rss>).*$/s', '\\1', $xml);
+    $xml = preg_replace('/url="(.*?\.(jpg|png|gif))\?.*?"/s', 'url="' . htmlspecialchars('\\1', ENT_XML1, 'UTF-8', true) . '"', $xml);
+    $xml = preg_replace('/type=""/s', '', $xml);
 
-// 	if(is_object($rss->children($namespaces['media']))) {$flux=$rss->children($namespaces['media']);
-// // echo '<pre>';print_r($flux);
-// }
-// 	else
-		if(isset($rss->channel->item)) $flux = $rss->channel->item;
-	else if(isset($rss->item)) $flux=$rss->item;
-	else if(isset($rss->entry)) $flux=$rss->entry;
-	else {
-		echo "$j : <b>/!\ type de flux inconnu /!\</b><br />";
-		print_r($rss);
-		continue;
-	}
-	$nb_art = 0;
-	foreach ($flux as $item) {
-		$link=null;
-		if($nb_art++ > 5) break;
-		// echo '<pre>';
-		// print_r($item);
-		if(is_object($item->link)) {
-			foreach($item->link as $t) {
+    $rss = @simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 
-				if($t['rel'] == "alternate" ||$t['rel'] == "self") $link = $t['href'];
-				if(!isset($link) && isset($t['href'])) $link = $t['href'];
-			}
-		}
-		if(!isset($link) && isset($item->guid) && preg_match('/^https?:\/\//',$item->guid)) $link = $item->guid;
-		if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//',$item->link)) $link = $item->link;
-		//le lien n'est pas complet !
-		if(!preg_match('/^https?:\/\//',$linkmaster)) $linkmaster = $ttt[0];
-		//echo "<h1>$linkmaster</h1><br />";
-		$link = complete_link($link, $linkmaster);
+    // Update RSS URL if redirected
+    $redirectURL = curl_getinfo($ch[$j], CURLINFO_EFFECTIVE_URL);
+    if($urlOrigins[$j] != $redirectURL) {
+        $stmt = $mysqli->prepare("UPDATE reader_flux SET rss = ? WHERE id = ?");
+        $stmt->bind_param("si", $redirectURL, $feedIds[$j]);
+        $stmt->execute();
+    }
 
-		// print $link;
-		// die;
-		if(!isset($link)|| !$link || $link=='') {
-			print "Aucun lien trouvé.<br />";
-			if($DEBUG) echo '<pre>';
-			if($DEBUG) print_r($rss);
-			if($DEBUG) echo '</pre>';
-			continue;
-		}
-		$guid = null;
-		if(isset($item->guid)) $guid = $item->guid;
-		if(isset($guid) && preg_match('/^https?:\/\/.*/',$guid)) $link = $guid;
-		if($DEBUG) echo 'Lien : <a href="'.$link.'">'.$link.'</a><br />';
+    // Handle XML parsing errors
+    if (!$rss && $DEBUG) {
+        foreach (libxml_get_errors() as $error) {
+            var_dump($error);
+        }
+        echo '<pre>';
+        print_r($rss);
+        echo htmlspecialchars(curl_multi_getcontent($ch[$j]));
+        echo '</pre>';
+        libxml_clear_errors();
+    }
 
+    if(empty($rss)) {
+        echo "Flux vide!<br />\n";
+        continue;
+    }
 
+    // Extract feed title
+    $title = (isset($rss->title)) ? $rss->title : $rss->channel->title;
+    if(!isset($title)) {
+        echo "Pas de titre!";
+        if($DEBUG) {
+            echo '<pre>';
+            print_r($rss);
+            echo '</pre>';
+        }
+        continue;
+    }
 
-//nettoyage rapide de link (à compléter surement)
-		$a = array(')','(','"','\\');
-		$b = array('','','','\\\\');
-		$link = str_replace($a, $b, $link);
-		$link_without_security = preg_replace('/^https?/','' , $link);
-		$v = $mysqli->query("select id from reader_item where id_flux=".$dd[$j]." and link like '%".$mysqli->real_escape_string($link_without_security)."';") or die($mysqli->error);
-		if (!$v->num_rows) {
-			$title = null;
-			if($item->title) $title=$item->title;
-			else {
-				echo "PAS DE TITRE !!!<br />";
-			}
-			$iDate = null;
+    echo "$title : ";
 
-			if(isset($item->pubDate)) $iDate=$item->pubDate;
-			else if(isset($item->published)) $iDate = $item->published;
-			echo "|$iDate|<br>";
-			try {
-				$date = new DateTime($iDate);
-			} catch (Exception $e) {
-				echo $e->getMessage();
-				$date = new DateTime();
-			}
-			$iDate = $date->getTimestamp();
-			if(!isset($iDate) || $iDate > time()) $iDate = time();
+    // Extract feed link
+    $linkmaster = null;
+    if($rss->channel->link) {
+        $linkmaster = $rss->channel->link;
+    } elseif($rss->link[0]['href']) {
+        $linkmaster = $rss->link[0]['href'];
+    }
 
+    // Determine feed item structure
+    if(isset($rss->channel->item)) {
+        $flux = $rss->channel->item;
+    } elseif(isset($rss->item)) {
+        $flux = $rss->item;
+    } elseif(isset($rss->entry)) {
+        $flux = $rss->entry;
+    } else {
+        echo "$j : <b>/!\ Type de flux inconnu /!\</b><br />";
+        if($DEBUG) print_r($rss);
+        continue;
+    }
 
-			$image=null;
-			if(isset($item->image)) $image=$item->image;
-			$content = null;
-			/*if(isset($item->enclosure)) {
-				echo '<pre><h1>';
-	print_r($item->enclosure);
-	echo $item->enclosure['url'];
-	echo '</h1></pre>';
-//				die ("FUCK OFF!");
+    $nb_art = 0;
 
-			}*/
+    // Process each item in the feed
+    foreach ($flux as $item) {
+        $link = null;
 
-			// if($item->children($namespaces['media'])) $content=$item->children($namespaces['media']);
-			// else
-				if(isset($item->description)) $content = $item->description;
-			//else if(isset($item->{'media:description'})) $content = $item->{'media:description'}; //ne marche pas
-			//voir xpath dans TESTS
-			else if(isset($item->content)) $content = $item->content;
-			else if(isset($item->summary)) $content = $item->summary;
-			else if(isset($item->media)) var_dump($item->media);
-			else {
-				print "pas de content<br />";
-				if(preg_match('/^(.*\/\/)?(www.)?youtube.com\/watch\?v=(.*)/', $link, $m) || preg_match('/^(.*\/\/)?(www.)?youtube.com\/shorts\/(.*)/', $link, $m)) {
-					echo "Lien youtube trouvé!<br />";
-      		//$content = '<yt width="560" height="315" src="https://www.youtube.com/embed/'.$m[3].'" frameborder="0" allowfullscreen></yt>';
-					$content = '<yt>'.$m[3].'</yt>';
-				}
-				else if(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
-					echo "Image trouvée!<br />";
-					$content = '<img src="'.$m[1].'" />';
-				}
-			}
-			if(!isset($content) || $content=='') {
-				echo '<b>pas de content</b><br/>';
-				print_r($item);
-				echo '<br /><br />';
-			}
+        // Limit to 5 articles per feed per update
+        if($nb_art++ > 5) break;
 
-			//print "CONTENT : |$content|";
-			$author = null;
+        // Extract item link
+        if(is_object($item->link)) {
+            foreach($item->link as $t) {
+                if($t['rel'] == "alternate" || $t['rel'] == "self") {
+                    $link = $t['href'];
+                }
+                if(!isset($link) && isset($t['href'])) {
+                    $link = $t['href'];
+                }
+            }
+        }
 
-			if(isset($item->author->name)) $author = $item->author->name;
-			else if(isset($item->author)) $author = $item->author;
-			else $author ='';
-			/* echo "&nbsp;&nbsp;id          : $dd[$j]<br />"; */
-			/* echo "&nbsp;&nbsp;date        : $iDate<br />"; */
-			/* echo "&nbsp;&nbsp;guid        : $guid<br />"; */
-			/* echo "&nbsp;&nbsp;title       : $title<br />"; */
-			/* echo "&nbsp;&nbsp;author      : $author<br />"; */
-			/* echo "&nbsp;&nbsp;link        : $link<br />"; */
-			 //echo "&nbsp;&nbsp;content     : $content<br /><br />";
+        if(!isset($link) && isset($item->guid) && preg_match('/^https?:\/\//', $item->guid)) {
+            $link = $item->guid;
+        }
+        if(!isset($link) && isset($item->link) && preg_match('/^https?:\/\//', $item->link)) {
+            $link = $item->link;
+        }
 
-			$title = clean_txt($title);
-			$content = clean_txt($content);
-			//echo "&nbsp;&nbsp;content     : $content<br /><br />";
-			$author = clean_txt($author);
-			print "MAJ<br />";
-/*			echo "insert into reader_item values ('', $dd[$j], '".date("Y-m-d H:i:s",$iDate)."', '".$mysqli->real_escape_string($guid)."', '".$mysqli->real_escape_string($title)."', '".$mysqli->real_escape_string($author)."', '".$mysqli->real_escape_string($link)."', '".$mysqli->real_escape_string($content);
-			echo "<br /><br />";*/
-			$mysqli->query("insert into reader_item values ('', $dd[$j], '".date("Y-m-d H:i:s",$iDate)."', '".$mysqli->real_escape_string($guid)."', '".$mysqli->real_escape_string($title)."', '".$mysqli->real_escape_string($author)."', '".$mysqli->real_escape_string($link)."', '".$mysqli->real_escape_string($content)."');") or die($mysqli->error);
-		}
-		$mysqli->query("update reader_flux set `update`=CURRENT_TIMESTAMP() where id=".$dd[$j].";") or die($mysqli->error);
-		print ".";
-	}
-	echo "\n";
-	curl_multi_remove_handle($mh,$ch[$j]);
+        // Complete relative URLs
+        if(!preg_match('/^https?:\/\//', $linkmaster)) {
+            $linkmaster = $feedMeta[0];
+        }
+
+        $link = complete_link($link, $linkmaster);
+
+        if(!isset($link) || !$link || $link == '') {
+            if($DEBUG) {
+                echo "Aucun lien trouvé.<br />";
+                echo '<pre>';
+                print_r($item);
+                echo '</pre>';
+            }
+            continue;
+        }
+
+        // Use GUID as link if it's a URL
+        $guid = null;
+        if(isset($item->guid)) {
+            $guid = $item->guid;
+        }
+        if(isset($guid) && preg_match('/^https?:\/\/.*/', $guid)) {
+            $link = $guid;
+        }
+
+        if($DEBUG) {
+            echo 'Lien : <a href="' . htmlspecialchars($link) . '">' . htmlspecialchars($link) . '</a><br />';
+        }
+
+        // Clean link for database storage
+        $link = str_replace(array(')', '(', '"', '\\'), array('', '', '', '\\\\'), $link);
+        $link_without_protocol = preg_replace('/^https?/', '', $link);
+
+        // Check if article already exists
+        $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND link LIKE ?");
+        $searchPattern = '%' . $link_without_protocol . '%';
+        $stmt->bind_param("is", $feedIds[$j], $searchPattern);
+        $stmt->execute();
+        $existingResult = $stmt->get_result();
+
+        if ($existingResult->num_rows == 0) {
+            // New article - extract data
+            $title = isset($item->title) ? $item->title : null;
+
+            if(!$title) {
+                echo "PAS DE TITRE !!!<br />";
+                continue;
+            }
+
+            // Extract publication date
+            $iDate = null;
+            if(isset($item->pubDate)) {
+                $iDate = $item->pubDate;
+            } elseif(isset($item->published)) {
+                $iDate = $item->published;
+            }
+
+            try {
+                $date = new DateTime($iDate);
+            } catch (Exception $e) {
+                if($DEBUG) echo $e->getMessage();
+                $date = new DateTime();
+            }
+
+            $iDate = $date->getTimestamp();
+            if(!isset($iDate) || $iDate > time()) {
+                $iDate = time();
+            }
+
+            // Extract content
+            $content = null;
+            if(isset($item->description)) {
+                $content = $item->description;
+            } elseif(isset($item->content)) {
+                $content = $item->content;
+            } elseif(isset($item->summary)) {
+                $content = $item->summary;
+            } elseif(preg_match('/^(.*\/\/)?(www\.)?youtube\.com\/(watch\?v=|shorts\/)(.*)/', $link, $m)) {
+                // YouTube link detected
+                echo "Lien YouTube trouvé!<br />";
+                $content = '<yt>' . $m[4] . '</yt>';
+            } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
+                // Image link detected
+                echo "Image trouvée!<br />";
+                $content = '<img src="' . htmlspecialchars($m[1]) . '" />';
+            }
+
+            if(!isset($content) || $content == '') {
+                if($DEBUG) {
+                    echo '<b>Pas de content</b><br/>';
+                    print_r($item);
+                    echo '<br /><br />';
+                }
+            }
+
+            // Extract author
+            $author = '';
+            if(isset($item->author->name)) {
+                $author = $item->author->name;
+            } elseif(isset($item->author)) {
+                $author = $item->author;
+            }
+
+            // Clean text content
+            $title = clean_txt($title);
+            $content = clean_txt($content);
+            $author = clean_txt($author);
+
+            echo "MAJ<br />";
+
+            // Insert new article using prepared statement
+            $stmt = $mysqli->prepare("
+                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description)
+                VALUES ('', ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $pubdate = date("Y-m-d H:i:s", $iDate);
+            $stmt->bind_param("issssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content);
+            $stmt->execute();
+        }
+
+        echo ".";
+    }
+
+    // Update feed last update timestamp
+    $stmt = $mysqli->prepare("UPDATE reader_flux SET `update` = CURRENT_TIMESTAMP() WHERE id = ?");
+    $stmt->bind_param("i", $feedIds[$j]);
+    $stmt->execute();
+
+    echo "\n";
+    curl_multi_remove_handle($mh, $ch[$j]);
 }
+
 curl_multi_close($mh);
 ?>
