@@ -183,8 +183,16 @@ function renderMenu(menuData) {
   var newFeeds = [];
 
   for(var i in m) {
-    if (m[i].n > 0) {
-      menu += '\t<li id="f' + i + '" class="fluxnew" title="' + m[i].d + '" onclick="view(' + i + ');">'  + m[i].t + '<span class="nb_flux"> ' + m[i].n + '</span> <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
+    // Show feed if: has unread articles OR is currently selected (even if empty)
+    var isCurrentFeed = (id == i);
+    var shouldShow = (m[i].n > 0) || isCurrentFeed;
+
+    if (shouldShow) {
+      // Use different class for empty but selected feed
+      var feedClass = (m[i].n > 0) ? 'fluxnew' : 'flux';
+      var counterDisplay = (m[i].n > 0) ? '<span class="nb_flux"> ' + m[i].n + '</span>' : '';
+
+      menu += '\t<li id="f' + i + '" class="' + feedClass + '" title="' + m[i].d + '" onclick="view(' + i + ');">'  + m[i].t + counterDisplay + ' <span class="icon"><a title="Tout marquer comme lu" onclick="markallread(' + i + ')"></a> <a title="Se désabonner" onclick="unsubscribe(\'' + m[i].t.replace(/'/g, "\\\'") + '\', ' + i + ')"></a></span></li>\n';
       nb_title += m[i].n || 0;
 
       // Check if counter changed
