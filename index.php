@@ -8,6 +8,9 @@ header('Content-Type: text/html; charset=utf-8');
 //header('X-Frame-Options: deny');
 //header('X-Content-Type-Options: nosniff');
 include('/www/conf.php');
+
+// Cache busting only in debug mode
+$cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -15,11 +18,11 @@ include('/www/conf.php');
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" type="text/css" href="themes/common.css?v=<?php echo time(); ?>" media="screen" />
-<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light.css?v=<?php echo time(); ?>" media="screen" title="Normal" />
+<link rel="stylesheet" type="text/css" href="themes/common.css<?php echo $cacheBuster; ?>" media="screen" />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light.css<?php echo $cacheBuster; ?>" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <script src="favico.min.js" defer></script>
-<script src="https://reader.gheop.com/lib.js?v=<?php echo time(); ?>" type="text/javascript" defer></script>
+<script src="https://reader.gheop.com/lib.js<?php echo $cacheBuster; ?>" type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
