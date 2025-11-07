@@ -23,9 +23,9 @@ $userId = (int)$_SESSION['user_id'];
 // ============================================================================
 
 // Article limit
-$limit = 50;
+$limit = 100;
 if (isset($_GET['nb']) && is_numeric($_GET['nb'])) {
-    $limit = min(100, max(1, (int)$_GET['nb']));
+    $limit = min(200, max(1, (int)$_GET['nb']));
 }
 
 // Feed filter for articles
