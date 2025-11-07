@@ -34,28 +34,7 @@ const DM = document.getElementsByTagName("main")[0];
 var cptReadArticle = 0;
 var imageObserver;
 
-var inactivityTime = function () {
-  var t;
-  window.onload = resetTimer;
-
-  document.onmousemove = resetTimer;
-  document.onkeydown = resetTimer;
-  document.onload = resetTimer;
-  document.onmousedown = resetTimer; // touchscreen presses
-  document.ontouchstart = resetTimer;
-  document.onclick = resetTimer;     // touchpad clicks
-  document.onscroll = resetTimer;    // scrolling with arrow keys
-
-  function rearm() {
-  	if(online)
-	    document.location.reload(true);
-  }
-  function resetTimer() {
-    clearTimeout(t);
-    t = setTimeout(rearm, 300000);
-        // 1000 milisec = 1 sec
-  }
-};
+// Inactivity reload removed - SSE handles reconnections automatically
 
 function $(i) {
   return D.getElementById(i);
@@ -1751,7 +1730,6 @@ function i() {
   window.addEventListener('beforeunload', stopSSEConnection);
   window.onresize = scroll;
 
-  inactivityTime();
   $('s').onfocus = function() {
     search_focus = 1;
     //log("Focus sur l'input de recherche.");
