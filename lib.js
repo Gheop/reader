@@ -1122,12 +1122,11 @@ function view(i) {
     }
   }
 
-  // If menu says there are articles but we don't have them in d, reload ALL data
-  // We must load ALL articles, not just this feed, to keep d complete
+  // If menu says there are articles but we don't have them in d, load this specific feed
+  // Loading ALL articles with LIMIT 50 might miss older articles from this feed
   if (!hasArticlesForFeed && m && m[i] && m[i].n > 0) {
-    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, reloading all data');
-    loadData('all', true); // Load ALL articles to refresh d completely
-    // After load completes, articles will be filtered by current id automatically
+    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, loading feed-specific data');
+    loadData(i, false); // Load THIS feed's articles (no cache, direct from API)
     return;
   }
 
