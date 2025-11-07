@@ -152,7 +152,7 @@ function fetchAndUpdateData(feedId) {
         renderMenu(data.menu);
         // Use current global 'id' if feedId is 'all' (reload scenario)
         var displayFeed = (feedId === 'all' && id !== 'all') ? id : (feedId || 'all');
-        renderArticles(data.articles, displayFeed);
+        renderArticles(data.articles, displayFeed, true); // true = from API
       } else {
         console.error('Invalid data structure:', data);
       }
@@ -307,8 +307,8 @@ function renderMenu(menuData) {
   progressBar();
 }
 
-function renderArticles(articlesData, feedId) {
-  console.log('renderArticles called with feedId:', feedId);
+function renderArticles(articlesData, feedId, fromAPI = false) {
+  console.log('renderArticles called with feedId:', feedId, 'fromAPI:', fromAPI);
   console.log('articlesData keys:', Object.keys(articlesData).length);
   let page = '';
   cptReadArticle = 0;
@@ -316,10 +316,15 @@ function renderArticles(articlesData, feedId) {
   loadmore = 0;
   d = articlesData;
 
-  // Initialize read state for articles if not already set (first load from API)
+  // Initialize read state for articles
+  // If data comes fresh from API (reader_unread_cache), all articles are unread
+  // If data comes from cache, preserve existing read states
   for(let i in d) {
-    if (d[i].r === undefined) {
-      d[i].r = 1; // Articles from API are unread
+    if (fromAPI) {
+      d[i].r = 1; // Articles from API are always unread (from reader_unread_cache)
+      d[i].readblock = 0;
+    } else if (d[i].r === undefined) {
+      d[i].r = 1; // Default to unread if not set
       d[i].readblock = 0;
     }
   }
