@@ -8,6 +8,7 @@ header('Content-Type: text/html; charset=utf-8');
 //header('X-Frame-Options: deny');
 //header('X-Content-Type-Options: nosniff');
 include('/www/conf.php');
+include(__DIR__ . '/auth.php');
 
 // Cache busting only in debug mode
 $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
@@ -33,19 +34,10 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 </head>
 <body>
 <?php
-if(!isset($_SESSION['pseudo'])) {
-    if (isset($_COOKIE['session'])) {
-      $auth = explode("|",$_COOKIE['session']);
-      $req = $mysqli->query("select id, pseudo, pwd from users where pseudo='$auth[0]'");
-      $d = $req->fetch_array();
-      if($d['pwd'] == $auth[1]) {
-	     $_SESSION['pseudo'] = $d['pseudo'];
-	     $_SESSION['user_id'] = $d['id'];
-	     setrawcookie("session", "$d[pseudo]|$d[pwd]", time()+26000000, '/', '.gheop.com');
-	    }
-    }
-  }
-   else if(isset($_GET['a']) && $_GET['a'] == 'destroy') include('../destroy.php');
+// Handle logout
+if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
+    include('../destroy.php');
+}
 ?>
 <div id="register">
   <div id="theme-selector">

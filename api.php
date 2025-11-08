@@ -8,6 +8,7 @@
 $start_time = microtime(true);
 header("Content-Type: application/json; charset=UTF-8");
 include('/www/conf.php');
+include(__DIR__ . '/auth.php');
 
 // Security: Validate user authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
