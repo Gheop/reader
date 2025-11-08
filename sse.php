@@ -21,9 +21,13 @@ while (ob_get_level() > 0) {
 }
 
 include('/www/conf.php');
+include(__DIR__ . '/auth.php');
 
 // Security: Validate user authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
+    // Log debug info
+    error_log('SSE auth failed - Session status: ' . session_status() . ', Session ID: ' . session_id() . ', Has user_id: ' . (isset($_SESSION['user_id']) ? 'yes' : 'no'));
+
     echo "event: error\n";
     echo "data: {\"error\":\"Unauthorized\"}\n\n";
     flush();
