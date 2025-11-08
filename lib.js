@@ -659,8 +659,25 @@ function stopBackgroundSync() {
   }
 }
 
+// Debounced favicon update to prevent "Too many badges requests" error
+let faviconTimeout;
+let lastFaviconUpdate = 0;
 function favicon(nb) {
-	if(nb >= 0 && favicon_badge) favicon_badge.badge(nb);
+	if(nb < 0) return;
+
+	// Debounce: only update favicon max once per 100ms
+	const now = Date.now();
+	clearTimeout(faviconTimeout);
+
+	faviconTimeout = setTimeout(() => {
+		try {
+			if(favicon_badge) favicon_badge.badge(nb);
+		} catch(e) {
+			// Ignore favicon errors - they shouldn't block read marking
+			console.warn('Favicon update failed:', e.message);
+		}
+		lastFaviconUpdate = now;
+	}, 100);
   //  $('favico').href = "https://reader.gheop.com/favicon"+nb+".png";
 }
 
