@@ -659,6 +659,39 @@ function stopBackgroundSync() {
   }
 }
 
+// Batch read requests to avoid flooding server
+let readBatchQueue = [];
+let readBatchTimeout = null;
+
+function flushReadBatch() {
+	if (readBatchQueue.length === 0) return;
+
+	const idsToMark = [...readBatchQueue];
+	readBatchQueue = [];
+
+	// Send batch request
+	const data = 'ids=' + idsToMark.join(',');
+	myFetch('read.php', data, 1).catch(err => {
+		console.error('Batch read failed, retrying individually:', err);
+		// Retry failed items individually
+		idsToMark.forEach(id => myFetch('read.php', 'id=' + id, 1));
+	});
+}
+
+function queueReadRequest(articleId) {
+	readBatchQueue.push(articleId);
+
+	// Clear existing timeout
+	clearTimeout(readBatchTimeout);
+
+	// Flush immediately if queue is large, otherwise wait 500ms
+	if (readBatchQueue.length >= 20) {
+		flushReadBatch();
+	} else {
+		readBatchTimeout = setTimeout(flushReadBatch, 500);
+	}
+}
+
 // Debounced favicon update to prevent "Too many badges requests" error
 let faviconTimeout;
 let lastFaviconUpdate = 0;
@@ -1615,8 +1648,8 @@ function read(k, v=0) {
   d[k].r = 0;
   $(k).className = 'item0';
 
-  // Send request to server to mark as read
-  myFetch('read.php', 'id='+k, 1);
+  // Queue read request for batch processing (reduces server load)
+  queueReadRequest(k);
 
   // Update title counter
   D.title = 'Gheop Reader' + ((--nb_title > 0) ? ' (' + nb_title + ')' : '');
