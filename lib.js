@@ -917,10 +917,11 @@ function scroll() {
                                 imageObserver.unobserve(art);
                                 read(art.id);
                                 cptReadArticle++;
-                                if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
-                                    loadinprogress = 1;
-                                    more();
-                                }
+                                // Disabled: automatic "load more" no longer needed with API loading all articles
+                                // if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
+                                //     loadinprogress = 1;
+                                //     more();
+                                // }
                             }
                         }
                     });
@@ -972,10 +973,11 @@ function oldScroll() {
         count++;
         if($(i).offsetTop <= DM.scrollTop) {
             if (d[i].r != 0) read(i);
-            if (!loadinprogress && count + 5 >= loadmore) {
-                loadinprogress = 1;
-                more();
-            }
+            // Disabled: automatic "load more" no longer needed with API loading all articles
+            // if (!loadinprogress && count + 5 >= loadmore) {
+            //     loadinprogress = 1;
+            //     more();
+            // }
         } else return;
     }
 }
