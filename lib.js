@@ -883,6 +883,30 @@ function scroll() {
         unreadArticles.forEach(function(art) {
                 imageObserver.observe(art);
             });
+
+        // Fallback: mark articles as read during fast scrolling
+        // IntersectionObserver can miss articles during very fast scrolls
+        let scrollTimeout;
+        let lastScrollTop = DM.scrollTop;
+        DM.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                // After scroll stops, check for any unread articles above current position
+                const currentScrollTop = DM.scrollTop;
+                if (currentScrollTop > lastScrollTop) { // Scrolling down
+                    let unread = Array.from(document.getElementsByClassName("item1"));
+                    unread.forEach(function(art) {
+                        if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
+                            // Article is above viewport and still marked unread - mark it read
+                            imageObserver.unobserve(art);
+                            read(art.id);
+                            cptReadArticle++;
+                        }
+                    });
+                }
+                lastScrollTop = currentScrollTop;
+            }, 100); // Check 100ms after scroll stops
+        }, {passive: true});
     }
     else {
         DM.onscroll = oldScroll;
