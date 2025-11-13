@@ -28,6 +28,9 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 ini_set('max_execution_time', '500');
 $mysqli = $_SESSION['mysqli'];
 
+// Release session lock to allow other requests to proceed
+session_write_close();
+
 // Parse and validate parameters
 $extra = '';
 $feedId = null;
