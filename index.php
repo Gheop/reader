@@ -47,6 +47,7 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
       <a href="#" onclick="selectTheme('dark');return false;" data-theme="dark"><i class="theme-icon-dark"></i> Sombre</a>
       <a href="#" onclick="selectTheme('adaptive');return false;" data-theme="adaptive"><i class="theme-icon-adaptive"></i> Adaptatif</a>
       <a href="#" onclick="selectTheme('smooth');return false;" data-theme="smooth"><i class="theme-icon-smooth"></i> Progressif</a>
+      <a href="#" onclick="selectTheme('modern');return false;" data-theme="modern"><i class="theme-icon-modern"></i> Moderne</a>
     </div>
   </div>
 <?php

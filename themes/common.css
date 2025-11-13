@@ -172,22 +172,30 @@ li > input {
 
 .icon a:before {
   font-size: 1rem; /* Restaurer la taille pour l'icône FontAwesome */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 /* Icônes du menu - flux */
 .fluxnew .icon a:first-child:before,
 .flux .icon a:first-child:before {
   content: "\f560";  /* check - marquer comme lu */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 .fluxnew .icon a:last-child:before,
 .flux .icon a:last-child:before {
   content: "\f1f8";  /* times/close - désabonner */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 /* Icônes du menu principal - All */
 #fall .icon a:first-child:before {
   content: "\f067";  /* plus - ajouter un flux */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 #up {
@@ -235,6 +243,8 @@ li > input {
   font-size: 1rem;
   cursor: pointer;
   margin-right: 10px;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
 }
 
 #theme-dropdown {
@@ -293,6 +303,13 @@ li > input {
   content: "\f5a4";  /* sunset - thème progressif */
   font-family: "Font Awesome 6 Free";
   font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-modern:before {
+  content: "\f0d0";  /* magic wand - thème moderne */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
   margin-right: 8px;
 }
 
@@ -459,6 +476,7 @@ article-content {
 /* Icônes avant */
 .website {
   font-family: var(--font-family-main), var(--font-family-icon);
+  font-weight: 900;
   position: relative;
 }
 .website:hover::after {
@@ -477,21 +495,20 @@ article-content {
   pointer-events: none;
   margin-top: 5px;
 }
-.website:before { content: "From "; }
 .nickname:before { content: " by "; }
-.item1 .lu:before { content: "\f070"; }
-.item0 .lu:before { content: "\f06e"; color: var(--color-love); }
-.readability:before { content: "\f15c"; font-weight: 900; }
-.summarize:before { content: "\f5dc"; font-weight: 900; }
-.kindle:before { content: "\f02d"; font-weight: 900; }
-.sendTo:before { content: "\f1d8"; font-weight: 900; }
-.print:before { content: "\f02f"; font-weight: 900; }
-.search:before { content: "\f002"; font-weight: 900; }
-.star:before { content: "\f005"; font-weight: 400; }
-.starred:before { content: "\f005"; font-weight: 900; }
-.love0:before { content: "\f004"; font-weight: 400; }
-.love1:before { color: red; content: "\f004"; font-weight: 900; }
-.tags:before { content: "\f02b"; font-weight: 900; }
+.item1 .lu:before { content: "\f070"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.item0 .lu:before { content: "\f06e"; color: var(--color-love); font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.readability:before { content: "\f15c"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.summarize:before { content: "\f5dc"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.kindle:before { content: "\f02d"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.sendTo:before { content: "\f1d8"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.print:before { content: "\f02f"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.search:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.star:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.starred:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.love0:before { content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.love1:before { color: red; content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.tags:before { content: "\f02b"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 
 /* Titre et métadonnées */
 .headline {
@@ -540,12 +557,15 @@ p {
   padding-left: var(--spacing-xs);
   cursor: pointer;
   font-weight: bold;
+  font-family: var(--font-family-main), var(--font-family-icon);
 }
 
 .flux {
   display: none;
   opacity: 1;
   transition: opacity var(--transition-fast);
+  font-family: var(--font-family-main), var(--font-family-icon);
+  font-weight: 900;
 }
 
 .fluxnew a, .flux a {
