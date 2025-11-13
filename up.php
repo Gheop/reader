@@ -76,6 +76,56 @@ function complete_link($link, $linkmaster) {
     return $link;
 }
 
+/**
+ * Fetch YouTube video description using YouTube Data API v3
+ * Requires YOUTUBE_API_KEY to be set in /www/conf.php
+ * @param string $videoId YouTube video ID
+ * @return string|null Video description or null if not found/no API key
+ */
+function get_youtube_description($videoId) {
+    // Check if YouTube API key is configured
+    if (!defined('YOUTUBE_API_KEY') || empty(YOUTUBE_API_KEY)) {
+        return null;
+    }
+
+    $apiKey = YOUTUBE_API_KEY;
+    $url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' . urlencode($videoId) . '&key=' . urlencode($apiKey);
+
+    $ch = curl_init();
+    curl_setopt_array($ch, array(
+        CURLOPT_URL => $url,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2
+    ));
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode != 200 || !$response) {
+        return null;
+    }
+
+    $data = json_decode($response, true);
+
+    if (isset($data['items'][0]['snippet']['description'])) {
+        $description = $data['items'][0]['snippet']['description'];
+
+        // Clean up and limit length
+        $description = trim($description);
+        if (strlen($description) > 2000) {
+            $description = substr($description, 0, 2000) . '...';
+        }
+
+        return $description;
+    }
+
+    return null;
+}
+
 // Fetch feed URLs
 $r = get_links($mysqli, $extra);
 $mh = curl_multi_init();
@@ -305,10 +355,38 @@ for($j = 0; $j < $i; $j++) {
                 $content = $item->content;
             } elseif(isset($item->summary)) {
                 $content = $item->summary;
-            } elseif(preg_match('/^(.*\/\/)?(www\.)?youtube\.com\/(watch\?v=|shorts\/)(.*)/', $link, $m)) {
-                // YouTube link detected
-                echo "Lien YouTube trouvé!<br />";
-                $content = '<yt>' . $m[4] . '</yt>';
+            }
+
+            // Check if content contains YouTube video or if link is YouTube
+            $youtubeVideoId = null;
+            if(preg_match('/^(.*\/\/)?(www\.)?youtube\.com\/(watch\?v=|shorts\/)([^&\s]+)/', $link, $m)) {
+                $youtubeVideoId = $m[4];
+            } elseif(preg_match('/^(.*\/\/)?youtu\.be\/([^&\s]+)/', $link, $m)) {
+                $youtubeVideoId = $m[2];
+            }
+
+            // If YouTube video detected, add video embed and fetch description
+            if($youtubeVideoId) {
+                echo "Lien YouTube trouvé: " . $youtubeVideoId . "<br />";
+
+                // Fetch YouTube description
+                $ytDescription = get_youtube_description($youtubeVideoId);
+
+                // Build content with video embed and description
+                $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
+
+                if($ytDescription) {
+                    echo "Description récupérée (" . strlen($ytDescription) . " chars)<br />";
+                    // Add description below video
+                    $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
+                }
+
+                // If there was existing content from RSS, append it
+                if(!empty($content)) {
+                    $content = $videoContent . '<hr />' . $content;
+                } else {
+                    $content = $videoContent;
+                }
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
                 // Image link detected
                 echo "Image trouvée!<br />";

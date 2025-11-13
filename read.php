@@ -35,11 +35,48 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
     }
     $valuesString = implode(',', $values);
 
-    $query = "INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES $valuesString";
-    $mysqli->query($query);
+    // Start transaction
+    $mysqli->begin_transaction();
 
-    header('Content-Type: application/json');
-    echo '{"read":true,"count":' . count($ids) . '}';
+    try {
+        // Mark as read
+        $query = "INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES $valuesString";
+        $result = $mysqli->query($query);
+
+        if (!$result) {
+            throw new Exception("Insert failed: " . $mysqli->error);
+        }
+
+        // Remove from unread cache
+        $idsString = implode(',', $ids);
+        $deleteQuery = "DELETE FROM reader_unread_cache WHERE id_user = $userId AND id_item IN ($idsString)";
+        $deleteResult = $mysqli->query($deleteQuery);
+
+        if (!$deleteResult) {
+            throw new Exception("Cache delete failed: " . $mysqli->error);
+        }
+
+        // Update feed counter
+        $updateQuery = "UPDATE reader_flux SET unread_count_user_$userId = (
+            SELECT COUNT(*) FROM reader_unread_cache WHERE id_user = $userId AND id_flux = reader_flux.id
+        ) WHERE id IN (SELECT DISTINCT id_flux FROM reader_item WHERE id IN ($idsString))";
+        $updateResult = $mysqli->query($updateQuery);
+
+        if (!$updateResult) {
+            throw new Exception("Counter update failed: " . $mysqli->error);
+        }
+
+        $mysqli->commit();
+
+        header('Content-Type: application/json');
+        echo '{"read":true,"count":' . count($ids) . '}';
+
+    } catch (Exception $e) {
+        $mysqli->rollback();
+        error_log("Batch read failed: " . $e->getMessage());
+        http_response_code(500);
+        echo '{"error":"Database error","details":"' . $e->getMessage() . '"}';
+    }
 
 } elseif(isset($_POST['id']) && is_numeric($_POST['id'])) {
     // Single ID mode (backwards compatibility)

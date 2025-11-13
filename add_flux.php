@@ -85,9 +85,39 @@ function searchRSSUrlSpecialSite($url) {
         return false;
     }
 
-    // YouTube video (extract channel)
+    // YouTube video (extract channel using YouTube API)
     if(preg_match('/^.*\/\/(www\.|m\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)\/(watch\?.*\&?v=|embed\/|shorts\/)?([^\?\&]*)(.*)$/', $url, $m)) {
-        $html = file_get_html('https://www.youtube.com/watch?v=' . $m[4]);
+        $videoId = $m[4];
+
+        // Use YouTube API if available
+        if(defined('YOUTUBE_API_KEY') && !empty(YOUTUBE_API_KEY)) {
+            $apiKey = YOUTUBE_API_KEY;
+            $apiUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' . urlencode($videoId) . '&key=' . urlencode($apiKey);
+
+            $ch = curl_init();
+            curl_setopt_array($ch, array(
+                CURLOPT_URL => $apiUrl,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+            ));
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            if($response) {
+                $data = json_decode($response, true);
+                if(isset($data['items'][0]['snippet']['channelId'])) {
+                    $channelId = $data['items'][0]['snippet']['channelId'];
+                    return 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $channelId;
+                }
+            }
+        }
+
+        // Fallback: Try HTML scraping (old method, may not work)
+        $html = file_get_html('https://www.youtube.com/watch?v=' . $videoId);
         if($html) {
             foreach($html->find('meta[itemprop=channelId]') as $element) {
                 return 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $element->content;
@@ -117,14 +147,20 @@ function searchRSSUrlSpecialSite($url) {
         return 'http://www.dailymotion.com/rss/user/' . $m[1];
     }
 
-    // Twitter
-    if(preg_match('/^.*\/\/(www\.)?twitter\.com\/(.*)?\/?.*$/', $url, $m)) {
-        return 'https://reader.gheop.com/scraping/twitter.com.php?f=' . urlencode($m[2]);
+    // Twitter/X
+    if(preg_match('/^.*\/\/(www\.)?(twitter\.com|x\.com)\/([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        // Exclure les pages spéciales (home, explore, notifications, messages, search)
+        $excluded = ['home', 'explore', 'notifications', 'messages', 'search', 'i', 'settings'];
+        if (!in_array(strtolower($m[3]), $excluded)) {
+            return 'https://reader.gheop.com/scraping/twitter.com.php?f=' . urlencode($m[3]);
+        }
     }
 
     // Reddit
-    if(preg_match('/^.*\/\/(www\.)?reddit\.com\/(.*)?$/', $url, $m)) {
-        return $m[0] . '.rss';
+    if(preg_match('/^.*\/\/(www\.)?reddit\.com\/(r|u)\/([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        // URL de subreddit: https://www.reddit.com/r/programming/
+        // URL d'utilisateur: https://www.reddit.com/u/username/
+        return 'https://reader.gheop.com/scraping/reddit.com.php?f=' . urlencode($m[2] . '/' . $m[3]);
     }
 
     // Medium
@@ -133,6 +169,33 @@ function searchRSSUrlSpecialSite($url) {
             return 'https://' . $m[1] . '.medium.com/feed';
         }
         return false;
+    }
+
+    // LinkedIn
+    if(preg_match('/^.*\/\/(www\.)?linkedin\.com\/in\/([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        return 'https://reader.gheop.com/scraping/linkedin.com.php?f=' . urlencode($m[2]);
+    }
+
+    // Instagram
+    // Gérer différents formats d'URLs Instagram
+    if(preg_match('/^.*\/\/(www\.)?instagram\.com\/stories\/([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        // URL de stories: https://www.instagram.com/stories/username/
+        return 'https://reader.gheop.com/scraping/instagram.com.php?f=' . urlencode($m[2]);
+    }
+    if(preg_match('/^.*\/\/(www\.)?instagram\.com\/([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        // URL de profil standard: https://www.instagram.com/username/
+        // Ne pas matcher les URLs de posts (/p/) ou reels (/reel/)
+        if($m[2] !== 'p' && $m[2] !== 'reel' && $m[2] !== 'tv' && $m[2] !== 'stories') {
+            return 'https://reader.gheop.com/scraping/instagram.com.php?f=' . urlencode($m[2]);
+        }
+    }
+
+    // TikTok
+    // Gérer différents formats d'URLs TikTok
+    if(preg_match('/^.*\/\/(www\.)?tiktok\.com\/@([^\/\?]+)(\/.*)?$/', $url, $m)) {
+        // URL de profil: https://www.tiktok.com/@username
+        // URL de vidéo: https://www.tiktok.com/@username/video/123456789
+        return 'https://reader.gheop.com/scraping/tiktok.com.php?f=' . urlencode('@' . $m[2]);
     }
 
     return false;

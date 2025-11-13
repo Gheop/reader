@@ -144,14 +144,86 @@ function fetchAndUpdateData(feedId) {
     });
 }
 
+// Background preloading of feed-specific articles to avoid pagination during scrolling
+let preloadedFeeds = {}; // Track which feeds have been preloaded
+let isPreloading = false; // Prevent multiple concurrent preloads
+
+function preloadFeedArticles(feedId) {
+  // Don't preload if already done or in progress
+  if (preloadedFeeds[feedId] || isPreloading) {
+    console.log('Preload skipped for feed', feedId, '- already preloaded:', !!preloadedFeeds[feedId], 'isPreloading:', isPreloading);
+    return;
+  }
+
+  // Don't preload if this feed has no articles
+  if (!m || !m[feedId] || m[feedId].n === 0) {
+    console.log('Preload skipped for feed', feedId, '- no unread articles');
+    return;
+  }
+
+  console.log('=== PRELOADING feed', feedId, 'with', m[feedId].n, 'articles ===');
+  isPreloading = true;
+
+  // Request up to 200 articles for this feed (API max)
+  const url = 'api.php?id=' + feedId + '&nb=200';
+
+  fetch(url, {
+    credentials: 'same-origin'
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.articles) {
+        console.log('PRELOAD: Received', Object.keys(data.articles).length, 'articles for feed', feedId);
+
+        // Merge new articles into existing data
+        if (!d) d = {};
+
+        let newCount = 0;
+        for (let articleId in data.articles) {
+          if (!d[articleId]) {
+            // New article not in memory yet
+            d[articleId] = data.articles[articleId];
+            d[articleId].r = 1; // Unread
+            d[articleId].readblock = 0;
+            newCount++;
+          }
+        }
+
+        console.log('PRELOAD: Added', newCount, 'new articles to memory for feed', feedId);
+        preloadedFeeds[feedId] = true;
+
+        // Update cache with expanded data
+        if (m) {
+          saveToCache({menu: m, articles: d, timestamp: Date.now()});
+        }
+      }
+    })
+    .catch(err => {
+      console.error('Preload failed for feed', feedId, ':', err);
+    })
+    .finally(() => {
+      isPreloading = false;
+    });
+}
+
 function renderMenu(menuData) {
   // Save old counters for comparison
   var oldCounters = {};
   var oldFeedsVisible = {};
+  var locallyModified = {};
   if (m) {
     for(var i in m) {
       oldCounters[i] = m[i].n || 0;
       oldFeedsVisible[i] = m[i].n > 0;
+      // Marquer les compteurs modifiés localement (batch en attente)
+      if (readBatchQueue.length > 0 && oldCounters[i] !== undefined) {
+        locallyModified[i] = true;
+      }
     }
   }
 
@@ -163,6 +235,15 @@ function renderMenu(menuData) {
   if (id !== 'all' && m && m[id] && !menuData[id]) {
     currentFeedData = m[id];
     console.log('Preserving currently selected feed', id, 'in menu');
+  }
+
+  // Pour les flux modifiés localement, garder les compteurs locaux si plus petits
+  for(var i in menuData) {
+    if (m && m[i] && m[i].locallyModified && m[i].n < menuData[i].n) {
+      console.log('Keeping local counter for feed', i, '- Local:', m[i].n, 'Server:', menuData[i].n);
+      menuData[i].n = m[i].n;
+      menuData[i].locallyModified = true; // Garder le flag
+    }
   }
 
   m = menuData;
@@ -412,7 +493,25 @@ function startBackgroundSync(intervalSeconds = 30) {
   }, intervalSeconds * 1000);
 }
 
-function fetchAndUpdateDataBackground() {
+async function fetchAndUpdateDataBackground() {
+  console.log('=== SSE BACKGROUND SYNC START ===');
+
+  // Wait for read activity to stop (2 seconds of inactivity)
+  const timeSinceLastRead = Date.now() - lastReadActivity;
+  if (timeSinceLastRead < 2000) {
+    console.log('SSE: Recent read activity detected (', timeSinceLastRead, 'ms ago), delaying sync for 2 seconds...');
+    // Retry after 2 seconds
+    setTimeout(() => fetchAndUpdateDataBackground(), 2000);
+    return;
+  }
+
+  // Flush any pending read requests BEFORE fetching new data
+  // This ensures articles marked as read locally are saved server-side
+  // before we check for new articles
+  console.log('SSE: No recent read activity, flushing pending read requests...');
+  await flushReadBatch();
+  console.log('SSE: Flush complete, now fetching data...');
+
   const url = 'api.php'; // Always fetch all data
   console.log('Background fetching data from:', url);
 
@@ -481,7 +580,12 @@ function appendNewArticles(newArticlesData) {
     }
   }
 
-  console.log('Found', newArticles.length, 'new articles,', reactivatedArticles.length, 'reactivated articles, and', removedArticles.length, 'removed articles for current view');
+  console.log('SSE: Found', newArticles.length, 'new articles,', reactivatedArticles.length, 'reactivated articles, and', removedArticles.length, 'removed articles for current view');
+
+  // Count how many articles are in newArticlesData
+  var newDataCount = Object.keys(newArticlesData).length;
+  var oldDataCount = d ? Object.keys(d).length : 0;
+  console.log('SSE: Old data had', oldDataCount, 'articles, new data has', newDataCount, 'articles');
 
   // Initialize read state for all articles from API (they are all unread)
   for(var i in newArticlesData) {
@@ -493,13 +597,14 @@ function appendNewArticles(newArticlesData) {
   for(var i in locallyModifiedArticles) {
     if (d && d[i]) {
       newArticlesData[i] = d[i];
-      console.log('Preserving locally modified article', i);
+      console.log('SSE: Preserving locally modified article', i);
     }
   }
 
   // Then preserve read articles that are in DOM (but not locally modified or in newArticlesData)
   // This allows users to still interact with them (mark as unread, etc.)
   if (d) {
+    var preservedCount = 0;
     for(var i in d) {
       // Only preserve if:
       // 1. Article is NOT in new data (it's read according to server)
@@ -507,12 +612,14 @@ function appendNewArticles(newArticlesData) {
       // 3. Article was NOT locally modified (already handled above)
       if (!newArticlesData[i] && $(i) && !locallyModifiedArticles[i]) {
         newArticlesData[i] = d[i];
-        console.log('Preserving read article in DOM:', i);
+        preservedCount++;
       }
     }
+    console.log('SSE: Preserved', preservedCount, 'read articles from DOM');
   }
 
   d = newArticlesData;
+  console.log('SSE: Updated global data object to', Object.keys(d).length, 'articles');
 
   // Handle removed articles (mark as read, don't remove from DOM to preserve scroll)
   if (removedArticles.length > 0) {
@@ -568,12 +675,14 @@ function appendNewArticles(newArticlesData) {
 
   // Handle reactivated articles (marked as unread elsewhere)
   if (reactivatedArticles.length > 0) {
+    console.log('SSE: Processing', reactivatedArticles.length, 'reactivated articles:', reactivatedArticles.join(', '));
+
     // Remove "Flux vide" message if it exists
     var articles = DM.querySelectorAll('article');
     articles.forEach(function(article) {
       var titleLink = article.querySelector('.title');
       if (titleLink && titleLink.textContent === 'Flux vide') {
-        console.log('Removing "Flux vide" message (reactivated articles)');
+        console.log('SSE: Removing "Flux vide" message (reactivated articles)');
         article.remove();
       }
     });
@@ -583,7 +692,7 @@ function appendNewArticles(newArticlesData) {
       if (article && article.className === 'item0') {
         // Change from read (item0) to unread (item1)
         article.className = 'item1';
-        console.log('Reactivated article', articleId, 'from read to unread');
+        console.log('SSE: Reactivated article', articleId, 'from read to unread (feed:', d[articleId].f, ')');
 
         // Add fade-in animation
         article.classList.add('fade-in-new');
@@ -592,7 +701,7 @@ function appendNewArticles(newArticlesData) {
         }, 600);
       }
     });
-    console.log('Reactivated', reactivatedArticles.length, 'articles');
+    console.log('SSE: Reactivated', reactivatedArticles.length, 'articles');
   }
 
   // Handle new articles (fade in and add to DOM)
@@ -662,30 +771,48 @@ function stopBackgroundSync() {
 // Batch read requests to avoid flooding server
 let readBatchQueue = [];
 let readBatchTimeout = null;
+let lastReadActivity = 0; // Timestamp of last read activity
 
 function flushReadBatch() {
-	if (readBatchQueue.length === 0) return;
+	if (readBatchQueue.length === 0) return Promise.resolve();
 
 	const idsToMark = [...readBatchQueue];
 	readBatchQueue = [];
 
-	// Send batch request
+	console.log('FLUSHING BATCH: Marking', idsToMark.length, 'articles as read on server');
+
+	// Send batch request and return the promise
 	const data = 'ids=' + idsToMark.join(',');
-	myFetch('read.php', data, 1).catch(err => {
-		console.error('Batch read failed, retrying individually:', err);
-		// Retry failed items individually
-		idsToMark.forEach(id => myFetch('read.php', 'id=' + id, 1));
-	});
+	return myFetch('read.php', data, 1)
+		.then(() => {
+			console.log('BATCH SUCCESS: Marked', idsToMark.length, 'articles as read');
+			// Nettoyer les flags locallyModified après succès
+			for (var feedId in m) {
+				if (m[feedId].locallyModified) {
+					m[feedId].locallyModified = false;
+				}
+			}
+		})
+		.catch(err => {
+			console.error('Batch read failed, retrying individually:', err);
+			// Retry failed items individually
+			idsToMark.forEach(id => myFetch('read.php', 'id=' + id, 1));
+		});
 }
 
 function queueReadRequest(articleId) {
 	readBatchQueue.push(articleId);
+	console.log('QUEUE: Article', articleId, 'added to batch queue (', readBatchQueue.length, 'in queue)');
+
+	// Update last read activity timestamp
+	lastReadActivity = Date.now();
 
 	// Clear existing timeout
 	clearTimeout(readBatchTimeout);
 
 	// Flush immediately if queue is large, otherwise wait 500ms
 	if (readBatchQueue.length >= 20) {
+		console.log('QUEUE: Auto-flushing (20 items reached)');
 		flushReadBatch();
 	} else {
 		readBatchTimeout = setTimeout(flushReadBatch, 500);
@@ -804,6 +931,9 @@ function selectTheme(themeName) {
         startSmoothAdaptiveTheme();
       }
     }, 100);
+  } else if (themeName === 'modern') {
+    $('stylesheet').href = 'themes/modern.css?v=' + timestamp;
+    localStorage.setItem('theme', 'modern');
   }
 
   updateThemeIcon();
@@ -825,6 +955,8 @@ function updateThemeIcon() {
     iconClass = 'theme-icon-adaptive';
   } else if (stylesheet.includes('adaptive-smooth.css')) {
     iconClass = 'theme-icon-smooth';
+  } else if (stylesheet.includes('modern.css')) {
+    iconClass = 'theme-icon-modern';
   }
 
   themeCurrent.innerHTML = '<i class="' + iconClass + '"></i>';
@@ -939,6 +1071,9 @@ function scroll() {
         // IntersectionObserver can miss articles during very fast scrolls
         let scrollTimeout;
         let lastScrollTop = DM.scrollTop;
+        let bounceTimeout;
+        let lastBounceTime = 0;
+
         DM.addEventListener('scroll', function() {
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(function() {
@@ -946,16 +1081,64 @@ function scroll() {
                 const currentScrollTop = DM.scrollTop;
                 if (currentScrollTop > lastScrollTop) { // Scrolling down
                     let unread = Array.from(document.getElementsByClassName("item1"));
+                    var fallbackMarked = 0;
                     unread.forEach(function(art) {
                         if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
                             // Article is above viewport and still marked unread - mark it read
                             imageObserver.unobserve(art);
                             read(art.id);
                             cptReadArticle++;
+                            fallbackMarked++;
                         }
                     });
+                    if (fallbackMarked > 0) {
+                        console.log('FALLBACK: Marked', fallbackMarked, 'missed articles as read');
+                    }
                 }
                 lastScrollTop = currentScrollTop;
+
+                // Bounce effect when reaching bottom of last article
+                clearTimeout(bounceTimeout);
+                bounceTimeout = setTimeout(function() {
+                    const now = Date.now();
+                    // Throttle to max once every 2 seconds
+                    if (now - lastBounceTime < 2000) return;
+
+                    const scrollBottom = DM.scrollTop + DM.clientHeight;
+                    const scrollHeight = DM.scrollHeight;
+                    const addBlank = $('addblank');
+
+                    // Check if we're at the bottom (within 50px threshold)
+                    if (scrollBottom >= scrollHeight - 50 && addBlank) {
+                        // Find the last article
+                        const articles = Array.from(document.querySelectorAll('.item1, .item0'));
+                        if (articles.length > 0) {
+                            const lastArticle = articles[articles.length - 1];
+                            const lastArticleTop = lastArticle.offsetTop;
+                            const lastArticleHeight = lastArticle.offsetHeight;
+                            const lastArticleBottom = lastArticleTop + lastArticleHeight;
+
+                            // Check if we can see less than 40% of the last article
+                            const visibleTop = Math.max(lastArticleTop, DM.scrollTop);
+                            const visibleBottom = Math.min(lastArticleBottom, scrollBottom);
+                            const visibleHeight = visibleBottom - visibleTop;
+                            const visiblePercentage = (visibleHeight / lastArticleHeight) * 100;
+
+                            if (visiblePercentage > 0 && visiblePercentage < 40) {
+                                // Bounce back to show the full article
+                                lastBounceTime = now;
+                                const targetScroll = lastArticleTop - 10;
+
+                                // Smooth scroll with bounce effect
+                                DM.style.scrollBehavior = 'smooth';
+                                DM.scrollTop = targetScroll;
+                                setTimeout(() => {
+                                    DM.style.scrollBehavior = '';
+                                }, 500);
+                            }
+                        }
+                    }
+                }, 150); // Check 150ms after scroll stops
             }, 100); // Check 100ms after scroll stops
         }, {passive: true});
     }
@@ -1148,6 +1331,9 @@ function updateStyle(elem) {
 }
 
 function view(i) {
+  console.log('=== VIEW FEED', i, '===');
+  console.log('Menu counter for feed:', m && m[i] ? m[i].n : 'N/A');
+
   // Update UI state - remove 'show' from old feed if it exists
   var oldFeed = $('f' + id);
   if (oldFeed) {
@@ -1166,16 +1352,21 @@ function view(i) {
 
   // Check if we have articles for this feed
   var hasArticlesForFeed = false;
+  var unreadCount = 0;
+  var readCount = 0;
   if (d) {
     for(var articleId in d) {
       if (i === 'all' || d[articleId].f == i) {
         if (d[articleId].r === 1) { // Only count unread articles
           hasArticlesForFeed = true;
-          break;
+          unreadCount++;
+        } else if (d[articleId].r === 0) {
+          readCount++;
         }
       }
     }
   }
+  console.log('Articles in memory for feed', i, '- Unread:', unreadCount, 'Read:', readCount);
 
   // If menu says there are articles but we don't have them in d, load this specific feed
   // Loading ALL articles with LIMIT 50 might miss older articles from this feed
@@ -1189,11 +1380,24 @@ function view(i) {
   // The background sync will update automatically
   if (d && Object.keys(d).length > 0) {
     renderArticles(d, i);
+
+    // Trigger background preload if this is a specific feed (not 'all')
+    // This will load ALL articles for this feed to avoid pagination delays
+    if (i !== 'all' && m && m[i] && m[i].n > unreadCount) {
+      console.log('Feed', i, 'has more articles in menu (', m[i].n, ') than in memory (', unreadCount, '), triggering preload after 1 second...');
+      setTimeout(() => preloadFeedArticles(i), 1000);
+    }
   } else {
     // No data in memory, try cache
     const cached = loadFromCache();
     if (cached && cached.articles) {
       renderArticles(cached.articles, i);
+
+      // Trigger background preload for specific feeds
+      if (i !== 'all' && m && m[i] && m[i].n > 0) {
+        console.log('Feed', i, 'loaded from cache, triggering preload after 1 second...');
+        setTimeout(() => preloadFeedArticles(i), 1000);
+      }
     }
   }
 }
@@ -1411,7 +1615,7 @@ function countWords(elem) {
 function generateArticle(i) {
  	let datepub = dateArticle(d[i].p);
 //voir http://microformats.org/wiki/hcard
-return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a> <a class="sendTo" onclick="sendTo('+i+')"></a><a class="print" onclick="printIt('+i+')"></a><span id="tag'+i+'" class="tags icon"><a onclick="tagIt('+i+')"></a></span></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a> <a class="sendTo" onclick="sendTo('+i+')"></a><a class="print" onclick="printIt('+i+')"></a><span id="tag'+i+'" class="tags icon"><a onclick="tagIt('+i+')"></a></span></div>\n</article>';
 //<!--href="https://gheop.com/readability/?url=' + d[i].l + '" -->
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
@@ -1488,9 +1692,14 @@ async function myFetch(url, data, noreturn) {
     }
   });
   if(!noreturn) {
-  const json = await response.json();
-  return json;
-}
+    const json = await response.json();
+    return json;
+  } else {
+    // Even if we don't need the return value, wait for the request to complete
+    // This ensures pending batch tracking works correctly
+    await response.text(); // Consume the response body
+    return;
+  }
   }
   catch (err) {
     console.log('fetch failed', err);
@@ -1650,6 +1859,8 @@ function read(k, v=0) {
   d[k].r = 0;
   $(k).className = 'item0';
 
+  console.log('READ article', k, 'feed:', d[k].f, '- Menu counter before:', m[d[k].f] ? m[d[k].f].n : 'N/A');
+
   // Queue read request for batch processing (reduces server load)
   queueReadRequest(k);
 
@@ -1669,6 +1880,8 @@ function read(k, v=0) {
 
   // Update menu counter
   m[d[k].f].n--;
+  m[d[k].f].locallyModified = true; // Marquer comme modifié localement
+  console.log('Menu counter after:', m[d[k].f].n, '- Total in title:', nb_title);
   if (m[d[k].f].n > 0) {
      $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
       light('f' + d[k].f);
@@ -1702,21 +1915,127 @@ var pressedKeys = [],
   konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; //, konamized = false;
 //var timerkona;
 
+var konamiGameLoop;
 function konami() {
-  //document.body.style.background = "url(stickmen.png)";
- // document.body.style.fontFamily = "LaChatteAMaman";
-  DM.innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg</a><div class="author">From <a>Gheop</a> by SiB</div><div class="descr"><canvas id="c"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+DM.innerHTML;
+  DM.innerHTML = '<div id="konami" class="item1"><div class="date">Now!</div><a id="game" class="title">Easter Egg - Dragon Fly - Hold any key to fly - Press ESC to exit</a><div class="author">From <a href="https://js1k.com/2014-dragons/demo/1955" target="_blank">js1k.com</a> by mouminoux</div><div class="descr"><canvas id="c" style="border: 2px solid #333; display: block; margin: 20px auto;"></canvas></div><div class="action">&nbsp;&nbsp;☺ ☻ ☺ ☻ </div></div>'+DM.innerHTML;
   $('konami').style.display='block';
-  ////js1k.com/2014-dragons/details/1955
   DM.scrollTop = 0;
   kona = 1;
+
+  // Dragon Fly game from js1k.com/2014-dragons/demo/1955
+  var a = $('c');
+  var c = a.getContext('2d');
+
+  // Setup canvas size
+  a.style.width = (a.width = 1e3) + "px";
+  a.style.height = (a.height = 500) + "px";
+
+  // Create canvas method shortcuts
+  for(p in c) {
+    c[p[0] + (p[6] || "")] = c[p];
+  }
+
+  // Game variables
+  var J, K, C, B, u, D, E, F, G, H, I, L, M, N, O, t, U, K2, Q, R, i;
+  J = K = C = B = 0;
+  u = 50;
+  D = 250;
+  E = F = G = H = 1;
+  I = 250;
+
+  // Game loop
+  konamiGameLoop = setInterval(function() {
+    L = 300;
+    M = 500;
+    N = 400;
+
+    with(c) {
+      A = function(S, x, y, T) {
+        T && a(x, y, T, 0, 7, 0);
+        fillStyle = S.P ? S : "#" + "ceff99aaffff333f99ff7".substr(S * 3, 3);
+        fill();
+        ba();
+      };
+
+      A(0, 0, 0, 10000);
+      A(6, 800, 300, 140);
+      O = G * u % 400;
+      l(0 - O, N + 100);
+      l(0 - O, N);
+
+      for(i = 0; i < 7; i++) {
+        qt(i * 200 + 100 - O, i % 2 ? L : M, i * 200 + 200 - O, N);
+      }
+
+      l(i * 200 - O, N + 100);
+      ca();
+      fillStyle = "#5c1";
+      fill();
+      ba();
+
+      t = (G * (u + E) + I) % 200 / 200;
+      U = 1 - t;
+      K2 = U * U * N + 2 * t * U * ((G * (u + E) + I) % 400 > 200 ? L : M) + t * t * N;
+      D += F;
+
+      if(D >= K) {
+        if(K2 < K) {
+          if(F > 0 && (K2 - K) < 0 && !J) {
+            E = E / 3;
+            K2 = K;
+          }
+          E -= E < 2 ? 0 : 0.1;
+        } else {
+          E += 0.1 * H * H;
+        }
+        J = 1;
+        D = K;
+        if(K2 < K && F > (K2 - K)) {
+          F = (K2 - K);
+        }
+      } else {
+        J = 0;
+      }
+
+      F += 0.4 * H;
+      K = K2;
+      A(3 - H, I, D - 10, 10);
+      A(3, I + 3, D - 12, 4);
+      A(4, I + 4, D - 12, 1);
+      Q = 200 + Math.pow(B, 1.3) - u;
+      R = 50 + Math.sin(B / 2) * 2;
+      A(1, Q, R, 30);
+      A(3, Q + 20, R + 5, 7);
+      A(4, Q + 22, R + 7, 2);
+      A(6, 0, 0, 0);
+      fx(++B + " ☆", 5, 10);
+      fx((C < B ? C = B : C) + " ★", 40, 10);
+
+      if(Q > 4 * I) {
+        clearInterval(konamiGameLoop);
+        setTimeout(function() {
+          if(confirm("Game Over! Score: " + B + "\nBest: " + C + "\n\nPlay again?")) {
+            E = F = u = B = K = 2;
+            konamiGameLoop = setInterval(arguments.callee, 30);
+          }
+        }, 100);
+      }
+    }
+    u += E;
+  }, 30);
+
+  // Key handler for dragon fly
+  window.konamiKeyHandler = function(evt) {
+    var b = evt;
+    H = b.type[5] ? 2 : 1;
+  };
 }
 
 function konamistop() {
   kona = 0;
-  // document.body.style.background = "url(data:image/gif;base64,R0lGODdhAwADAOcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///ywAAAAAAwADAAAICQDb/Rv4T6DAgAA7)";
-  // clearInterval(timerkona);
-  $('konami').style.display = 'none';
+  if(konamiGameLoop) clearInterval(konamiGameLoop);
+  if($('konami')) $('konami').style.display = 'none';
+  window.konamiKeyHandler = null;
 }
 
 
@@ -1818,7 +2137,13 @@ function i() {
     if (search_focus === 1) return;
     var k = (evt.which) ? evt.which : evt.keyCode;
     if (kona == 1) {
-      if (k == 27) konamistop();
+      if (k == 27) {
+        konamistop();
+        return;
+      }
+      if (window.konamiKeyHandler) {
+        window.konamiKeyHandler(evt);
+      }
       return;
     }
     if (pressedKeys.length == konamiCode.length) pressedKeys.shift();
@@ -2052,6 +2377,9 @@ window.addEventListener('DOMContentLoaded', () => {
         startSmoothAdaptiveTheme();
       }
     }, 100);
+  } else if (savedTheme === 'modern') {
+    // Utilisateur a choisi le thème moderne
+    $('stylesheet').href = 'themes/modern.css?v=' + timestamp;
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
