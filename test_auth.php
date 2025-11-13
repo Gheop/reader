@@ -18,7 +18,7 @@ if (isset($_COOKIE['session'])) {
 
         if ($d['pwd'] == $auth[1]) {
             echo "   ✓ Password matches - authentication SHOULD work\n";
-            echo "\n2. But $_SESSION['user_id'] is: " . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NOT SET') . "\n";
+            echo "\n2. But \$_SESSION['user_id'] is: " . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NOT SET') . "\n";
             echo "\nThis means the authentication code in index.php hasn't run yet.\n";
             echo "The cookie exists and is valid, but the session hasn't been populated.\n";
         } else {

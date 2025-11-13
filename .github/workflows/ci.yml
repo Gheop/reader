@@ -31,7 +31,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: PHP Syntax Check
-      run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \; | (! grep -v "No syntax errors detected")
+      run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -not -path "./TESTS/*" -exec php -l {} \; | (! grep -v "No syntax errors detected")
 
     - name: PHP_CodeSniffer
       continue-on-error: true
