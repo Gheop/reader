@@ -298,12 +298,23 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
 
             // Clean link
             $link = str_replace([')', '(', '"', '\\'], ['', '', '', '\\\\'], $link);
-            $link_without_protocol = preg_replace('/^https?/', '', $link);
 
-            // Check if article exists
-            $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND CAST(link AS CHAR) LIKE ?");
-            $searchPattern = '%' . $link_without_protocol . '%';
-            $stmt->bind_param("is", $feedId, $searchPattern);
+            // Extract GUID first (before checking existence)
+            $guid = isset($item->guid) && $item->guid ? clean_txt($item->guid) : null;
+
+            // Check if article exists - prefer GUID check, fallback to link
+            if($guid) {
+                // Check by GUID (most reliable)
+                $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND guid = ?");
+                $stmt->bind_param("is", $feedId, $guid);
+            } else {
+                // Fallback to link check if no GUID
+                $link_without_protocol = preg_replace('/^https?/', '', $link);
+                $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND CAST(link AS CHAR) LIKE ?");
+                $searchPattern = '%' . $link_without_protocol . '%';
+                $stmt->bind_param("is", $feedId, $searchPattern);
+            }
+
             $stmt->execute();
             $existingResult = $stmt->get_result();
 
@@ -356,7 +367,11 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
             $title = clean_txt($title);
             $content = clean_txt($content);
             $author = clean_txt($author);
-            $guid = isset($item->guid) && $item->guid ? clean_txt($item->guid) : $link;
+
+            // Use link as GUID fallback if not set earlier
+            if(!$guid) {
+                $guid = $link;
+            }
 
             // Insert article
             $stmt = $mysqli->prepare("
