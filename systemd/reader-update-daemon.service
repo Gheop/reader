@@ -1,0 +1,28 @@
+[Unit]
+Description=Gheop Reader Feed Update Daemon
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/www/reader
+ExecStart=/usr/bin/php /www/reader/update_daemon.php
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=reader-update-daemon
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+CPUQuota=50%
+MemoryLimit=512M
+
+[Install]
+WantedBy=multi-user.target
