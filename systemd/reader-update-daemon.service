@@ -4,8 +4,8 @@ After=network.target mysql.service
 
 [Service]
 Type=simple
-User=www-data
-Group=www-data
+User=sib
+Group=sib
 WorkingDirectory=/www/reader
 ExecStart=/usr/bin/php /www/reader/update_daemon.php
 Restart=always
