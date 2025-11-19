@@ -1,12 +1,13 @@
 <?php
-//header("Content-Security-Policy: default-src 'self' https:;");
-header("Content-Security-Policy: img-src 'self' data: https:;");
-//header("Content-Security-Policy: img-src 'self' data:;");
-//header("Content-Security-Policy: img-src: 'self' 'inline'");
-//header("Content-Security-Policy: frame-ancestors 'none'");
+// Security Headers
+header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Content-Security-Policy: img-src 'self' data: https:; frame-ancestors 'self'");
 header('Content-Type: text/html; charset=utf-8');
-//header('X-Frame-Options: deny');
-//header('X-Content-Type-Options: nosniff');
+
 include('/www/conf.php');
 include(__DIR__ . '/auth.php');
 
@@ -23,7 +24,7 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light.css<?php echo $cacheBuster; ?>" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <script src="favico.min.js" defer></script>
-<script src="https://reader.gheop.com/lib.js<?php echo $cacheBuster; ?>" type="text/javascript" defer></script>
+<script src="lib.js<?php echo $cacheBuster; ?>" type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
