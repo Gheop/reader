@@ -1,0 +1,45 @@
+{
+    "name": "gheop/reader",
+    "description": "A lightweight, self-hosted RSS/Atom feed reader",
+    "type": "project",
+    "license": "MIT",
+    "keywords": ["rss", "atom", "feed-reader", "self-hosted"],
+    "homepage": "https://reader.gheop.com",
+    "support": {
+        "issues": "https://github.com/Gheop/reader/issues",
+        "source": "https://github.com/Gheop/reader"
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-mysqli": "*",
+        "ext-dom": "*",
+        "ext-simplexml": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gheop\\Reader\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Gheop\\Reader\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage-html --coverage-clover coverage.xml",
+        "phpstan": "phpstan analyse",
+        "phpcs": "phpcs --standard=PSR12 --exclude=vendor,node_modules,scraping .",
+        "phpcbf": "phpcbf --standard=PSR12 --exclude=vendor,node_modules,scraping ."
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}
