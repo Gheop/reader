@@ -843,7 +843,6 @@ function favicon(nb) {
 
 function changeTheme(style) {
   if(imageObserver) imageObserver.disconnect();
-  const timestamp = Date.now();
   const currentTheme = localStorage.getItem('theme') || 'auto';
 
   let nextTheme;
@@ -861,13 +860,13 @@ function changeTheme(style) {
 
   // Appliquer le thème
   if (nextTheme === 'light') {
-    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/light.css';
     localStorage.setItem('theme', 'light');
   } else if (nextTheme === 'dark') {
-    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/dark.css';
     localStorage.setItem('theme', 'dark');
   } else if (nextTheme === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -876,7 +875,7 @@ function changeTheme(style) {
       }
     }, 100);
   } else if (nextTheme === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive-smooth.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -904,17 +903,16 @@ function selectTheme(themeName) {
   }
 
   if(imageObserver) imageObserver.disconnect();
-  const timestamp = Date.now();
 
   // Appliquer le thème sélectionné
   if (themeName === 'light') {
-    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/light.css';
     localStorage.setItem('theme', 'light');
   } else if (themeName === 'dark') {
-    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/dark.css';
     localStorage.setItem('theme', 'dark');
   } else if (themeName === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -923,7 +921,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive-smooth.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -932,7 +930,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'modern') {
-    $('stylesheet').href = 'themes/modern.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/modern.css';
     localStorage.setItem('theme', 'modern');
   }
 
@@ -1430,7 +1428,7 @@ function up() {
   $('up').style.animation='spin 4s infinite linear';
   $('up').style.color = "red";
   //affError("Mise à jour des flux en cours!", 10);
-    xhr.open("POST", 'up.php', true);
+    xhr.open("POST", 'up_parallel.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('xhr=1');
     requestTimer = setTimeout((function() {
@@ -2351,17 +2349,16 @@ document.onload = i();
 // Charger le thème sauvegardé au démarrage
 window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
-  const timestamp = Date.now();
 
   if (savedTheme === 'dark') {
     // Utilisateur a choisi le thème sombre
-    $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/dark.css';
   } else if (savedTheme === 'light') {
     // Utilisateur a choisi le thème clair
-    $('stylesheet').href = 'themes/light.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/light.css';
   } else if (savedTheme === 'adaptive') {
     // Utilisateur a choisi le thème adaptatif
-    $('stylesheet').href = 'themes/adaptive.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive.css';
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
       if (window.startAdaptiveTheme) {
@@ -2370,7 +2367,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'smooth') {
     // Utilisateur a choisi le thème smooth progressif
-    $('stylesheet').href = 'themes/adaptive-smooth.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/adaptive-smooth.css';
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
       if (window.startSmoothAdaptiveTheme) {
@@ -2379,11 +2376,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'modern') {
     // Utilisateur a choisi le thème moderne
-    $('stylesheet').href = 'themes/modern.css?v=' + timestamp;
+    $('stylesheet').href = 'themes/modern.css';
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      $('stylesheet').href = 'themes/dark.css?v=' + timestamp;
+      $('stylesheet').href = 'themes/dark.css';
     }
     // Sinon on garde light.css qui est déjà chargé par défaut
   }
