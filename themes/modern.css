@@ -1,0 +1,518 @@
+/* ========================================
+   Thème Moderne - Modern.css
+   Basé sur les meilleures pratiques UI Design Tips
+   Focus : Lisibilité, hiérarchie visuelle, espacement optimal
+   ======================================== */
+
+/* Variables du thème moderne */
+:root {
+  /* Palette de couleurs moderne - Tons neutres avec accent subtil */
+  --modern-primary: #4F46E5;        /* Indigo moderne pour CTA */
+  --modern-primary-hover: #4338CA;  /* Hover state plus foncé */
+  --modern-primary-light: #EEF2FF;  /* Background léger pour highlights */
+
+  --modern-bg-body: #FAFAFA;         /* Fond très léger, pas blanc pur */
+  --modern-bg-main: #F5F5F7;         /* Fond principal Apple-like */
+  --modern-bg-card: #FFFFFF;         /* Cards blancs purs */
+  --modern-bg-hover: #F9FAFB;        /* Hover subtil sur cards */
+
+  --modern-text-primary: #1F2937;    /* Texte principal, fort contraste */
+  --modern-text-secondary: #6B7280;  /* Texte secondaire, moins contrasté */
+  --modern-text-tertiary: #9CA3AF;   /* Texte tertiaire pour métadonnées */
+
+  --modern-border-light: #E5E7EB;    /* Bordures légères */
+  --modern-border-medium: #D1D5DB;   /* Bordures moyennes */
+
+  --modern-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --modern-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --modern-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --modern-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Espacements suivant système 8pt grid */
+  --modern-space-1: 0.25rem;  /* 4px */
+  --modern-space-2: 0.5rem;   /* 8px */
+  --modern-space-3: 0.75rem;  /* 12px */
+  --modern-space-4: 1rem;     /* 16px */
+  --modern-space-5: 1.25rem;  /* 20px */
+  --modern-space-6: 1.5rem;   /* 24px */
+  --modern-space-8: 2rem;     /* 32px */
+  --modern-space-10: 2.5rem;  /* 40px */
+  --modern-space-12: 3rem;    /* 48px */
+
+  /* Border radius moderne */
+  --modern-radius-sm: 0.375rem;   /* 6px */
+  --modern-radius-md: 0.5rem;     /* 8px */
+  --modern-radius-lg: 0.75rem;    /* 12px */
+  --modern-radius-xl: 1rem;       /* 16px */
+
+  /* Typographie moderne - Type scale 1.25 (recommandation UI Tips) */
+  --modern-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --modern-font-serif: 'Georgia', 'Cambria', 'Times New Roman', Times, serif;
+  --modern-font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+  --modern-text-xs: 0.75rem;      /* 12px */
+  --modern-text-sm: 0.875rem;     /* 14px */
+  --modern-text-base: 1rem;       /* 16px */
+  --modern-text-lg: 1.125rem;     /* 18px */
+  --modern-text-xl: 1.25rem;      /* 20px */
+  --modern-text-2xl: 1.5rem;      /* 24px */
+  --modern-text-3xl: 1.875rem;    /* 30px */
+  --modern-text-4xl: 2.25rem;     /* 36px */
+
+  /* Line height optimal pour lecture (UI Tips recommandation) */
+  --modern-leading-tight: 1.25;
+  --modern-leading-normal: 1.5;
+  --modern-leading-relaxed: 1.75;
+
+  /* Transitions subtiles */
+  --modern-transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --modern-transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   Typographie moderne avec hiérarchie forte
+   ======================================== */
+
+body {
+  font-family: var(--modern-font-serif);
+  font-size: var(--modern-text-lg);      /* 18px pour meilleure lisibilité */
+  line-height: var(--modern-leading-relaxed);  /* 1.75 pour confort lecture */
+  font-weight: 400;
+  color: var(--modern-text-primary);
+  background: var(--modern-bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Limitation largeur paragraphes (UI Tips: 500-700px) */
+.article-content p,
+.descr p {
+  max-width: 65ch;  /* ~650px à 16px, optimal pour lecture */
+  margin-bottom: var(--modern-space-4);
+}
+
+/* Hiérarchie typographique forte (UI Tips) */
+h1, .headline {
+  font-size: var(--modern-text-2xl);
+  font-weight: 700;
+  line-height: var(--modern-leading-tight);
+  color: var(--modern-text-primary);
+  margin-bottom: var(--modern-space-2);
+}
+
+h2 {
+  font-size: var(--modern-text-xl);
+  font-weight: 600;
+  line-height: var(--modern-leading-tight);
+  color: var(--modern-text-primary);
+  margin-bottom: var(--modern-space-2);
+}
+
+/* Sous-titres avec contraste réduit (UI Tips) */
+.byline, .author, .date, time {
+  font-size: var(--modern-text-sm);
+  color: var(--modern-text-secondary);
+  font-weight: 400;
+  line-height: var(--modern-leading-normal);
+}
+
+/* ========================================
+   Layout principal
+   ======================================== */
+
+main {
+  background: var(--modern-bg-main);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+nav {
+  background: var(--modern-bg-card);
+  border-right: 1px solid var(--modern-border-light);
+}
+
+/* ========================================
+   Cards articles avec espacement optimal
+   ======================================== */
+
+.item1, .item0 {
+  background: var(--modern-bg-card);
+  border-radius: var(--modern-radius-lg);
+  padding: var(--modern-space-6);  /* 24px */
+  margin: var(--modern-space-4) var(--modern-space-6);
+  border: 1px solid var(--modern-border-light);
+  transition: var(--modern-transition);
+}
+
+/* Card non lue avec ombre subtile */
+.item1 {
+  box-shadow: var(--modern-shadow-md);
+}
+
+/* Hover state avec ombre plus prononcée (UI Tips) */
+.item1:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--modern-shadow-hover);
+  border-color: var(--modern-border-medium);
+  background: var(--modern-bg-hover);
+}
+
+/* Card lue avec style désaturé */
+.item0 {
+  opacity: 0.7;
+  box-shadow: var(--modern-shadow-sm);
+}
+
+.item0:hover {
+  opacity: 0.85;
+  box-shadow: var(--modern-shadow-md);
+}
+
+/* Padding compensé sur edges non-arrondis (UI Tips) */
+article header {
+  margin-bottom: var(--modern-space-4);
+}
+
+article .article-content {
+  margin-top: var(--modern-space-4);
+  margin-bottom: var(--modern-space-4);
+}
+
+/* ========================================
+   Menu latéral moderne
+   ======================================== */
+
+nav ul {
+  list-style: none;
+  padding: var(--modern-space-2);
+  margin: 0;
+}
+
+nav li {
+  margin-bottom: var(--modern-space-1);
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  padding: var(--modern-space-3) var(--modern-space-4);
+  border-radius: var(--modern-radius-md);
+  color: var(--modern-text-secondary);
+  text-decoration: none;
+  transition: var(--modern-transition);
+  font-size: var(--modern-text-sm);
+  font-weight: 500;
+  font-family: var(--modern-font-sans);
+}
+
+nav a:hover {
+  background: var(--modern-bg-hover);
+  color: var(--modern-text-primary);
+}
+
+/* Item sélectionné avec highlight couleur (UI Tips) */
+.show, nav .show {
+  background: var(--modern-primary-light) !important;
+  color: var(--modern-primary) !important;
+  font-weight: 600;
+  border-left: 3px solid var(--modern-primary);
+  padding-left: calc(var(--modern-space-4) - 3px);
+}
+
+/* Badge count moderne */
+.unr {
+  background: var(--modern-primary);
+  color: white;
+  padding: var(--modern-space-1) var(--modern-space-2);
+  border-radius: 9999px;  /* Pill shape */
+  font-size: var(--modern-text-xs);
+  font-weight: 600;
+  margin-left: auto;
+  min-width: 1.5rem;
+  text-align: center;
+  font-family: var(--modern-font-sans);
+}
+
+/* ========================================
+   Boutons et CTAs (UI Tips: spécifiques, contextuels)
+   ======================================== */
+
+button, .button, input[type="submit"] {
+  font-family: var(--modern-font-sans);
+  font-size: var(--modern-text-sm);
+  font-weight: 500;
+  padding: var(--modern-space-2) var(--modern-space-4);
+  border-radius: var(--modern-radius-md);
+  border: 1px solid var(--modern-border-medium);
+  background: var(--modern-bg-card);
+  color: var(--modern-text-primary);
+  cursor: pointer;
+  transition: var(--modern-transition);
+}
+
+button:hover {
+  background: var(--modern-bg-hover);
+  border-color: var(--modern-primary);
+  color: var(--modern-primary);
+}
+
+/* Bouton primaire */
+button.primary, .button-primary {
+  background: var(--modern-primary);
+  color: white;
+  border-color: var(--modern-primary);
+}
+
+button.primary:hover {
+  background: var(--modern-primary-hover);
+  border-color: var(--modern-primary-hover);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--modern-shadow-md);
+}
+
+/* Boutons dangereux désaccentués (UI Tips) */
+button.danger, .button-danger {
+  background: transparent;
+  color: var(--modern-text-tertiary);
+  border-color: var(--modern-border-light);
+  font-size: var(--modern-text-xs);
+}
+
+button.danger:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+/* ========================================
+   Formulaires avec inputs explicites
+   ======================================== */
+
+input, textarea {
+  font-family: var(--modern-font-sans);
+  font-size: var(--modern-text-base);
+  padding: var(--modern-space-3) var(--modern-space-4);
+  border: 1px solid var(--modern-border-medium);
+  border-radius: var(--modern-radius-md);
+  background: var(--modern-bg-card);
+  color: var(--modern-text-primary);
+  transition: var(--modern-transition);
+  width: 100%;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--modern-primary);
+  box-shadow: 0 0 0 3px var(--modern-primary-light);
+}
+
+/* Placeholder guidant (UI Tips) */
+input::placeholder, textarea::placeholder {
+  color: var(--modern-text-tertiary);
+  opacity: 1;
+}
+
+/* Barre de recherche : forcer les mêmes dimensions que les autres thèmes */
+#s, #bs {
+  height: 1.7em !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+}
+
+/* ========================================
+   Liens avec couleur subtile
+   ======================================== */
+
+a {
+  color: var(--modern-primary);
+  text-decoration: none;
+  transition: var(--modern-transition);
+}
+
+a:hover {
+  color: var(--modern-primary-hover);
+  text-decoration: underline;
+}
+
+/* Liens dans articles : moins de couleur (UI Tips: pas tout en primary) */
+.article-content a {
+  color: var(--modern-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--modern-primary);
+  text-underline-offset: 2px;
+}
+
+.article-content a:hover {
+  color: var(--modern-primary);
+}
+
+/* ========================================
+   Séparation par whitespace (UI Tips)
+   ======================================== */
+
+article + article {
+  margin-top: var(--modern-space-6);
+}
+
+/* Pas de borders, uniquement espacement */
+.light {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+/* ========================================
+   Images et médias
+   ======================================== */
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--modern-radius-md);
+}
+
+/* Avatar avec border subtile (UI Tips: transparent PNGs) */
+.avatar {
+  border-radius: 9999px;
+  border: 2px solid var(--modern-border-light);
+}
+
+/* ========================================
+   Sélection de texte
+   ======================================== */
+
+::selection {
+  background: var(--modern-primary-light);
+  color: var(--modern-primary);
+}
+
+/* ========================================
+   Scrollbar moderne (Webkit)
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--modern-bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--modern-border-medium);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--modern-text-tertiary);
+}
+
+/* ========================================
+   Actions et metadata
+   ======================================== */
+
+.action {
+  display: flex;
+  gap: var(--modern-space-3);
+  align-items: center;
+  margin-top: var(--modern-space-4);
+  padding-top: var(--modern-space-4);
+  border-top: 1px solid var(--modern-border-light);
+  font-size: var(--modern-text-sm);
+  color: var(--modern-text-secondary);
+  font-family: var(--modern-font-sans);
+}
+
+.action a {
+  color: var(--modern-text-secondary);
+  padding: var(--modern-space-2) var(--modern-space-3);
+  border-radius: var(--modern-radius-sm);
+  transition: var(--modern-transition);
+}
+
+.action a:hover {
+  background: var(--modern-bg-hover);
+  color: var(--modern-text-primary);
+  text-decoration: none;
+}
+
+/* ========================================
+   Animations subtiles
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-new {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   Responsive - Mobile first
+   ======================================== */
+
+@media (max-width: 768px) {
+  body {
+    font-size: var(--modern-text-base);
+  }
+
+  .item1, .item0 {
+    padding: var(--modern-space-4);
+    margin: var(--modern-space-3) var(--modern-space-4);
+  }
+
+  h1, .headline {
+    font-size: var(--modern-text-xl);
+  }
+}
+
+/* ========================================
+   États de chargement
+   ======================================== */
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--modern-border-light);
+  border-top-color: var(--modern-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   Focus visible pour accessibilité
+   ======================================== */
+
+*:focus-visible {
+  outline: 2px solid var(--modern-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible, a:focus-visible {
+  outline-offset: 4px;
+}

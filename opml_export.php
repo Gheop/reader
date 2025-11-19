@@ -1,74 +1,33 @@
 <?php
-include('/www/conf.php');
-if (file_exists('opml.xml')) $opml = simplexml_load_file('opml.xml');
-else exit('Failed to open opml.xml.');
-  $flag = 0;
+require_once __DIR__ . '/src/OPMLGenerator.php';
 
-foreach($opml->body->outline as $t) {
-  $title = $link = $description = $language = ''; 
-  $rsslink = $t['xmlUrl'][0];
-  $link = $t['htmlUrl'][0];
-  echo "<b><u>$rsslink</b></u> : <br />";
-  if($rss = @simplexml_load_file($rsslink)) {
-    
-    //title
-    if($rss->channel->title) {
-      $title = $rss->channel->title;
-    }
-    elseif($rss->title) {
-      $title = $rss->title;
-    }
-    
-    //link
-    if($rss->channel->link) {
-      $link = $rss->channel->link;
-	}
-    elseif($rss->link[0]['href']) {
-      $link = $rss->link[0]['href'];
-    }
-    
-    //description/subtitle
-    if($rss->channel->description)
-      $description = $rss->channel->description;
-    elseif($rss->subtitle)
-      $description = $rss->subtitle;
-    
-    //language
-    if($rss->channel->language)
-      $language = $rss->channel->language;
-    elseif($rss->language) 
-      $language = $rss->language;
-    
-    
-    if(isset($title) && $title) { echo "$title|$description|$language|$rsslink|$link<br />";}
-    
-    if($title && $rsslink && $link) {
-      $v = $mysqli->query('select id from reader_flux where rss="'.$rsslink.'";') or die ($mysqli->error);
-      if($v->num_rows == 0) {
-	print "pas trouvé !!!!<br />";
-        $t = $mysqli->query('insert into reader_flux (title, description, language, rss, link) values ("'.$mysqli->real_escape_string(trim($title)).'","'.$mysqli->real_escape_string(trim($description)).'","'.$language.'","'.$rsslink.'","'.$link.'")') or die($mysqli->error);
-	print "Ajouté.<br />";
-	if($mysqli->insert_id) $i = $mysqli->query('insert into reader_user_flux (id_user, id_flux) values (1,"'.$mysqli->insert_id.'");') or die ($mysqli->error);
-	else echo "error pour récupérer l'id<br />";
-	
-	
-      }
-      else { 
-	echo "ce flux existe déjà<br />";
-      }
-    }
-    else {
-      echo 'données manquantes pour insérer<br />';
-      echo "<br /><br /><pre>";
-      print_r($rss);
-      echo "</pre>";
-    }
-    echo "<br />";
-  }
-  else
-    {
-      var_dump($rss);
-      echo 'Ne peut ouvrir ce flux.<br />';
-    }
+use Gheop\Reader\OPMLGenerator;
+
+include('/www/conf.php');
+if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
+
+// RÃ©cupÃ©rer tous les flux de l'utilisateur
+$r = $_SESSION['mysqli']->query('SELECT F.id, F.title, F.description, F.rss, F.link
+    FROM reader_flux F, reader_user_flux UF
+    WHERE UF.id_user='.$_SESSION['user_id'].'
+    AND UF.id_flux=F.id
+    ORDER BY F.title ASC') or die($_SESSION['mysqli']->error);
+
+// Convertir le rÃ©sultat en tableau
+$feeds = [];
+while($flux = $r->fetch_assoc()) {
+    $feeds[] = $flux;
 }
 
+// GÃ©nÃ©rer l'OPML
+$xml = OPMLGenerator::generate($feeds);
+
+// Envoyer les en-tÃªtes pour le tÃ©lÃ©chargement
+header('Content-Type: application/xml; charset=utf-8');
+header('Content-Disposition: attachment; filename="' . OPMLGenerator::getFilename() . '"');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+
+// Envoyer le XML
+echo $xml;
+?>

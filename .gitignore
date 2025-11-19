@@ -12,3 +12,37 @@ scraping/node_modules/
 scraping/package-lock.json
 scraping/package.json
 scraping/vendor/
+
+# Composer
+/vendor/
+composer.lock
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+coverage.xml
+coverage-html/
+
+# PHPStan
+.phpstan.cache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
+
+# Node
+node_modules/
+package-lock.json
+
+# Logs
+*.log

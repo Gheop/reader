@@ -127,6 +127,21 @@
   100% { transform: rotate(0deg); }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-new {
+  animation: fadeIn 0.6s ease-out;
+}
+
 /* ========================================
    Styles de base communs
    ======================================== */
@@ -157,22 +172,30 @@ li > input {
 
 .icon a:before {
   font-size: 1rem; /* Restaurer la taille pour l'icône FontAwesome */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 /* Icônes du menu - flux */
 .fluxnew .icon a:first-child:before,
 .flux .icon a:first-child:before {
   content: "\f560";  /* check - marquer comme lu */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 .fluxnew .icon a:last-child:before,
 .flux .icon a:last-child:before {
   content: "\f1f8";  /* times/close - désabonner */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 /* Icônes du menu principal - All */
 #fall .icon a:first-child:before {
   content: "\f067";  /* plus - ajouter un flux */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
 }
 
 #up {
@@ -181,6 +204,18 @@ li > input {
 
 #up:before {
   content: "\f021";  /* sync/refresh - mettre à jour */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+/* Icône d'export OPML */
+#export {
+  font-size: 0; /* Cacher le texte inséré par le serveur */
+}
+
+#export:before {
+  content: "\f56d";  /* file-export - exporter */
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   font-size: 1rem;
@@ -198,17 +233,84 @@ li > input {
   font-size: 1rem;
 }
 
-/* Icône de changement de thème */
-#theme {
-  font-size: 0; /* Cacher le texte inséré par le serveur */
+/* Sélecteur de thème avec dropdown */
+#theme-selector {
+  position: relative;
+  display: inline-block;
 }
 
-#theme:before {
-  content: "\f186";  /* moon - thème sombre/clair */
+#theme-current {
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 10px;
   font-family: "Font Awesome 6 Free";
   font-weight: 400;
-  font-size: 1rem;
-  margin-right: 10px;
+}
+
+#theme-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 5px 0;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 5px;
+}
+
+#theme-dropdown.theme-dropdown-hidden {
+  display: none;
+}
+
+#theme-dropdown a {
+  display: block;
+  padding: 8px 15px;
+  color: #333;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+#theme-dropdown a:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Icônes des thèmes */
+.theme-icon-light:before {
+  content: "\f185";  /* sun - thème clair */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-dark:before {
+  content: "\f186";  /* moon - thème sombre */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-adaptive:before {
+  content: "\f017";  /* clock - thème adaptatif */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-smooth:before {
+  content: "\f5a4";  /* sunset - thème progressif */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.theme-icon-modern:before {
+  content: "\f0d0";  /* magic wand - thème moderne */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
 }
 
 a {
@@ -374,6 +476,7 @@ article-content {
 /* Icônes avant */
 .website {
   font-family: var(--font-family-main), var(--font-family-icon);
+  font-weight: 900;
   position: relative;
 }
 .website:hover::after {
@@ -392,21 +495,20 @@ article-content {
   pointer-events: none;
   margin-top: 5px;
 }
-.website:before { content: "From "; }
 .nickname:before { content: " by "; }
-.item1 .lu:before { content: "\f070"; }
-.item0 .lu:before { content: "\f06e"; color: var(--color-love); }
-.readability:before { content: "\f15c"; font-weight: 900; }
-.summarize:before { content: "\f5dc"; font-weight: 900; }
-.kindle:before { content: "\f02d"; font-weight: 900; }
-.sendTo:before { content: "\f1d8"; font-weight: 900; }
-.print:before { content: "\f02f"; font-weight: 900; }
-.search:before { content: "\f002"; font-weight: 900; }
-.star:before { content: "\f005"; font-weight: 400; }
-.starred:before { content: "\f005"; font-weight: 900; }
-.love0:before { content: "\f004"; font-weight: 400; }
-.love1:before { color: red; content: "\f004"; font-weight: 900; }
-.tags:before { content: "\f02b"; font-weight: 900; }
+.item1 .lu:before { content: "\f070"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.item0 .lu:before { content: "\f06e"; color: var(--color-love); font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.readability:before { content: "\f15c"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.summarize:before { content: "\f5dc"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.kindle:before { content: "\f02d"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.sendTo:before { content: "\f1d8"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.print:before { content: "\f02f"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.search:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.star:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.starred:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.love0:before { content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.love1:before { color: red; content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.tags:before { content: "\f02b"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 
 /* Titre et métadonnées */
 .headline {
@@ -455,12 +557,15 @@ p {
   padding-left: var(--spacing-xs);
   cursor: pointer;
   font-weight: bold;
+  font-family: var(--font-family-main), var(--font-family-icon);
 }
 
 .flux {
   display: none;
   opacity: 1;
   transition: opacity var(--transition-fast);
+  font-family: var(--font-family-main), var(--font-family-icon);
+  font-weight: 900;
 }
 
 .fluxnew a, .flux a {
@@ -581,16 +686,21 @@ input, textarea, button {
   margin-bottom: 5px;
 }
 
-/* Footer */
+/* Footer - barre de progression toujours visible */
 footer {
-  position: absolute;
-  height: 4px;
-  bottom: 0;
+  position: fixed !important;
+  height: 4px !important;
+  bottom: 0 !important;
   margin: 0;
-  left: 0;
-  right: 0;
+  left: 0 !important;
+  right: 0 !important;
   padding: 0;
   overflow: auto;
+  z-index: 1001 !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 a.liked {
