@@ -423,7 +423,7 @@ if($result->num_rows == 0) {
         $stmt->execute();
 
         // Fetch initial articles
-        getContentUrl('https://reader.gheop.com/up.php?id=' . $feedId);
+        getContentUrl('https://reader.gheop.com/up_parallel.php?id=' . $feedId);
 
         echo "Vous êtes maintenant inscrit à ce flux.";
     } else {
@@ -446,7 +446,7 @@ if($result->num_rows == 0) {
         $stmt->execute();
 
         // Fetch initial articles
-        getContentUrl('https://reader.gheop.com/up.php?id=' . $feedId);
+        getContentUrl('https://reader.gheop.com/up_parallel.php?id=' . $feedId);
 
         echo "Vous êtes maintenant inscrit à ce flux.";
     } else {
