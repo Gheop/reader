@@ -1,0 +1,61 @@
+# Security Headers and Access Control
+# Generated for Gheop Reader
+
+# Deny access to sensitive files and directories
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Protect Git repository
+RedirectMatch 404 /\.git
+
+# Protect other sensitive patterns
+<FilesMatch "(^#.*#|\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$">
+    Require all denied
+</FilesMatch>
+
+# Deny access to specific sensitive files
+<Files ~ "^(\.env|\.env\.local|\.env\.production|config\.json|web\.config|web\.config\.bak|package\.json|docker-compose\.yml|composer\.json|composer\.lock)$">
+    Require all denied
+</Files>
+
+# Security Headers
+<IfModule mod_headers.c>
+    # HTTP Strict Transport Security (HSTS)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Clickjacking protection
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # XSS Protection (legacy browsers)
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Remove server version info
+    Header always unset X-Powered-By
+    ServerSignature Off
+</IfModule>
+
+# PHP Session Cookie Security
+<IfModule mod_php.c>
+    php_flag session.cookie_httponly on
+    php_flag session.cookie_secure on
+    php_value session.cookie_samesite Strict
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+</IfModule>
