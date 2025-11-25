@@ -8,7 +8,7 @@
  * - Images: Cache-first with background update
  */
 
-const VERSION = '1.1.0';
+const VERSION = '1.1.1';
 const CACHE_NAME = `gheop-reader-v${VERSION}`;
 const CACHE_STATIC = `${CACHE_NAME}-static`;
 const CACHE_API = `${CACHE_NAME}-api`;
@@ -29,7 +29,11 @@ const STATIC_ASSETS = [
   '/themes/modern.min.css',
   '/fontawesome/css/all.min.css',
   '/fontawesome/webfonts/fa-solid-900.woff2',
-  '/favicon.png'
+  '/favicon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png',
+  '/icon.svg'
 ];
 
 // API endpoints to cache

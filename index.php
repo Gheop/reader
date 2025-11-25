@@ -41,7 +41,7 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <meta name="apple-mobile-web-app-title" content="ƒlux∑">
 <meta name="theme-color" content="#2c3e50">
 <meta name="description" content="Agrégateur RSS moderne avec support offline - Suivez vos flux RSS, Twitter, eBay et plus encore !">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 </head>
 <body>
