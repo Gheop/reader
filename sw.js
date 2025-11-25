@@ -8,7 +8,7 @@
  * - Images: Cache-first with background update
  */
 
-const VERSION = '1.1.1';
+const VERSION = '1.2.0';
 const CACHE_NAME = `gheop-reader-v${VERSION}`;
 const CACHE_STATIC = `${CACHE_NAME}-static`;
 const CACHE_API = `${CACHE_NAME}-api`;
@@ -21,6 +21,7 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/lib.min.js',
   '/favico.min.js',
+  '/background-sync.js',
   '/themes/common.min.css',
   '/themes/light.min.css',
   '/themes/dark.min.css',
@@ -241,6 +242,157 @@ async function limitCacheSize(cacheName, maxItems) {
     }
     console.log('[SW] Cleaned cache, removed', toDelete, 'old entries from', cacheName);
   }
+}
+
+/**
+ * Background Sync: Queue offline read marks for later sync
+ */
+const SYNC_TAG_READ = 'sync-read-articles';
+const READ_QUEUE_STORE = 'read-queue';
+
+self.addEventListener('sync', event => {
+  console.log('[SW] Sync event:', event.tag);
+
+  if (event.tag === SYNC_TAG_READ) {
+    event.waitUntil(syncReadArticles());
+  }
+});
+
+/**
+ * Sync queued read marks to server
+ */
+async function syncReadArticles() {
+  console.log('[SW] Starting background sync for read articles');
+
+  try {
+    // Get queued read marks from IndexedDB
+    const queue = await getReadQueue();
+
+    if (queue.length === 0) {
+      console.log('[SW] No articles to sync');
+      return;
+    }
+
+    console.log(`[SW] Syncing ${queue.length} read articles`);
+
+    // Try to sync each queued item
+    const results = await Promise.allSettled(
+      queue.map(item => syncReadMark(item))
+    );
+
+    // Count successes
+    const succeeded = results.filter(r => r.status === 'fulfilled').length;
+    console.log(`[SW] Sync complete: ${succeeded}/${queue.length} successful`);
+
+    // Clear successfully synced items
+    if (succeeded > 0) {
+      await clearSyncedItems(queue.slice(0, succeeded));
+    }
+
+    // Notify main thread
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_COMPLETE',
+        synced: succeeded,
+        total: queue.length
+      });
+    });
+
+  } catch (error) {
+    console.error('[SW] Background sync failed:', error);
+    throw error; // Retry sync later
+  }
+}
+
+/**
+ * Sync a single read mark to server
+ */
+async function syncReadMark(item) {
+  const formData = new FormData();
+  formData.append('id', item.id);
+
+  const response = await fetch('/read.php', {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server returned ${response.status}`);
+  }
+
+  return response;
+}
+
+/**
+ * Get read queue from IndexedDB
+ */
+async function getReadQueue() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('gheop-reader', 1);
+
+    request.onerror = () => reject(request.error);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(READ_QUEUE_STORE)) {
+        db.createObjectStore(READ_QUEUE_STORE, { keyPath: 'id' });
+      }
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+
+      if (!db.objectStoreNames.contains(READ_QUEUE_STORE)) {
+        resolve([]);
+        db.close();
+        return;
+      }
+
+      const tx = db.transaction(READ_QUEUE_STORE, 'readonly');
+      const store = tx.objectStore(READ_QUEUE_STORE);
+      const getAllRequest = store.getAll();
+
+      getAllRequest.onsuccess = () => {
+        resolve(getAllRequest.result);
+        db.close();
+      };
+
+      getAllRequest.onerror = () => {
+        reject(getAllRequest.error);
+        db.close();
+      };
+    };
+  });
+}
+
+/**
+ * Clear synced items from queue
+ */
+async function clearSyncedItems(items) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('gheop-reader', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction(READ_QUEUE_STORE, 'readwrite');
+      const store = tx.objectStore(READ_QUEUE_STORE);
+
+      items.forEach(item => store.delete(item.id));
+
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    };
+
+    request.onerror = () => reject(request.error);
+  });
 }
 
 /**
