@@ -7,6 +7,13 @@
 include('/www/conf.php');
 include(__DIR__ . '/auth.php');
 
+// Query performance monitoring helper
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
+
 // Security: Validate authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     http_response_code(401);
@@ -41,7 +48,9 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
     try {
         // Mark as read
         $query = "INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES $valuesString";
+        $query_start = microtime(true);
         $result = $mysqli->query($query);
+        logSlowQuery('read.php - batch insert', (microtime(true) - $query_start) * 1000);
 
         if (!$result) {
             throw new Exception("Insert failed: " . $mysqli->error);
@@ -50,7 +59,9 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
         // Remove from unread cache
         $idsString = implode(',', $ids);
         $deleteQuery = "DELETE FROM reader_unread_cache WHERE id_user = $userId AND id_item IN ($idsString)";
+        $query_start = microtime(true);
         $deleteResult = $mysqli->query($deleteQuery);
+        logSlowQuery('read.php - cache delete', (microtime(true) - $query_start) * 1000);
 
         if (!$deleteResult) {
             throw new Exception("Cache delete failed: " . $mysqli->error);
@@ -60,7 +71,9 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
         $updateQuery = "UPDATE reader_flux SET unread_count_user_$userId = (
             SELECT COUNT(*) FROM reader_unread_cache WHERE id_user = $userId AND id_flux = reader_flux.id
         ) WHERE id IN (SELECT DISTINCT id_flux FROM reader_item WHERE id IN ($idsString))";
+        $query_start = microtime(true);
         $updateResult = $mysqli->query($updateQuery);
+        logSlowQuery('read.php - counter update', (microtime(true) - $query_start) * 1000);
 
         if (!$updateResult) {
             throw new Exception("Counter update failed: " . $mysqli->error);
@@ -84,7 +97,9 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
 
     $stmt = $mysqli->prepare("INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES (?, ?, NOW())");
     $stmt->bind_param("ii", $userId, $itemId);
+    $query_start = microtime(true);
     $stmt->execute();
+    logSlowQuery('read.php - single insert', (microtime(true) - $query_start) * 1000);
     $stmt->close();
 
     header('Content-Type: application/json');

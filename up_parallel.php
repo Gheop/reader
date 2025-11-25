@@ -14,6 +14,13 @@
 include('/www/conf.php');
 include('clean_text.php');
 
+// Query performance monitoring helper
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
+
 // Configuration
 $BATCH_SIZE = 50;           // Process 50 feeds per batch
 $MAX_CONCURRENT = 20;       // Max 20 parallel downloads at once
@@ -145,7 +152,9 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
     $feedIds = array_column($feeds, 'id');
     $feedIdList = implode(',', array_map('intval', $feedIds));
     $metaQuery = "SELECT id, link, title, rss FROM reader_flux WHERE id IN ($feedIdList)";
+    $query_start = microtime(true);
     $metaResult = $mysqli->query($metaQuery);
+    logSlowQuery('up_parallel.php - batch feed metadata', (microtime(true) - $query_start) * 1000);
 
     $feedMeta = [];
     while($row = $metaResult->fetch_assoc()) {
@@ -315,8 +324,10 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
                 $stmt->bind_param("is", $feedId, $searchPattern);
             }
 
+            $query_start = microtime(true);
             $stmt->execute();
             $existingResult = $stmt->get_result();
+            logSlowQuery('up_parallel.php - check existing article', (microtime(true) - $query_start) * 1000, 50);
 
             if($existingResult->num_rows > 0) {
                 continue; // Article already exists
@@ -356,8 +367,10 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
 
                 $checkStmt = $mysqli->prepare("SELECT description FROM reader_item WHERE link = ? LIMIT 1");
                 $checkStmt->bind_param("s", $link);
+                $query_start = microtime(true);
                 $checkStmt->execute();
                 $checkResult = $checkStmt->get_result();
+                logSlowQuery('up_parallel.php - check YouTube cache', (microtime(true) - $query_start) * 1000, 50);
                 if ($checkRow = $checkResult->fetch_assoc()) {
                     // Video already exists, description already in content
                     $needsFetch = false;
@@ -403,7 +416,9 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
             $pubdate = date("Y-m-d H:i:s", $iDate);
             $stmt->bind_param("issssss", $feedId, $pubdate, $guid, $title, $author, $link, $content);
 
+            $query_start = microtime(true);
             if($stmt->execute()) {
+                logSlowQuery('up_parallel.php - insert article', (microtime(true) - $query_start) * 1000, 50);
                 $newArticles++;
             }
         }

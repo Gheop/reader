@@ -7,6 +7,13 @@
 include('/www/conf.php');
 include('clean_text.php');
 
+// Query performance monitoring helper
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
+
 // Allow CLI execution for cron jobs (updates all feeds)
 if (php_sapi_name() === 'cli') {
     // CLI mode: bypass authentication, initialize session
@@ -173,8 +180,10 @@ if ($i > 0) {
     $stmt = $mysqli->prepare("SELECT id, link, title, rss FROM reader_flux WHERE id IN ($placeholders)");
     $types = str_repeat('i', $i);
     $stmt->bind_param($types, ...$feedIds);
+    $query_start = microtime(true);
     $stmt->execute();
     $result = $stmt->get_result();
+    logSlowQuery('up.php - batch feed metadata', (microtime(true) - $query_start) * 1000);
     while ($row = $result->fetch_assoc()) {
         $feedMetadata[$row['id']] = $row;
     }
@@ -327,8 +336,10 @@ for($j = 0; $j < $i; $j++) {
         $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND link LIKE ?");
         $searchPattern = '%' . $link_without_protocol . '%';
         $stmt->bind_param("is", $feedIds[$j], $searchPattern);
+        $query_start = microtime(true);
         $stmt->execute();
         $existingResult = $stmt->get_result();
+        logSlowQuery('up.php - check existing article', (microtime(true) - $query_start) * 1000, 50);
 
         if ($existingResult->num_rows == 0) {
             // New article - extract data
@@ -387,8 +398,10 @@ for($j = 0; $j < $i; $j++) {
 
                 $checkStmt = $mysqli->prepare("SELECT description FROM reader_item WHERE link = ? LIMIT 1");
                 $checkStmt->bind_param("s", $link);
+                $query_start = microtime(true);
                 $checkStmt->execute();
                 $checkResult = $checkStmt->get_result();
+                logSlowQuery('up.php - check YouTube cache', (microtime(true) - $query_start) * 1000, 50);
                 if ($checkRow = $checkResult->fetch_assoc()) {
                     // Video already exists, description already in content
                     $needsFetch = false;
@@ -461,7 +474,9 @@ for($j = 0; $j < $i; $j++) {
             ");
             $pubdate = date("Y-m-d H:i:s", $iDate);
             $stmt->bind_param("issssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content);
+            $query_start = microtime(true);
             $stmt->execute();
+            logSlowQuery('up.php - insert article', (microtime(true) - $query_start) * 1000, 50);
         }
 
         echo ".";

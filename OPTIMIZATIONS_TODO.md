@@ -120,19 +120,25 @@ ALTER TABLE reader_item ADD COLUMN youtube_description TEXT;
 **Effort**: Low (1 hour)
 **Status**: TODO
 
-### 15. ⏳ Add Query Performance Monitoring
-**Files**: `api.php`, `read.php`, `up.php`
+### 15. ✅ Add Query Performance Monitoring
+**Files**: `api.php`, `read.php`, `up.php`, `up_parallel.php`
 **Issue**: No slow query detection
 **Impact**: Identifies bottlenecks
 **Effort**: Low (30 min)
 **Code**:
 ```php
-$start = microtime(true);
-// Execute query
-$duration = (microtime(true) - $start) * 1000;
-if ($duration > 100) error_log("Slow query: " . $duration . "ms");
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
 ```
-**Status**: TODO
+**Status**: ✅ COMPLETED (commit pending)
+**Details**: Added monitoring to all critical queries:
+- api.php: menu query, articles query
+- read.php: batch insert, cache delete, counter update, single insert
+- up.php: batch feed metadata, check existing article, YouTube cache, insert article
+- up_parallel.php: batch feed metadata, check existing article, YouTube cache, insert article
 
 ## Completed
 
