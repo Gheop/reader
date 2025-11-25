@@ -17,6 +17,20 @@ $jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
 $cssExt = $useMinified ? '.min.css' : '.css';
 // Cache busting only in debug mode
 $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
+
+// Subresource Integrity (SRI) hashes for security
+$sriHashes = [
+    'lib.min.js' => 'sha384-qVVojp6SyCOYo9ly/HapmWlsukxFkobDypOZQObTdyzbU3t5AMLH5u7STk98arYy',
+    'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
+    'themes/common.min.css' => 'sha384-kKSlAtqw0rVAL+rQksdfoBwEhrBbIwTjxsCW4YtcKFKTRNd2A2zSnRWl0py7T6QG',
+    'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
+    'fontawesome/css/all.min.css' => 'sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g'
+];
+
+// Get SRI attribute helper
+function getSRI($file, $sriHashes, $useMinified) {
+    return ($useMinified && isset($sriHashes[$file])) ? ' integrity="' . $sriHashes[$file] . '" crossorigin="anonymous"' : '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -25,12 +39,13 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style">
 <link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style">
 <link rel="preload" href="fontawesome/css/all.min.css" as="style">
-<link rel="stylesheet" href="fontawesome/css/all.min.css">
-<link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen" />
-<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal" />
+<link rel="stylesheet" href="fontawesome/css/all.min.css"<?php echo getSRI('fontawesome/css/all.min.css', $sriHashes, $useMinified); ?>>
+<link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?> />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?> />
 <title>Gheop Reader</title>
-<script src="favico.min.js" defer></script>
-<script src="<?php echo $jsFile . $cacheBuster; ?>" type="text/javascript" defer></script>
+<script src="background-sync.js" defer></script>
+<script src="favico.min.js"<?php echo getSRI('favico.min.js', $sriHashes, $useMinified); ?> defer></script>
+<script src="<?php echo $jsFile . $cacheBuster; ?>"<?php echo getSRI($jsFile, $sriHashes, $useMinified); ?> type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <link rel="manifest" href="/manifest.json">
@@ -42,6 +57,13 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <meta name="theme-color" content="#2c3e50">
 <meta name="description" content="Agrégateur RSS moderne avec support offline - Suivez vos flux RSS, Twitter, eBay et plus encore !">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- iOS Splash Screens -->
+<link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash-2048x2732.png">
 
 </head>
 <body>

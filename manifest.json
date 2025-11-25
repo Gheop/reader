@@ -49,6 +49,16 @@
       ]
     }
   ],
+  "share_target": {
+    "action": "/share.php",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "prefer_related_applications": false,
   "related_applications": [],
   "scope": "/",
