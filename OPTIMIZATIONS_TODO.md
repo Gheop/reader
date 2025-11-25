@@ -54,12 +54,15 @@ ALTER TABLE reader_flux ADD INDEX idx_rss (rss(100));
 
 ## Medium Priority
 
-### 7. ⏳ Use Native JSON in API
+### 7. ❌ Use Native JSON in API - REJECTED
 **File**: `api.php` lines 71-173
 **Issue**: String concatenation instead of json_encode()
-**Impact**: 10-15% payload size reduction
+**Impact**: None - actually slower
 **Effort**: Medium (1-2 hours)
-**Status**: TODO
+**Status**: ❌ REJECTED after benchmarking
+**Reason**: String concatenation is **6.3x FASTER** than json_encode() (0.291ms vs 2.119ms per 200 articles)
+**Benchmark**: See benchmark_json.php - with real data, manual concatenation significantly outperforms native JSON encoding
+**Note**: Keep using string concatenation for API responses - it's the optimal approach
 
 ### 8. ⏳ Shared Shadow DOM Styles
 **File**: `lib.js` lines 1279-1299

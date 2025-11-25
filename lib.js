@@ -1285,23 +1285,10 @@ function menu() {
 
 
 
-customElements.define('article-content', class extends HTMLElement {
-  connectedCallback() {
-    const shadow = this.attachShadow({mode: 'open'});
-    /*const style = document.createElement("style");
-    shadow.appendChild(style);
-*/    shadow.innerHTML = this.innerHTML;
-    updateStyle(this);
-  }
-});
-
-function updateStyle(elem) {
- // console.log(elem);
-//  console.log(countWords(elem)+' words.');
-  const shadow = elem.shadowRoot;
-  const style = document.createElement("style");
-  shadow.appendChild(style);
-  shadow.querySelector("style").textContent = `
+// Shared stylesheet for all article-content shadow DOMs
+// This is created ONCE and reused by all articles, saving memory
+const articleStyleSheet = new CSSStyleSheet();
+articleStyleSheet.replaceSync(`
     .article-content {
   text-align: justify;
   padding: 10px 10px 0 10px !important;
@@ -1344,8 +1331,17 @@ function updateStyle(elem) {
     transform: rotate(360deg);
   }
 }
-  `;
-}
+`);
+
+// Custom element for article content with shared stylesheet
+customElements.define('article-content', class extends HTMLElement {
+  connectedCallback() {
+    const shadow = this.attachShadow({mode: 'open'});
+    // Use shared stylesheet instead of creating new one per article
+    shadow.adoptedStyleSheets = [articleStyleSheet];
+    shadow.innerHTML = this.innerHTML;
+  }
+});
 
 function view(i) {
   console.log('=== VIEW FEED', i, '===');
