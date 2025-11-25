@@ -48,6 +48,9 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
 }
 ?>
 <div id="register">
+  <div id="offline-indicator" style="display:none; padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; margin-right: 10px; font-size: 12px;">
+    <i class="fa fa-wifi" style="text-decoration: line-through;"></i> Mode hors ligne
+  </div>
   <div id="theme-selector">
     <a id="theme-current" href="#" onclick="toggleThemeDropdown();return false;"></a>
     <div id="theme-dropdown" class="theme-dropdown-hidden">

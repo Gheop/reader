@@ -25,6 +25,107 @@ var cacheVersion = 'v1';
 var locallyModifiedArticles = {}; // Track articles manually marked as unread
 var eventSource = null; // SSE connection
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
+
+// ============================================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('[App] Service Worker registered:', registration.scope);
+
+        // Check for updates every hour
+        setInterval(() => {
+          registration.update();
+        }, 60 * 60 * 1000);
+
+        // Handle updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('[App] New Service Worker found');
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[App] New Service Worker installed, update available');
+
+              // Show update notification to user
+              showUpdateNotification(newWorker);
+            }
+          });
+        });
+      })
+      .catch(err => {
+        console.error('[App] Service Worker registration failed:', err);
+      });
+
+    // Listen for controller change (new SW activated)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('[App] Service Worker controller changed, reloading page');
+      window.location.reload();
+    });
+  });
+}
+
+// Show update notification
+function showUpdateNotification(worker) {
+  if (!confirm('Une nouvelle version de Gheop Reader est disponible. Voulez-vous la charger maintenant ?')) {
+    return;
+  }
+
+  // Tell the new SW to skip waiting
+  worker.postMessage({ type: 'SKIP_WAITING' });
+}
+
+// Utility: Clear all caches (for debugging)
+window.clearServiceWorkerCache = async function() {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+    console.log('[App] No active Service Worker');
+    return;
+  }
+
+  const messageChannel = new MessageChannel();
+
+  return new Promise((resolve, reject) => {
+    messageChannel.port1.onmessage = (event) => {
+      if (event.data.success) {
+        console.log('[App] Service Worker cache cleared');
+        resolve();
+      } else {
+        reject(new Error('Failed to clear cache'));
+      }
+    };
+
+    navigator.serviceWorker.controller.postMessage(
+      { type: 'CLEAR_CACHE' },
+      [messageChannel.port2]
+    );
+  });
+};
+
+// ============================================================================
+// ONLINE/OFFLINE STATUS INDICATOR
+// ============================================================================
+function updateOnlineStatus() {
+  const indicator = document.getElementById('offline-indicator');
+  if (!indicator) return;
+
+  if (navigator.onLine) {
+    indicator.style.display = 'none';
+    console.log('[App] Online');
+  } else {
+    indicator.style.display = 'inline-block';
+    console.log('[App] Offline');
+  }
+}
+
+// Update status on page load
+window.addEventListener('load', updateOnlineStatus);
+
+// Listen for online/offline events
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 	const locale = navigator.language;
  	rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
