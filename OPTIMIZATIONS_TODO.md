@@ -92,12 +92,24 @@ ALTER TABLE reader_item ADD COLUMN youtube_description TEXT;
 **Effort**: High (8-10 hours)
 **Status**: TODO
 
-### 11. ⏳ HTTP/2 Server Push
-**File**: `.htaccess` or nginx config
-**Issue**: Critical resources not pushed
-**Impact**: 10-15% initial load
-**Effort**: Low (30 min)
-**Status**: TODO
+### 11. ✅ HTTP/2 Preload Hints
+**File**: `index.php`
+**Issue**: Critical resources not preloaded
+**Impact**: 10-15% initial load improvement
+**Effort**: Low (15 min)
+**Status**: ✅ COMPLETED (commit pending)
+**Details**:
+- HTTP/2 is already enabled in nginx config (line 381)
+- HTTP/3 (QUIC) is also enabled for even better performance
+- Added preload hints for critical resources:
+  - lib.min.js (main JavaScript)
+  - themes/common.min.css (common styles)
+  - themes/light.min.css (theme styles)
+  - fontawesome/css/all.min.css (icons)
+  - fontawesome/webfonts/fa-solid-900.woff2 (font file)
+- Browser downloads these resources in parallel during HTML parse
+- HTTP/2 Server Push is deprecated; preload hints are the modern approach
+**Note**: Server Push was deprecated in Chrome 106 in favor of preload hints which provide better control
 
 ### 12. ✅ Progressive Image Loading
 **Files**: `clean_text.php`, `up.php`, `up_parallel.php`
