@@ -8,7 +8,7 @@
  * - Images: Cache-first with background update
  */
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const CACHE_NAME = `gheop-reader-v${VERSION}`;
 const CACHE_STATIC = `${CACHE_NAME}-static`;
 const CACHE_API = `${CACHE_NAME}-api`;
@@ -97,6 +97,16 @@ self.addEventListener('fetch', event => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
     return;
+  }
+
+  // IMPORTANT: Skip SSE (Server-Sent Events) - EventSource doesn't work through SW
+  if (url.pathname.includes('sse.php')) {
+    return; // Let browser handle SSE directly
+  }
+
+  // Skip read.php (POST requests for marking as read)
+  if (url.pathname.includes('read.php')) {
+    return; // Let browser handle POST directly
   }
 
   // Route based on request type

@@ -25,7 +25,6 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style">
 <link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style">
 <link rel="preload" href="fontawesome/css/all.min.css" as="style">
-<link rel="preload" href="fontawesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fontawesome/css/all.min.css">
 <link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen" />
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal" />
