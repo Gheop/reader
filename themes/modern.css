@@ -80,8 +80,8 @@ body {
   font-weight: 400;
   color: var(--modern-text-primary);
   background: var(--modern-bg-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased; /* Safari/Chrome */
+  -moz-osx-font-smoothing: grayscale; /* Firefox macOS only - will warn on other platforms */
 }
 
 /* Limitation largeur paragraphes (UI Tips: 500-700px) */
