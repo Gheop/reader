@@ -38,7 +38,8 @@ CREATE TABLE `reader_flux` (
   `update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `unread_count_user_2` int(11) DEFAULT 0,
   `unread_count_user_1` int(11) DEFAULT 0,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_rss` (`rss`(100))
 ) ENGINE=InnoDB AUTO_INCREMENT=1461 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC TRANSACTIONAL=0;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
