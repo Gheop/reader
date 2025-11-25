@@ -25,6 +25,107 @@ var cacheVersion = 'v1';
 var locallyModifiedArticles = {}; // Track articles manually marked as unread
 var eventSource = null; // SSE connection
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
+
+// ============================================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('[App] Service Worker registered:', registration.scope);
+
+        // Check for updates every hour
+        setInterval(() => {
+          registration.update();
+        }, 60 * 60 * 1000);
+
+        // Handle updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          console.log('[App] New Service Worker found');
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[App] New Service Worker installed, update available');
+
+              // Show update notification to user
+              showUpdateNotification(newWorker);
+            }
+          });
+        });
+      })
+      .catch(err => {
+        console.error('[App] Service Worker registration failed:', err);
+      });
+
+    // Listen for controller change (new SW activated)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('[App] Service Worker controller changed, reloading page');
+      window.location.reload();
+    });
+  });
+}
+
+// Show update notification
+function showUpdateNotification(worker) {
+  if (!confirm('Une nouvelle version de Gheop Reader est disponible. Voulez-vous la charger maintenant ?')) {
+    return;
+  }
+
+  // Tell the new SW to skip waiting
+  worker.postMessage({ type: 'SKIP_WAITING' });
+}
+
+// Utility: Clear all caches (for debugging)
+window.clearServiceWorkerCache = async function() {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+    console.log('[App] No active Service Worker');
+    return;
+  }
+
+  const messageChannel = new MessageChannel();
+
+  return new Promise((resolve, reject) => {
+    messageChannel.port1.onmessage = (event) => {
+      if (event.data.success) {
+        console.log('[App] Service Worker cache cleared');
+        resolve();
+      } else {
+        reject(new Error('Failed to clear cache'));
+      }
+    };
+
+    navigator.serviceWorker.controller.postMessage(
+      { type: 'CLEAR_CACHE' },
+      [messageChannel.port2]
+    );
+  });
+};
+
+// ============================================================================
+// ONLINE/OFFLINE STATUS INDICATOR
+// ============================================================================
+function updateOnlineStatus() {
+  const indicator = document.getElementById('offline-indicator');
+  if (!indicator) return;
+
+  if (navigator.onLine) {
+    indicator.style.display = 'none';
+    console.log('[App] Online');
+  } else {
+    indicator.style.display = 'inline-block';
+    console.log('[App] Offline');
+  }
+}
+
+// Update status on page load
+window.addEventListener('load', updateOnlineStatus);
+
+// Listen for online/offline events
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
 	const locale = navigator.language;
  	rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
@@ -860,13 +961,13 @@ function changeTheme(style) {
 
   // Appliquer le thème
   if (nextTheme === 'light') {
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (nextTheme === 'dark') {
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
     localStorage.setItem('theme', 'dark');
   } else if (nextTheme === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -875,7 +976,7 @@ function changeTheme(style) {
       }
     }, 100);
   } else if (nextTheme === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -906,13 +1007,13 @@ function selectTheme(themeName) {
 
   // Appliquer le thème sélectionné
   if (themeName === 'light') {
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (themeName === 'dark') {
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
     localStorage.setItem('theme', 'dark');
   } else if (themeName === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -921,7 +1022,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -930,7 +1031,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'modern') {
-    $('stylesheet').href = 'themes/modern.css';
+    $('stylesheet').href = 'themes/modern.min.css';
     localStorage.setItem('theme', 'modern');
   }
 
@@ -1018,127 +1119,62 @@ function search(t) {
   return false;
 }
 
+// Cache last rootHeight to avoid recreating observer unnecessarily
+let lastRootHeight = 0;
+
 function scroll() {
     //var unreadArticles = document.querySelectorAll(".item1");
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
     let unreadArticles = Array.from(document.getElementsByClassName("item1"));
-    let rootHeight = DM.offsetHeight-5;
+    // Cache offsetHeight to avoid multiple reflows
+    const dmHeight = DM.offsetHeight;
+    let rootHeight = dmHeight - 5;
     // Utiliser IntersectionObserver sauf pour Safari (bug avec root)
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if ("IntersectionObserver" in window && !isSafari) {
-        window.addEventListener("resize", scroll);
-        window.addEventListener("orientationChange", scroll);
-        //on vire tout en cas de resize car rootHeight change ... et on recommence
-        if(imageObserver) imageObserver.disconnect();
-        if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        if($('addblank')) $('addblank').style.height = (dmHeight - 60) + 'px';
 
-        imageObserver = new IntersectionObserver(function(entries, observer) {
-                entries.forEach(function(entry) {
-                        // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
-                        if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
-                            let art = entry.target;
-                            // Skip if this is a newly added article (protected for 2 seconds)
-                            if (art.dataset.newArticle === 'true') {
-                                return;
+        // Only recreate observer if rootHeight changed (e.g., window resize)
+        if(!imageObserver || lastRootHeight !== rootHeight) {
+            if(imageObserver) imageObserver.disconnect();
+            lastRootHeight = rootHeight;
+
+            imageObserver = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(entry) {
+                            // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
+                            if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
+                                let art = entry.target;
+                                // Skip if this is a newly added article (protected for 2 seconds)
+                                if (art.dataset.newArticle === 'true') {
+                                    return;
+                                }
+                                // Vérifier que l'article n'est pas déjà lu
+                                if (d[art.id] && d[art.id].r !== 0) {
+                                    // Marquer immédiatement comme traité avant d'appeler read()
+                                    imageObserver.unobserve(art);
+                                    read(art.id);
+                                    cptReadArticle++;
+                                    // Disabled: automatic "load more" no longer needed with API loading all articles
+                                    // if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
+                                    //     loadinprogress = 1;
+                                    //     more();
+                                    // }
+                                }
                             }
-                            // Vérifier que l'article n'est pas déjà lu
-                            if (d[art.id] && d[art.id].r !== 0) {
-                                // Marquer immédiatement comme traité avant d'appeler read()
-                                imageObserver.unobserve(art);
-                                read(art.id);
-                                cptReadArticle++;
-                                // Disabled: automatic "load more" no longer needed with API loading all articles
-                                // if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
-                                //     loadinprogress = 1;
-                                //     more();
-                                // }
-                            }
-                        }
-                    });
-            }, {
-            root: DM,
-                    rootMargin: "0px 0px -"+rootHeight+"px 0px",
-                    threshold: [0, 0.01, 1]
-                    });
+                        });
+                }, {
+                root: DM,
+                        rootMargin: "0px 0px -"+rootHeight+"px 0px",
+                        threshold: [0, 0.01, 1]
+                        });
+        } else {
+            // Observer already exists with correct rootHeight, just disconnect to re-observe new articles
+            imageObserver.disconnect();
+        }
 
         unreadArticles.forEach(function(art) {
                 imageObserver.observe(art);
             });
-
-        // Fallback: mark articles as read during fast scrolling
-        // IntersectionObserver can miss articles during very fast scrolls
-        let scrollTimeout;
-        let lastScrollTop = DM.scrollTop;
-        let bounceTimeout;
-        let lastBounceTime = 0;
-
-        DM.addEventListener('scroll', function() {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(function() {
-                // After scroll stops, check for any unread articles above current position
-                const currentScrollTop = DM.scrollTop;
-                if (currentScrollTop > lastScrollTop) { // Scrolling down
-                    let unread = Array.from(document.getElementsByClassName("item1"));
-                    var fallbackMarked = 0;
-                    unread.forEach(function(art) {
-                        if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
-                            // Article is above viewport and still marked unread - mark it read
-                            imageObserver.unobserve(art);
-                            read(art.id);
-                            cptReadArticle++;
-                            fallbackMarked++;
-                        }
-                    });
-                    if (fallbackMarked > 0) {
-                        console.log('FALLBACK: Marked', fallbackMarked, 'missed articles as read');
-                    }
-                }
-                lastScrollTop = currentScrollTop;
-
-                // Bounce effect when reaching bottom of last article
-                clearTimeout(bounceTimeout);
-                bounceTimeout = setTimeout(function() {
-                    const now = Date.now();
-                    // Throttle to max once every 2 seconds
-                    if (now - lastBounceTime < 2000) return;
-
-                    const scrollBottom = DM.scrollTop + DM.clientHeight;
-                    const scrollHeight = DM.scrollHeight;
-                    const addBlank = $('addblank');
-
-                    // Check if we're at the bottom (within 50px threshold)
-                    if (scrollBottom >= scrollHeight - 50 && addBlank) {
-                        // Find the last article
-                        const articles = Array.from(document.querySelectorAll('.item1, .item0'));
-                        if (articles.length > 0) {
-                            const lastArticle = articles[articles.length - 1];
-                            const lastArticleTop = lastArticle.offsetTop;
-                            const lastArticleHeight = lastArticle.offsetHeight;
-                            const lastArticleBottom = lastArticleTop + lastArticleHeight;
-
-                            // Check if we can see less than 40% of the last article
-                            const visibleTop = Math.max(lastArticleTop, DM.scrollTop);
-                            const visibleBottom = Math.min(lastArticleBottom, scrollBottom);
-                            const visibleHeight = visibleBottom - visibleTop;
-                            const visiblePercentage = (visibleHeight / lastArticleHeight) * 100;
-
-                            if (visiblePercentage > 0 && visiblePercentage < 40) {
-                                // Bounce back to show the full article
-                                lastBounceTime = now;
-                                const targetScroll = lastArticleTop - 10;
-
-                                // Smooth scroll with bounce effect
-                                DM.style.scrollBehavior = 'smooth';
-                                DM.scrollTop = targetScroll;
-                                setTimeout(() => {
-                                    DM.style.scrollBehavior = '';
-                                }, 500);
-                            }
-                        }
-                    }
-                }, 150); // Check 150ms after scroll stops
-            }, 100); // Check 100ms after scroll stops
-        }, {passive: true});
     }
     else {
         DM.onscroll = oldScroll;
@@ -1163,6 +1199,90 @@ function oldScroll() {
     }
 }
 
+// Initialize scroll fallback and bounce handlers (once only)
+// These handlers are added ONCE when the page loads, not on every scroll() call
+(function initScrollHandlers() {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (!("IntersectionObserver" in window) || isSafari) return; // Only for IntersectionObserver mode
+
+    let scrollTimeout;
+    let lastScrollTop = 0;
+    let bounceTimeout;
+    let lastBounceTime = 0;
+
+    // Add scroll handler ONCE
+    DM.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            // After scroll stops, check for any unread articles above current position
+            const currentScrollTop = DM.scrollTop;
+            if (currentScrollTop > lastScrollTop) { // Scrolling down
+                let unread = Array.from(document.getElementsByClassName("item1"));
+                var fallbackMarked = 0;
+                unread.forEach(function(art) {
+                    if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
+                        // Article is above viewport and still marked unread - mark it read
+                        if (imageObserver) imageObserver.unobserve(art);
+                        read(art.id);
+                        cptReadArticle++;
+                        fallbackMarked++;
+                    }
+                });
+                if (fallbackMarked > 0) {
+                    console.log('FALLBACK: Marked', fallbackMarked, 'missed articles as read');
+                }
+            }
+            lastScrollTop = currentScrollTop;
+
+            // Bounce effect when reaching bottom of last article
+            clearTimeout(bounceTimeout);
+            bounceTimeout = setTimeout(function() {
+                const now = Date.now();
+                // Throttle to max once every 2 seconds
+                if (now - lastBounceTime < 2000) return;
+
+                const scrollBottom = DM.scrollTop + DM.clientHeight;
+                const scrollHeight = DM.scrollHeight;
+                const addBlank = $('addblank');
+
+                // Check if we're at the bottom (within 50px threshold)
+                if (scrollBottom >= scrollHeight - 50 && addBlank) {
+                    // Find the last article
+                    const articles = Array.from(document.querySelectorAll('.item1, .item0'));
+                    if (articles.length > 0) {
+                        const lastArticle = articles[articles.length - 1];
+                        const lastArticleTop = lastArticle.offsetTop;
+                        const lastArticleHeight = lastArticle.offsetHeight;
+                        const lastArticleBottom = lastArticleTop + lastArticleHeight;
+
+                        // Check if we can see less than 40% of the last article
+                        const visibleTop = Math.max(lastArticleTop, DM.scrollTop);
+                        const visibleBottom = Math.min(lastArticleBottom, scrollBottom);
+                        const visibleHeight = visibleBottom - visibleTop;
+                        const visiblePercentage = (visibleHeight / lastArticleHeight) * 100;
+
+                        if (visiblePercentage > 0 && visiblePercentage < 40) {
+                            // Bounce back to show the full article
+                            lastBounceTime = now;
+                            const targetScroll = lastArticleTop - 10;
+
+                            // Smooth scroll with bounce effect
+                            DM.style.scrollBehavior = 'smooth';
+                            DM.scrollTop = targetScroll;
+                            setTimeout(() => {
+                                DM.style.scrollBehavior = '';
+                            }, 500);
+                        }
+                    }
+                }
+            }, 150); // Check 150ms after scroll stops
+        }, 100); // Check 100ms after scroll stops
+    }, {passive: true});
+
+    // Add resize/orientation handlers ONCE
+    window.addEventListener("resize", scroll, {passive: true});
+    window.addEventListener("orientationchange", scroll, {passive: true});
+})();
 
 function goUp() {
   DM.scrollTop -= 20;
@@ -1266,23 +1386,10 @@ function menu() {
 
 
 
-customElements.define('article-content', class extends HTMLElement {
-  connectedCallback() {
-    const shadow = this.attachShadow({mode: 'open'});
-    /*const style = document.createElement("style");
-    shadow.appendChild(style);
-*/    shadow.innerHTML = this.innerHTML;
-    updateStyle(this);
-  }
-});
-
-function updateStyle(elem) {
- // console.log(elem);
-//  console.log(countWords(elem)+' words.');
-  const shadow = elem.shadowRoot;
-  const style = document.createElement("style");
-  shadow.appendChild(style);
-  shadow.querySelector("style").textContent = `
+// Shared stylesheet for all article-content shadow DOMs
+// This is created ONCE and reused by all articles, saving memory
+const articleStyleSheet = new CSSStyleSheet();
+articleStyleSheet.replaceSync(`
     .article-content {
   text-align: justify;
   padding: 10px 10px 0 10px !important;
@@ -1325,8 +1432,17 @@ function updateStyle(elem) {
     transform: rotate(360deg);
   }
 }
-  `;
-}
+`);
+
+// Custom element for article content with shared stylesheet
+customElements.define('article-content', class extends HTMLElement {
+  connectedCallback() {
+    const shadow = this.attachShadow({mode: 'open'});
+    // Use shared stylesheet instead of creating new one per article
+    shadow.adoptedStyleSheets = [articleStyleSheet];
+    shadow.innerHTML = this.innerHTML;
+  }
+});
 
 function view(i) {
   console.log('=== VIEW FEED', i, '===');
@@ -2352,13 +2468,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   if (savedTheme === 'dark') {
     // Utilisateur a choisi le thème sombre
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
   } else if (savedTheme === 'light') {
     // Utilisateur a choisi le thème clair
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
   } else if (savedTheme === 'adaptive') {
     // Utilisateur a choisi le thème adaptatif
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
       if (window.startAdaptiveTheme) {
@@ -2367,7 +2483,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'smooth') {
     // Utilisateur a choisi le thème smooth progressif
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
       if (window.startSmoothAdaptiveTheme) {
@@ -2376,13 +2492,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'modern') {
     // Utilisateur a choisi le thème moderne
-    $('stylesheet').href = 'themes/modern.css';
+    $('stylesheet').href = 'themes/modern.min.css';
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      $('stylesheet').href = 'themes/dark.css';
+      $('stylesheet').href = 'themes/dark.min.css';
     }
-    // Sinon on garde light.css qui est déjà chargé par défaut
+    // Sinon on garde light.min.css qui est déjà chargé par défaut
   }
 
   // Mettre à jour l'icône du thème après un court délai pour s'assurer que le DOM est prêt

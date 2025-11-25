@@ -10,6 +10,13 @@ header("Content-Type: application/json; charset=UTF-8");
 include('/www/conf.php');
 include(__DIR__ . '/auth.php');
 
+// Query performance monitoring helper
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
+
 // Security: Validate user authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     http_response_code(401);
@@ -58,8 +65,10 @@ $menuSql = "
 
 $stmt = $_SESSION['mysqli']->prepare($menuSql);
 $stmt->bind_param("i", $userId);
+$query_start = microtime(true);
 $stmt->execute();
 $menuResult = $stmt->get_result();
+logSlowQuery('api.php - menu query', (microtime(true) - $query_start) * 1000);
 
 if (!$menuResult) {
     error_log('Menu query failed: ' . $_SESSION['mysqli']->error);
@@ -137,8 +146,10 @@ if ($feedId !== null) {
     $stmt->bind_param("ii", $userId, $limit);
 }
 
+$query_start = microtime(true);
 $stmt->execute();
 $articlesResult = $stmt->get_result();
+logSlowQuery('api.php - articles query', (microtime(true) - $query_start) * 1000);
 
 if (!$articlesResult) {
     error_log('Articles query failed: ' . $_SESSION['mysqli']->error);

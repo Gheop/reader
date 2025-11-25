@@ -7,6 +7,13 @@
 include('/www/conf.php');
 include('clean_text.php');
 
+// Query performance monitoring helper
+function logSlowQuery($queryName, $duration, $threshold = 100) {
+    if ($duration > $threshold) {
+        error_log(sprintf("SLOW QUERY [%s]: %.2fms (threshold: %dms)", $queryName, $duration, $threshold));
+    }
+}
+
 // Allow CLI execution for cron jobs (updates all feeds)
 if (php_sapi_name() === 'cli') {
     // CLI mode: bypass authentication, initialize session
@@ -166,21 +173,32 @@ do {
     }
 } while ($active && $status == CURLM_OK);
 
+// FIX N+1: Fetch ALL feed metadata in ONE query instead of one per feed
+$feedMetadata = [];
+if ($i > 0) {
+    $placeholders = implode(',', array_fill(0, $i, '?'));
+    $stmt = $mysqli->prepare("SELECT id, link, title, rss FROM reader_flux WHERE id IN ($placeholders)");
+    $types = str_repeat('i', $i);
+    $stmt->bind_param($types, ...$feedIds);
+    $query_start = microtime(true);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    logSlowQuery('up.php - batch feed metadata', (microtime(true) - $query_start) * 1000);
+    while ($row = $result->fetch_assoc()) {
+        $feedMetadata[$row['id']] = $row;
+    }
+}
+
 // Process each feed
 for($j = 0; $j < $i; $j++) {
     echo "\n" . $feedIds[$j] . " : ";
 
-    // Get feed metadata
-    $stmt = $mysqli->prepare("SELECT link, title, rss FROM reader_flux WHERE id = ?");
-    $stmt->bind_param("i", $feedIds[$j]);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if(!$result || $result->num_rows == 0) {
+    // Get feed metadata from pre-loaded array
+    if (!isset($feedMetadata[$feedIds[$j]])) {
         continue;
     }
 
-    $feedMeta = $result->fetch_array();
+    $feedMeta = $feedMetadata[$feedIds[$j]];
 
     // Parse XML content
     $xml = trim(curl_multi_getcontent($ch[$j]));
@@ -282,7 +300,7 @@ for($j = 0; $j < $i; $j++) {
 
         // Complete relative URLs
         if(!preg_match('/^https?:\/\//', $linkmaster)) {
-            $linkmaster = $feedMeta[0];
+            $linkmaster = $feedMeta['link'];
         }
 
         $link = complete_link($link, $linkmaster);
@@ -318,8 +336,10 @@ for($j = 0; $j < $i; $j++) {
         $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND link LIKE ?");
         $searchPattern = '%' . $link_without_protocol . '%';
         $stmt->bind_param("is", $feedIds[$j], $searchPattern);
+        $query_start = microtime(true);
         $stmt->execute();
         $existingResult = $stmt->get_result();
+        logSlowQuery('up.php - check existing article', (microtime(true) - $query_start) * 1000, 50);
 
         if ($existingResult->num_rows == 0) {
             // New article - extract data
@@ -372,28 +392,49 @@ for($j = 0; $j < $i; $j++) {
             if($youtubeVideoId) {
                 echo "Lien YouTube trouvé: " . $youtubeVideoId . "<br />";
 
-                // Fetch YouTube description
-                $ytDescription = get_youtube_description($youtubeVideoId);
+                // Check if we already have this video in DB (description already fetched)
+                $ytDescription = null;
+                $needsFetch = true;
 
-                // Build content with video embed and description
-                $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
-
-                if($ytDescription) {
-                    echo "Description récupérée (" . strlen($ytDescription) . " chars)<br />";
-                    // Add description below video
-                    $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
+                $checkStmt = $mysqli->prepare("SELECT description FROM reader_item WHERE link = ? LIMIT 1");
+                $checkStmt->bind_param("s", $link);
+                $query_start = microtime(true);
+                $checkStmt->execute();
+                $checkResult = $checkStmt->get_result();
+                logSlowQuery('up.php - check YouTube cache', (microtime(true) - $query_start) * 1000, 50);
+                if ($checkRow = $checkResult->fetch_assoc()) {
+                    // Video already exists, description already in content
+                    $needsFetch = false;
+                    $content = $checkRow['description'];
+                    echo "Vidéo déjà en base, description récupérée du cache<br />";
                 }
 
-                // If there was existing content from RSS, append it
-                if(!empty($content)) {
-                    $content = $videoContent . '<hr />' . $content;
-                } else {
-                    $content = $videoContent;
+                // Fetch YouTube description only for new videos
+                if ($needsFetch) {
+                    $ytDescription = get_youtube_description($youtubeVideoId);
+                }
+
+                // Build content only for new videos
+                if ($needsFetch) {
+                    $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
+
+                    if($ytDescription) {
+                        echo "Description récupérée (" . strlen($ytDescription) . " chars)<br />";
+                        // Add description below video
+                        $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
+                    }
+
+                    // If there was existing content from RSS, append it
+                    if(!empty($content)) {
+                        $content = $videoContent . '<hr />' . $content;
+                    } else {
+                        $content = $videoContent;
+                    }
                 }
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
                 // Image link detected
                 echo "Image trouvée!<br />";
-                $content = '<img src="' . htmlspecialchars($m[1]) . '" />';
+                $content = '<img loading="lazy" decoding="async" src="' . htmlspecialchars($m[1]) . '" />';
             }
 
             if(!isset($content) || $content == '') {
@@ -426,14 +467,16 @@ for($j = 0; $j < $i; $j++) {
 
             echo "MAJ<br />";
 
-            // Insert new article using prepared statement
+            // Insert new article (YouTube description already concatenated in $content)
             $stmt = $mysqli->prepare("
                 INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description)
                 VALUES ('', ?, ?, ?, ?, ?, ?, ?)
             ");
             $pubdate = date("Y-m-d H:i:s", $iDate);
             $stmt->bind_param("issssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content);
+            $query_start = microtime(true);
             $stmt->execute();
+            logSlowQuery('up.php - insert article', (microtime(true) - $query_start) * 1000, 50);
         }
 
         echo ".";

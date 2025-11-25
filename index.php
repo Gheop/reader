@@ -11,26 +11,37 @@ header('Content-Type: text/html; charset=utf-8');
 include('/www/conf.php');
 include(__DIR__ . '/auth.php');
 
+// Use minified assets in production, original files in debug mode
+$useMinified = !isset($_GET['debug']);
+$jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
+$cssExt = $useMinified ? '.min.css' : '.css';
 // Cache busting only in debug mode
 $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" type="text/css" href="themes/common.css<?php echo $cacheBuster; ?>" media="screen" />
-<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light.css<?php echo $cacheBuster; ?>" media="screen" title="Normal" />
+<link rel="preload" href="<?php echo $jsFile . $cacheBuster; ?>" as="script">
+<link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style">
+<link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style">
+<link rel="preload" href="fontawesome/css/all.min.css" as="style">
+<link rel="stylesheet" href="fontawesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen" />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <script src="favico.min.js" defer></script>
-<script src="lib.js<?php echo $cacheBuster; ?>" type="text/javascript" defer></script>
+<script src="<?php echo $jsFile . $cacheBuster; ?>" type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
+<link rel="manifest" href="/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-<meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="ƒlux∑">
+<meta name="theme-color" content="#2c3e50">
+<meta name="description" content="Agrégateur RSS moderne avec support offline - Suivez vos flux RSS, Twitter, eBay et plus encore !">
+<link rel="apple-touch-icon" href="favicon.png">
 
 </head>
 <body>
@@ -41,6 +52,9 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
 }
 ?>
 <div id="register">
+  <div id="offline-indicator" style="display:none; padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; margin-right: 10px; font-size: 12px;">
+    <i class="fa fa-wifi" style="text-decoration: line-through;"></i> Mode hors ligne
+  </div>
   <div id="theme-selector">
     <a id="theme-current" href="#" onclick="toggleThemeDropdown();return false;"></a>
     <div id="theme-dropdown" class="theme-dropdown-hidden">
