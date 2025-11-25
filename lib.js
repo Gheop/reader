@@ -1026,8 +1026,6 @@ function scroll() {
     // Utiliser IntersectionObserver sauf pour Safari (bug avec root)
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if ("IntersectionObserver" in window && !isSafari) {
-        window.addEventListener("resize", scroll);
-        window.addEventListener("orientationChange", scroll);
         //on vire tout en cas de resize car rootHeight change ... et on recommence
         if(imageObserver) imageObserver.disconnect();
         if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
@@ -1064,81 +1062,6 @@ function scroll() {
         unreadArticles.forEach(function(art) {
                 imageObserver.observe(art);
             });
-
-        // Fallback: mark articles as read during fast scrolling
-        // IntersectionObserver can miss articles during very fast scrolls
-        let scrollTimeout;
-        let lastScrollTop = DM.scrollTop;
-        let bounceTimeout;
-        let lastBounceTime = 0;
-
-        DM.addEventListener('scroll', function() {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(function() {
-                // After scroll stops, check for any unread articles above current position
-                const currentScrollTop = DM.scrollTop;
-                if (currentScrollTop > lastScrollTop) { // Scrolling down
-                    let unread = Array.from(document.getElementsByClassName("item1"));
-                    var fallbackMarked = 0;
-                    unread.forEach(function(art) {
-                        if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
-                            // Article is above viewport and still marked unread - mark it read
-                            imageObserver.unobserve(art);
-                            read(art.id);
-                            cptReadArticle++;
-                            fallbackMarked++;
-                        }
-                    });
-                    if (fallbackMarked > 0) {
-                        console.log('FALLBACK: Marked', fallbackMarked, 'missed articles as read');
-                    }
-                }
-                lastScrollTop = currentScrollTop;
-
-                // Bounce effect when reaching bottom of last article
-                clearTimeout(bounceTimeout);
-                bounceTimeout = setTimeout(function() {
-                    const now = Date.now();
-                    // Throttle to max once every 2 seconds
-                    if (now - lastBounceTime < 2000) return;
-
-                    const scrollBottom = DM.scrollTop + DM.clientHeight;
-                    const scrollHeight = DM.scrollHeight;
-                    const addBlank = $('addblank');
-
-                    // Check if we're at the bottom (within 50px threshold)
-                    if (scrollBottom >= scrollHeight - 50 && addBlank) {
-                        // Find the last article
-                        const articles = Array.from(document.querySelectorAll('.item1, .item0'));
-                        if (articles.length > 0) {
-                            const lastArticle = articles[articles.length - 1];
-                            const lastArticleTop = lastArticle.offsetTop;
-                            const lastArticleHeight = lastArticle.offsetHeight;
-                            const lastArticleBottom = lastArticleTop + lastArticleHeight;
-
-                            // Check if we can see less than 40% of the last article
-                            const visibleTop = Math.max(lastArticleTop, DM.scrollTop);
-                            const visibleBottom = Math.min(lastArticleBottom, scrollBottom);
-                            const visibleHeight = visibleBottom - visibleTop;
-                            const visiblePercentage = (visibleHeight / lastArticleHeight) * 100;
-
-                            if (visiblePercentage > 0 && visiblePercentage < 40) {
-                                // Bounce back to show the full article
-                                lastBounceTime = now;
-                                const targetScroll = lastArticleTop - 10;
-
-                                // Smooth scroll with bounce effect
-                                DM.style.scrollBehavior = 'smooth';
-                                DM.scrollTop = targetScroll;
-                                setTimeout(() => {
-                                    DM.style.scrollBehavior = '';
-                                }, 500);
-                            }
-                        }
-                    }
-                }, 150); // Check 150ms after scroll stops
-            }, 100); // Check 100ms after scroll stops
-        }, {passive: true});
     }
     else {
         DM.onscroll = oldScroll;
@@ -1163,6 +1086,90 @@ function oldScroll() {
     }
 }
 
+// Initialize scroll fallback and bounce handlers (once only)
+// These handlers are added ONCE when the page loads, not on every scroll() call
+(function initScrollHandlers() {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (!("IntersectionObserver" in window) || isSafari) return; // Only for IntersectionObserver mode
+
+    let scrollTimeout;
+    let lastScrollTop = 0;
+    let bounceTimeout;
+    let lastBounceTime = 0;
+
+    // Add scroll handler ONCE
+    DM.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            // After scroll stops, check for any unread articles above current position
+            const currentScrollTop = DM.scrollTop;
+            if (currentScrollTop > lastScrollTop) { // Scrolling down
+                let unread = Array.from(document.getElementsByClassName("item1"));
+                var fallbackMarked = 0;
+                unread.forEach(function(art) {
+                    if (art.offsetTop < currentScrollTop && d[art.id] && d[art.id].r !== 0) {
+                        // Article is above viewport and still marked unread - mark it read
+                        if (imageObserver) imageObserver.unobserve(art);
+                        read(art.id);
+                        cptReadArticle++;
+                        fallbackMarked++;
+                    }
+                });
+                if (fallbackMarked > 0) {
+                    console.log('FALLBACK: Marked', fallbackMarked, 'missed articles as read');
+                }
+            }
+            lastScrollTop = currentScrollTop;
+
+            // Bounce effect when reaching bottom of last article
+            clearTimeout(bounceTimeout);
+            bounceTimeout = setTimeout(function() {
+                const now = Date.now();
+                // Throttle to max once every 2 seconds
+                if (now - lastBounceTime < 2000) return;
+
+                const scrollBottom = DM.scrollTop + DM.clientHeight;
+                const scrollHeight = DM.scrollHeight;
+                const addBlank = $('addblank');
+
+                // Check if we're at the bottom (within 50px threshold)
+                if (scrollBottom >= scrollHeight - 50 && addBlank) {
+                    // Find the last article
+                    const articles = Array.from(document.querySelectorAll('.item1, .item0'));
+                    if (articles.length > 0) {
+                        const lastArticle = articles[articles.length - 1];
+                        const lastArticleTop = lastArticle.offsetTop;
+                        const lastArticleHeight = lastArticle.offsetHeight;
+                        const lastArticleBottom = lastArticleTop + lastArticleHeight;
+
+                        // Check if we can see less than 40% of the last article
+                        const visibleTop = Math.max(lastArticleTop, DM.scrollTop);
+                        const visibleBottom = Math.min(lastArticleBottom, scrollBottom);
+                        const visibleHeight = visibleBottom - visibleTop;
+                        const visiblePercentage = (visibleHeight / lastArticleHeight) * 100;
+
+                        if (visiblePercentage > 0 && visiblePercentage < 40) {
+                            // Bounce back to show the full article
+                            lastBounceTime = now;
+                            const targetScroll = lastArticleTop - 10;
+
+                            // Smooth scroll with bounce effect
+                            DM.style.scrollBehavior = 'smooth';
+                            DM.scrollTop = targetScroll;
+                            setTimeout(() => {
+                                DM.style.scrollBehavior = '';
+                            }, 500);
+                        }
+                    }
+                }
+            }, 150); // Check 150ms after scroll stops
+        }, 100); // Check 100ms after scroll stops
+    }, {passive: true});
+
+    // Add resize/orientation handlers ONCE
+    window.addEventListener("resize", scroll, {passive: true});
+    window.addEventListener("orientationchange", scroll, {passive: true});
+})();
 
 function goUp() {
   DM.scrollTop -= 20;
