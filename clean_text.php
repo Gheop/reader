@@ -89,10 +89,10 @@ function imgbase64($f) {
 //    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
     //voir pour mettre le onerror dans lib.js (stocker $f1 dans src2 ou un truc comme)
     $tmpfile = str_replace("/www/reader/", "", $tmpfile);
-    return '<img loading="lazy" src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
-//    return '<img loading="lazy" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+    return '<img loading="lazy" decoding="async" src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+//    return '<img loading="lazy" decoding="async" class="lazy" data-src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
   }
-  else return '<img loading="lazy" class="lazy" src="'.$f[1].'" />';
+  else return '<img loading="lazy" decoding="async" class="lazy" src="'.$f[1].'" />';
 }
 
 function clean_txt($v) {

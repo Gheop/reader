@@ -434,7 +434,7 @@ for($j = 0; $j < $i; $j++) {
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
                 // Image link detected
                 echo "Image trouvée!<br />";
-                $content = '<img src="' . htmlspecialchars($m[1]) . '" />';
+                $content = '<img loading="lazy" decoding="async" src="' . htmlspecialchars($m[1]) . '" />';
             }
 
             if(!isset($content) || $content == '') {

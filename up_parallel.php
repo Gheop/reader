@@ -392,7 +392,7 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
                     $content = !empty($content) ? $videoContent . '<hr />' . $content : $videoContent;
                 }
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
-                $content = '<img src="' . htmlspecialchars($m[1]) . '" />';
+                $content = '<img loading="lazy" decoding="async" src="' . htmlspecialchars($m[1]) . '" />';
             }
 
             // Author
