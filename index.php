@@ -33,10 +33,15 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <script src="<?php echo $jsFile . $cacheBuster; ?>" type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
+<link rel="manifest" href="/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-<meta name="description" content="Read and follow RSS, twitter, ebay, leboncoin ... and lot of more !">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="ƒlux∑">
+<meta name="theme-color" content="#2c3e50">
+<meta name="description" content="Agrégateur RSS moderne avec support offline - Suivez vos flux RSS, Twitter, eBay et plus encore !">
+<link rel="apple-touch-icon" href="favicon.png">
 
 </head>
 <body>

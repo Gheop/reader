@@ -8,7 +8,7 @@
  * - Images: Cache-first with background update
  */
 
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 const CACHE_NAME = `gheop-reader-v${VERSION}`;
 const CACHE_STATIC = `${CACHE_NAME}-static`;
 const CACHE_API = `${CACHE_NAME}-api`;
@@ -18,6 +18,7 @@ const CACHE_IMAGES = `${CACHE_NAME}-images`;
 const STATIC_ASSETS = [
   '/',
   '/index.php',
+  '/manifest.json',
   '/lib.min.js',
   '/favico.min.js',
   '/themes/common.min.css',
