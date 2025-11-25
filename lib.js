@@ -1018,6 +1018,9 @@ function search(t) {
   return false;
 }
 
+// Cache last rootHeight to avoid recreating observer unnecessarily
+let lastRootHeight = 0;
+
 function scroll() {
     //var unreadArticles = document.querySelectorAll(".item1");
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
@@ -1026,38 +1029,45 @@ function scroll() {
     // Utiliser IntersectionObserver sauf pour Safari (bug avec root)
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if ("IntersectionObserver" in window && !isSafari) {
-        //on vire tout en cas de resize car rootHeight change ... et on recommence
-        if(imageObserver) imageObserver.disconnect();
         if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
 
-        imageObserver = new IntersectionObserver(function(entries, observer) {
-                entries.forEach(function(entry) {
-                        // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
-                        if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
-                            let art = entry.target;
-                            // Skip if this is a newly added article (protected for 2 seconds)
-                            if (art.dataset.newArticle === 'true') {
-                                return;
+        // Only recreate observer if rootHeight changed (e.g., window resize)
+        if(!imageObserver || lastRootHeight !== rootHeight) {
+            if(imageObserver) imageObserver.disconnect();
+            lastRootHeight = rootHeight;
+
+            imageObserver = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(entry) {
+                            // Marquer comme lu si l'article est visible OU s'il vient de sortir par le haut
+                            if (entry.isIntersecting || (entry.boundingClientRect.top < 0 && entry.rootBounds)) {
+                                let art = entry.target;
+                                // Skip if this is a newly added article (protected for 2 seconds)
+                                if (art.dataset.newArticle === 'true') {
+                                    return;
+                                }
+                                // Vérifier que l'article n'est pas déjà lu
+                                if (d[art.id] && d[art.id].r !== 0) {
+                                    // Marquer immédiatement comme traité avant d'appeler read()
+                                    imageObserver.unobserve(art);
+                                    read(art.id);
+                                    cptReadArticle++;
+                                    // Disabled: automatic "load more" no longer needed with API loading all articles
+                                    // if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
+                                    //     loadinprogress = 1;
+                                    //     more();
+                                    // }
+                                }
                             }
-                            // Vérifier que l'article n'est pas déjà lu
-                            if (d[art.id] && d[art.id].r !== 0) {
-                                // Marquer immédiatement comme traité avant d'appeler read()
-                                imageObserver.unobserve(art);
-                                read(art.id);
-                                cptReadArticle++;
-                                // Disabled: automatic "load more" no longer needed with API loading all articles
-                                // if (!loadinprogress && cptReadArticle + 5 >= loadmore) {
-                                //     loadinprogress = 1;
-                                //     more();
-                                // }
-                            }
-                        }
-                    });
-            }, {
-            root: DM,
-                    rootMargin: "0px 0px -"+rootHeight+"px 0px",
-                    threshold: [0, 0.01, 1]
-                    });
+                        });
+                }, {
+                root: DM,
+                        rootMargin: "0px 0px -"+rootHeight+"px 0px",
+                        threshold: [0, 0.01, 1]
+                        });
+        } else {
+            // Observer already exists with correct rootHeight, just disconnect to re-observe new articles
+            imageObserver.disconnect();
+        }
 
         unreadArticles.forEach(function(art) {
                 imageObserver.observe(art);
