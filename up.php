@@ -381,42 +381,42 @@ for($j = 0; $j < $i; $j++) {
             if($youtubeVideoId) {
                 echo "Lien YouTube trouvé: " . $youtubeVideoId . "<br />";
 
-                // Check if we already have cached YouTube description
+                // Check if we already have this video in DB (description already fetched)
                 $ytDescription = null;
                 $needsFetch = true;
 
-                // Check existing item in DB for cached description
-                $checkStmt = $mysqli->prepare("SELECT youtube_description FROM reader_item WHERE link = ? LIMIT 1");
+                $checkStmt = $mysqli->prepare("SELECT description FROM reader_item WHERE link = ? LIMIT 1");
                 $checkStmt->bind_param("s", $link);
                 $checkStmt->execute();
                 $checkResult = $checkStmt->get_result();
                 if ($checkRow = $checkResult->fetch_assoc()) {
-                    if ($checkRow['youtube_description'] !== null) {
-                        $ytDescription = $checkRow['youtube_description'];
-                        $needsFetch = false;
-                        echo "Description YouTube cachée trouvée<br />";
-                    }
+                    // Video already exists, description already in content
+                    $needsFetch = false;
+                    $content = $checkRow['description'];
+                    echo "Vidéo déjà en base, description récupérée du cache<br />";
                 }
 
-                // Fetch YouTube description only if not cached
+                // Fetch YouTube description only for new videos
                 if ($needsFetch) {
                     $ytDescription = get_youtube_description($youtubeVideoId);
                 }
 
-                // Build content with video embed and description
-                $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
+                // Build content only for new videos
+                if ($needsFetch) {
+                    $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
 
-                if($ytDescription) {
-                    echo "Description récupérée (" . strlen($ytDescription) . " chars)<br />";
-                    // Add description below video
-                    $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
-                }
+                    if($ytDescription) {
+                        echo "Description récupérée (" . strlen($ytDescription) . " chars)<br />";
+                        // Add description below video
+                        $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
+                    }
 
-                // If there was existing content from RSS, append it
-                if(!empty($content)) {
-                    $content = $videoContent . '<hr />' . $content;
-                } else {
-                    $content = $videoContent;
+                    // If there was existing content from RSS, append it
+                    if(!empty($content)) {
+                        $content = $videoContent . '<hr />' . $content;
+                    } else {
+                        $content = $videoContent;
+                    }
                 }
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
                 // Image link detected
@@ -454,15 +454,13 @@ for($j = 0; $j < $i; $j++) {
 
             echo "MAJ<br />";
 
-            // Insert new article using prepared statement (with cached YouTube description)
+            // Insert new article (YouTube description already concatenated in $content)
             $stmt = $mysqli->prepare("
-                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description, youtube_description)
-                VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description)
+                VALUES ('', ?, ?, ?, ?, ?, ?, ?)
             ");
             $pubdate = date("Y-m-d H:i:s", $iDate);
-            // Save YouTube description to cache (null/empty string to mark as fetched)
-            $yt_cache = isset($youtubeVideoId) ? ($ytDescription ?? '') : null;
-            $stmt->bind_param("isssssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content, $yt_cache);
+            $stmt->bind_param("issssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content);
             $stmt->execute();
         }
 

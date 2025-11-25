@@ -350,36 +350,34 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
             }
 
             if($youtubeVideoId) {
-                // Check if we already have cached YouTube description for this video
-                // Use NULL as marker that we've already tried fetching (to avoid repeated API calls for failed videos)
+                // Check if we already have this video in DB (description already fetched)
                 $ytDescription = null;
                 $needsFetch = true;
 
-                // Check existing item in DB for cached description
-                $checkStmt = $mysqli->prepare("SELECT youtube_description FROM reader_item WHERE link = ? LIMIT 1");
+                $checkStmt = $mysqli->prepare("SELECT description FROM reader_item WHERE link = ? LIMIT 1");
                 $checkStmt->bind_param("s", $link);
                 $checkStmt->execute();
                 $checkResult = $checkStmt->get_result();
                 if ($checkRow = $checkResult->fetch_assoc()) {
-                    // If column exists and is not null (even empty string means we tried), use cached value
-                    if ($checkRow['youtube_description'] !== null) {
-                        $ytDescription = $checkRow['youtube_description'];
-                        $needsFetch = false;
-                    }
+                    // Video already exists, description already in content
+                    $needsFetch = false;
+                    $content = $checkRow['description']; // Use existing content with description
                 }
 
-                // Only fetch from API if we haven't cached it yet
+                // Only fetch from API for new videos
                 if ($needsFetch) {
                     $ytDescription = get_youtube_description($youtubeVideoId);
-                    // Cache result (even if null/empty to avoid re-fetching)
-                    // We'll update this when inserting the item below
                 }
 
                 $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
                 if($ytDescription) {
                     $videoContent .= '<div class="yt-description">' . nl2br(htmlspecialchars($ytDescription)) . '</div>';
                 }
-                $content = !empty($content) ? $videoContent . '<hr />' . $content : $videoContent;
+
+                // Only build videoContent for new items
+                if ($needsFetch) {
+                    $content = !empty($content) ? $videoContent . '<hr />' . $content : $videoContent;
+                }
             } elseif(preg_match('/^(\/\/.*\.(jpe?g|gif|png))/', $link, $m)) {
                 $content = '<img src="' . htmlspecialchars($m[1]) . '" />';
             }
@@ -397,15 +395,13 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
                 $guid = $link;
             }
 
-            // Insert article (with cached YouTube description if available)
+            // Insert article (YouTube description already concatenated in $content)
             $stmt = $mysqli->prepare("
-                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description, youtube_description)
-                VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description)
+                VALUES ('', ?, ?, ?, ?, ?, ?, ?)
             ");
             $pubdate = date("Y-m-d H:i:s", $iDate);
-            // Save YouTube description to cache (null/empty string to mark as fetched)
-            $yt_cache = isset($youtubeVideoId) ? ($ytDescription ?? '') : null;
-            $stmt->bind_param("isssssss", $feedId, $pubdate, $guid, $title, $author, $link, $content, $yt_cache);
+            $stmt->bind_param("issssss", $feedId, $pubdate, $guid, $title, $author, $link, $content);
 
             if($stmt->execute()) {
                 $newArticles++;
