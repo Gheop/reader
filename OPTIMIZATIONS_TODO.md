@@ -113,12 +113,18 @@ ALTER TABLE reader_item ADD COLUMN youtube_description TEXT;
 **Effort**: High (4 hours)
 **Status**: TODO
 
-### 14. ⏳ Self-host Font Awesome
-**File**: `index.php` line 26
+### 14. ✅ Self-host Font Awesome
+**File**: `index.php` line 24-26
 **Issue**: CDN dependency for critical resource
-**Impact**: 5-10% initial load
+**Impact**: 5-10% initial load, eliminates external dependency
 **Effort**: Low (1 hour)
-**Status**: TODO
+**Status**: ✅ COMPLETED (commit pending)
+**Details**:
+- Downloaded Font Awesome 6.5.1 and placed in fontawesome/ directory
+- Replaced CDN link with local all.min.css
+- Added preload hints for CSS and main font file (fa-solid-900.woff2)
+- Removed unnecessary preconnect hints to cloudflare CDN
+- Improves privacy (no external requests) and reliability (no CDN downtime)
 
 ### 15. ✅ Add Query Performance Monitoring
 **Files**: `api.php`, `read.php`, `up.php`, `up_parallel.php`
