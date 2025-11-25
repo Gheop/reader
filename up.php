@@ -166,21 +166,30 @@ do {
     }
 } while ($active && $status == CURLM_OK);
 
+// FIX N+1: Fetch ALL feed metadata in ONE query instead of one per feed
+$feedMetadata = [];
+if ($i > 0) {
+    $placeholders = implode(',', array_fill(0, $i, '?'));
+    $stmt = $mysqli->prepare("SELECT id, link, title, rss FROM reader_flux WHERE id IN ($placeholders)");
+    $types = str_repeat('i', $i);
+    $stmt->bind_param($types, ...$feedIds);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $feedMetadata[$row['id']] = $row;
+    }
+}
+
 // Process each feed
 for($j = 0; $j < $i; $j++) {
     echo "\n" . $feedIds[$j] . " : ";
 
-    // Get feed metadata
-    $stmt = $mysqli->prepare("SELECT link, title, rss FROM reader_flux WHERE id = ?");
-    $stmt->bind_param("i", $feedIds[$j]);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if(!$result || $result->num_rows == 0) {
+    // Get feed metadata from pre-loaded array
+    if (!isset($feedMetadata[$feedIds[$j]])) {
         continue;
     }
 
-    $feedMeta = $result->fetch_array();
+    $feedMeta = $feedMetadata[$feedIds[$j]];
 
     // Parse XML content
     $xml = trim(curl_multi_getcontent($ch[$j]));
@@ -282,7 +291,7 @@ for($j = 0; $j < $i; $j++) {
 
         // Complete relative URLs
         if(!preg_match('/^https?:\/\//', $linkmaster)) {
-            $linkmaster = $feedMeta[0];
+            $linkmaster = $feedMeta['link'];
         }
 
         $link = complete_link($link, $linkmaster);
