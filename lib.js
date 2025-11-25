@@ -1025,11 +1025,13 @@ function scroll() {
     //var unreadArticles = document.querySelectorAll(".item1");
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
     let unreadArticles = Array.from(document.getElementsByClassName("item1"));
-    let rootHeight = DM.offsetHeight-5;
+    // Cache offsetHeight to avoid multiple reflows
+    const dmHeight = DM.offsetHeight;
+    let rootHeight = dmHeight - 5;
     // Utiliser IntersectionObserver sauf pour Safari (bug avec root)
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if ("IntersectionObserver" in window && !isSafari) {
-        if($('addblank')) $('addblank').style.height = (DM.offsetHeight - 60) + 'px';
+        if($('addblank')) $('addblank').style.height = (dmHeight - 60) + 'px';
 
         // Only recreate observer if rootHeight changed (e.g., window resize)
         if(!imageObserver || lastRootHeight !== rootHeight) {
