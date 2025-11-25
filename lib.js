@@ -860,13 +860,13 @@ function changeTheme(style) {
 
   // Appliquer le thème
   if (nextTheme === 'light') {
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (nextTheme === 'dark') {
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
     localStorage.setItem('theme', 'dark');
   } else if (nextTheme === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -875,7 +875,7 @@ function changeTheme(style) {
       }
     }, 100);
   } else if (nextTheme === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -906,13 +906,13 @@ function selectTheme(themeName) {
 
   // Appliquer le thème sélectionné
   if (themeName === 'light') {
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (themeName === 'dark') {
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
     localStorage.setItem('theme', 'dark');
   } else if (themeName === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -921,7 +921,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -930,7 +930,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'modern') {
-    $('stylesheet').href = 'themes/modern.css';
+    $('stylesheet').href = 'themes/modern.min.css';
     localStorage.setItem('theme', 'modern');
   }
 
@@ -2352,13 +2352,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   if (savedTheme === 'dark') {
     // Utilisateur a choisi le thème sombre
-    $('stylesheet').href = 'themes/dark.css';
+    $('stylesheet').href = 'themes/dark.min.css';
   } else if (savedTheme === 'light') {
     // Utilisateur a choisi le thème clair
-    $('stylesheet').href = 'themes/light.css';
+    $('stylesheet').href = 'themes/light.min.css';
   } else if (savedTheme === 'adaptive') {
     // Utilisateur a choisi le thème adaptatif
-    $('stylesheet').href = 'themes/adaptive.css';
+    $('stylesheet').href = 'themes/adaptive.min.css';
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
       if (window.startAdaptiveTheme) {
@@ -2367,7 +2367,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'smooth') {
     // Utilisateur a choisi le thème smooth progressif
-    $('stylesheet').href = 'themes/adaptive-smooth.css';
+    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
       if (window.startSmoothAdaptiveTheme) {
@@ -2376,13 +2376,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
   } else if (savedTheme === 'modern') {
     // Utilisateur a choisi le thème moderne
-    $('stylesheet').href = 'themes/modern.css';
+    $('stylesheet').href = 'themes/modern.min.css';
   } else {
     // Pas de préférence sauvegardée : utiliser prefers-color-scheme
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      $('stylesheet').href = 'themes/dark.css';
+      $('stylesheet').href = 'themes/dark.min.css';
     }
-    // Sinon on garde light.css qui est déjà chargé par défaut
+    // Sinon on garde light.min.css qui est déjà chargé par défaut
   }
 
   // Mettre à jour l'icône du thème après un court délai pour s'assurer que le DOM est prêt

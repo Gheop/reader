@@ -2,26 +2,20 @@
 <?php
 /**
  * Asset Minification Script
- * Creates minified versions of JS and CSS files for production
+ * Uses terser for JavaScript and csso for CSS minification
+ *
+ * Requirements:
+ *   npm install -g terser csso-cli
  */
 
 function minifyJS($input, $output) {
-    $js = file_get_contents($input);
+    $cmd = sprintf('terser %s -o %s -c -m 2>&1', escapeshellarg($input), escapeshellarg($output));
+    exec($cmd, $outputLines, $returnCode);
 
-    // Remove comments (single line and multi-line)
-    $js = preg_replace('!/\*.*?\*/!s', '', $js);
-    $js = preg_replace('/\/\/.*$/m', '', $js);
-
-    // Remove whitespace
-    $js = preg_replace('/\s+/', ' ', $js);
-
-    // Remove unnecessary spaces around operators and punctuation
-    $js = preg_replace('/\s*([{};,:\[\]\(\)])\s*/', '$1', $js);
-
-    // Remove spaces around operators
-    $js = preg_replace('/\s*([=+\-*\/%&|<>!])\s*/', '$1', $js);
-
-    file_put_contents($output, $js);
+    if ($returnCode !== 0) {
+        echo "  ⚠️  Error minifying $input: " . implode("\n", $outputLines) . "\n";
+        return null;
+    }
 
     $originalSize = filesize($input);
     $minifiedSize = filesize($output);
@@ -35,24 +29,13 @@ function minifyJS($input, $output) {
 }
 
 function minifyCSS($input, $output) {
-    $css = file_get_contents($input);
+    $cmd = sprintf('csso %s -o %s 2>&1', escapeshellarg($input), escapeshellarg($output));
+    exec($cmd, $outputLines, $returnCode);
 
-    // Remove comments
-    $css = preg_replace('!/\*.*?\*/!s', '', $css);
-
-    // Remove whitespace
-    $css = preg_replace('/\s+/', ' ', $css);
-
-    // Remove spaces around CSS punctuation
-    $css = preg_replace('/\s*([{}:;,>+~])\s*/', '$1', $css);
-
-    // Remove trailing semicolons before }
-    $css = preg_replace('/;}/', '}', $css);
-
-    // Remove unnecessary zeros
-    $css = preg_replace('/:0(px|em|rem|%|vh|vw)/', ':0', $css);
-
-    file_put_contents($output, $css);
+    if ($returnCode !== 0) {
+        echo "  ⚠️  Error minifying $input: " . implode("\n", $outputLines) . "\n";
+        return null;
+    }
 
     $originalSize = filesize($input);
     $minifiedSize = filesize($output);
@@ -71,7 +54,7 @@ function formatBytes($bytes) {
     return round($bytes / 1048576, 1) . ' MB';
 }
 
-echo "=== Asset Minification ===\n\n";
+echo "=== Asset Minification (terser + csso) ===\n\n";
 
 $files = [
     'js' => [
@@ -90,8 +73,8 @@ $files = [
 $totalOriginal = 0;
 $totalMinified = 0;
 
-// Minify JavaScript
-echo "JavaScript Files:\n";
+// Minify JavaScript with terser
+echo "JavaScript Files (terser):\n";
 foreach ($files['js'] as $input => $output) {
     if (!file_exists($input)) {
         echo "  ⚠️  $input not found\n";
@@ -99,6 +82,8 @@ foreach ($files['js'] as $input => $output) {
     }
 
     $stats = minifyJS($input, $output);
+    if ($stats === null) continue;
+
     $totalOriginal += $stats['original'];
     $totalMinified += $stats['minified'];
 
@@ -112,8 +97,8 @@ foreach ($files['js'] as $input => $output) {
     );
 }
 
-// Minify CSS
-echo "CSS Files:\n";
+// Minify CSS with csso
+echo "CSS Files (csso):\n";
 foreach ($files['css'] as $input => $output) {
     if (!file_exists($input)) {
         echo "  ⚠️  $input not found\n";
@@ -121,6 +106,8 @@ foreach ($files['css'] as $input => $output) {
     }
 
     $stats = minifyCSS($input, $output);
+    if ($stats === null) continue;
+
     $totalOriginal += $stats['original'];
     $totalMinified += $stats['minified'];
 

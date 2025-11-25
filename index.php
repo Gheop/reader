@@ -11,6 +11,10 @@ header('Content-Type: text/html; charset=utf-8');
 include('/www/conf.php');
 include(__DIR__ . '/auth.php');
 
+// Use minified assets in production, original files in debug mode
+$useMinified = !isset($_GET['debug']);
+$jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
+$cssExt = $useMinified ? '.min.css' : '.css';
 // Cache busting only in debug mode
 $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 ?>
@@ -20,11 +24,11 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" type="text/css" href="themes/common.css<?php echo $cacheBuster; ?>" media="screen" />
-<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light.css<?php echo $cacheBuster; ?>" media="screen" title="Normal" />
+<link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen" />
+<link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal" />
 <title>Gheop Reader</title>
 <script src="favico.min.js" defer></script>
-<script src="lib.js<?php echo $cacheBuster; ?>" type="text/javascript" defer></script>
+<script src="<?php echo $jsFile . $cacheBuster; ?>" type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
