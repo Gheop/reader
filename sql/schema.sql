@@ -59,6 +59,7 @@ CREATE TABLE `reader_item` (
   `author` varchar(255) NOT NULL,
   `link` varchar(2048) NOT NULL,
   `description` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `youtube_description` TEXT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `link` (`link`(255)),
   KEY `reader_item_pubdate_IDX` (`pubdate`) USING BTREE,

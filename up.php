@@ -381,8 +381,27 @@ for($j = 0; $j < $i; $j++) {
             if($youtubeVideoId) {
                 echo "Lien YouTube trouvé: " . $youtubeVideoId . "<br />";
 
-                // Fetch YouTube description
-                $ytDescription = get_youtube_description($youtubeVideoId);
+                // Check if we already have cached YouTube description
+                $ytDescription = null;
+                $needsFetch = true;
+
+                // Check existing item in DB for cached description
+                $checkStmt = $mysqli->prepare("SELECT youtube_description FROM reader_item WHERE link = ? LIMIT 1");
+                $checkStmt->bind_param("s", $link);
+                $checkStmt->execute();
+                $checkResult = $checkStmt->get_result();
+                if ($checkRow = $checkResult->fetch_assoc()) {
+                    if ($checkRow['youtube_description'] !== null) {
+                        $ytDescription = $checkRow['youtube_description'];
+                        $needsFetch = false;
+                        echo "Description YouTube cachée trouvée<br />";
+                    }
+                }
+
+                // Fetch YouTube description only if not cached
+                if ($needsFetch) {
+                    $ytDescription = get_youtube_description($youtubeVideoId);
+                }
 
                 // Build content with video embed and description
                 $videoContent = '<yt>' . $youtubeVideoId . '</yt>';
@@ -435,13 +454,15 @@ for($j = 0; $j < $i; $j++) {
 
             echo "MAJ<br />";
 
-            // Insert new article using prepared statement
+            // Insert new article using prepared statement (with cached YouTube description)
             $stmt = $mysqli->prepare("
-                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description)
-                VALUES ('', ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO reader_item (id, id_flux, pubdate, guid, title, author, link, description, youtube_description)
+                VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $pubdate = date("Y-m-d H:i:s", $iDate);
-            $stmt->bind_param("issssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content);
+            // Save YouTube description to cache (null/empty string to mark as fetched)
+            $yt_cache = isset($youtubeVideoId) ? ($ytDescription ?? '') : null;
+            $stmt->bind_param("isssssss", $feedIds[$j], $pubdate, $guid, $title, $author, $link, $content, $yt_cache);
             $stmt->execute();
         }
 
