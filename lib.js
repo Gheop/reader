@@ -475,7 +475,15 @@ function renderArticles(articlesData, feedId, fromAPI = false) {
   cptReadArticle = 0;
   varscroll = 0;
   loadmore = 0;
-  d = articlesData;
+
+  // If data comes from API for a specific feed, replace global data completely
+  // API already filtered the results, so we don't need old cached data
+  if (fromAPI && feedId && feedId !== 'all') {
+    d = articlesData; // Replace completely
+  } else {
+    // Merge with existing data (for 'all' view or from cache)
+    d = articlesData;
+  }
 
   // Initialize read state for articles
   // If data comes fresh from API (reader_unread_cache), all articles are unread
@@ -492,7 +500,9 @@ function renderArticles(articlesData, feedId, fromAPI = false) {
 
   Now = new Date();
   for(let i in d) {
-    if (feedId && feedId !== 'all' && d[i].f != feedId) {
+    // Only filter by feed if data doesn't come from API (which already filtered)
+    // When fromAPI=true for a specific feed, API already filtered, so all articles in d belong to that feed
+    if (!fromAPI && feedId && feedId !== 'all' && d[i].f != feedId) {
       console.log('Skipping article', i, 'feed:', d[i].f, 'looking for:', feedId);
       continue;
     }
