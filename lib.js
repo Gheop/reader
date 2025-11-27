@@ -623,8 +623,10 @@ async function fetchAndUpdateDataBackground() {
   await flushReadBatch();
   console.log('SSE: Flush complete, now fetching data...');
 
-  const url = 'api.php'; // Always fetch all data
-  console.log('Background fetching data from:', url);
+  // Fetch data for the currently displayed feed (stored in global 'id' variable)
+  // If viewing 'all', fetch all articles. If viewing specific feed, fetch that feed's articles.
+  const url = (id === 'all') ? 'api.php' : 'api.php?id=' + id;
+  console.log('Background fetching data from:', url, '(current feed:', id, ')');
 
   fetch(url, {
     credentials: 'same-origin' // Include cookies for authentication
@@ -639,8 +641,13 @@ async function fetchAndUpdateDataBackground() {
       if (data.menu && data.articles) {
         console.log('Background sync: Menu items:', Object.keys(data.menu).length, 'Articles:', Object.keys(data.articles).length);
 
-        // Save to cache
-        saveToCache(data);
+        // Only save to cache if fetching 'all' data (not filtered by feed)
+        // Otherwise we'd overwrite the full cache with partial data
+        if (id === 'all') {
+          saveToCache(data);
+        } else {
+          console.log('SSE: Skipping cache save for filtered feed', id);
+        }
 
         // Update menu (with blink effects)
         renderMenu(data.menu);
