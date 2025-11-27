@@ -22,7 +22,7 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 $sriHashes = [
     'lib.min.js' => 'sha384-IDX8FR4TrEO3rNCWD7JXV0twxwGpazYX1V4J+6kovHW4YzSeC3fS+CEt/4YBlyGF',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-yLwDW2ARWWcfZIqQLj2Rb1X7CmhgWcfo6qi3eZt53IezUngO8dO82z+15a9Ntva3',
+    'themes/common.min.css' => 'sha384-uLugNMiESPScVOetUiYpuhGl+pFhKvM8gVEahQiqcMCLD2mqaMhhCivVuu+wq8Fc',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'fontawesome/css/all.min.css' => 'sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g'
 ];
@@ -133,8 +133,8 @@ echo '<nav>
   <div id="menu-resizer"></div>
 <main>
 </main>
-<footer>&nbsp;</footer>';
-//<script type="text/javascript" nonce="EDNnf03nceIOfn39fn3e9h3sdfa">i();</script>';
+<footer>&nbsp;</footer>
+<script type="text/javascript">i();</script>';
 }
 else {
   echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2><fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
