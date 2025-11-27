@@ -20,7 +20,7 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-bKscMstaOT5YItPHfWIus2lLdvBR6fedbNvpZcJfySHtc7Mnd0ef0YZNjzH90q4R',
+    'lib.min.js' => 'sha384-g2Ybzg26oHI60kzzCbB32JvKGjZjPBIkREVilzxe66gd252tLjm5jVb/TyDCqg8G',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-EMFIAlyJtjQQqkglhlepz4z6Lsi3Ou3oVpU2JIfZHC4joWL8+07jSPnDjPSqMyx1',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',

@@ -1093,15 +1093,16 @@ function updateThemeIcon() {
   let iconClass = '';
   const href = stylesheet.href;
 
-  if (href.includes('light.css')) {
+  // Check for theme names (works with both .css and .min.css)
+  if (href.includes('/light')) {
     iconClass = 'theme-icon-light';
-  } else if (href.includes('dark.css')) {
+  } else if (href.includes('/dark')) {
     iconClass = 'theme-icon-dark';
-  } else if (href.includes('adaptive.css')) {
-    iconClass = 'theme-icon-adaptive';
-  } else if (href.includes('adaptive-smooth.css')) {
+  } else if (href.includes('/adaptive-smooth')) {
     iconClass = 'theme-icon-smooth';
-  } else if (href.includes('modern.css')) {
+  } else if (href.includes('/adaptive')) {
+    iconClass = 'theme-icon-adaptive';
+  } else if (href.includes('/modern')) {
     iconClass = 'theme-icon-modern';
   }
 
