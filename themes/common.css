@@ -240,11 +240,17 @@ li > input {
 }
 
 #theme-current {
-  font-size: 1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   margin-right: 10px;
-  font-family: "Font Awesome 6 Free";
-  font-weight: 400;
+  color: #333;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 1;
+}
+
+#theme-current:hover {
+  color: #000;
 }
 
 #theme-dropdown {

@@ -2274,6 +2274,9 @@ function i() {
     $('fall').classList.add('show');
   }
 
+  // Initialize theme selector icon
+  updateThemeIcon();
+
   // Then load data
   loadData('all');
 

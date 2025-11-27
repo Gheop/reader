@@ -20,9 +20,9 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-k7n8Z6t9KdpMmAt8AF13jt1sySZilp+uJt3+auGokUsPZ0yGixXL9xsURRgDqrsj',
+    'lib.min.js' => 'sha384-IDX8FR4TrEO3rNCWD7JXV0twxwGpazYX1V4J+6kovHW4YzSeC3fS+CEt/4YBlyGF',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-kKSlAtqw0rVAL+rQksdfoBwEhrBbIwTjxsCW4YtcKFKTRNd2A2zSnRWl0py7T6QG',
+    'themes/common.min.css' => 'sha384-yLwDW2ARWWcfZIqQLj2Rb1X7CmhgWcfo6qi3eZt53IezUngO8dO82z+15a9Ntva3',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'fontawesome/css/all.min.css' => 'sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g'
 ];
