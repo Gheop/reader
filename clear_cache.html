@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vider le cache - Gheop Reader</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .secondary {
+            background: #95a5a6;
+        }
+        .secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 Vider le cache</h1>
+    <p>Cette page permet de vider complètement le cache du reader pour résoudre les problèmes d'affichage d'articles.</p>
+
+    <div id="status" class="status">
+        En attente...
+    </div>
+
+    <button onclick="clearAll()">Vider tout le cache</button>
+    <button onclick="window.location='/'" class="secondary">Retour au reader</button>
+
+    <h2>Ce qui sera vidé :</h2>
+    <ul>
+        <li>✓ Cache du Service Worker (assets, API, images)</li>
+        <li>✓ localStorage (données en cache)</li>
+        <li>✓ sessionStorage</li>
+    </ul>
+
+    <script>
+        async function clearAll() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status';
+            statusDiv.textContent = 'Nettoyage en cours...';
+
+            try {
+                let messages = [];
+
+                // 1. Clear Service Worker cache
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    try {
+                        const messageChannel = new MessageChannel();
+                        await new Promise((resolve, reject) => {
+                            messageChannel.port1.onmessage = (event) => {
+                                if (event.data.success) {
+                                    resolve();
+                                } else {
+                                    reject(new Error('Failed to clear SW cache'));
+                                }
+                            };
+                            navigator.serviceWorker.controller.postMessage(
+                                { type: 'CLEAR_CACHE' },
+                                [messageChannel.port2]
+                            );
+                            // Timeout after 5 seconds
+                            setTimeout(() => reject(new Error('Timeout')), 5000);
+                        });
+                        messages.push('✓ Cache Service Worker vidé');
+                    } catch (e) {
+                        messages.push('⚠ Service Worker: ' + e.message);
+                    }
+                }
+
+                // 2. Clear localStorage
+                try {
+                    localStorage.clear();
+                    messages.push('✓ localStorage vidé');
+                } catch (e) {
+                    messages.push('⚠ localStorage: ' + e.message);
+                }
+
+                // 3. Clear sessionStorage
+                try {
+                    sessionStorage.clear();
+                    messages.push('✓ sessionStorage vidé');
+                } catch (e) {
+                    messages.push('⚠ sessionStorage: ' + e.message);
+                }
+
+                // 4. Unregister Service Worker (for complete fresh start)
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                    }
+                    messages.push('✓ Service Worker désenregistré');
+                }
+
+                // Success!
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = messages.join('<br>') + '<br><br><strong>Cache vidé avec succès!</strong><br>La page va se recharger dans 2 secondes...';
+
+                setTimeout(() => {
+                    window.location = '/';
+                }, 2000);
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Erreur: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
