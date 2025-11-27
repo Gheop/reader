@@ -237,6 +237,9 @@ li > input {
 #theme-selector {
   position: relative;
   display: inline-block;
+  /* DEBUG: temporary background to see if element exists */
+  /* background: rgba(255,0,0,0.1); */
+  /* padding: 5px; */
 }
 
 #theme-current {
@@ -247,10 +250,24 @@ li > input {
   text-decoration: none;
   display: inline-block;
   line-height: 1;
+  min-width: 20px;
+  min-height: 20px;
 }
 
 #theme-current:hover {
   color: #000;
+}
+
+/* Ensure FontAwesome icons in theme selector are visible */
+#theme-current i:before,
+#theme-current .theme-icon-light:before,
+#theme-current .theme-icon-dark:before,
+#theme-current .theme-icon-adaptive:before,
+#theme-current .theme-icon-smooth:before,
+#theme-current .theme-icon-modern:before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  display: inline-block;
 }
 
 #theme-dropdown {
@@ -287,28 +304,28 @@ li > input {
 .theme-icon-light:before {
   content: "\f185";  /* sun - thème clair */
   font-family: "Font Awesome 6 Free";
-  font-weight: 400;
+  font-weight: 900;
   margin-right: 8px;
 }
 
 .theme-icon-dark:before {
   content: "\f186";  /* moon - thème sombre */
   font-family: "Font Awesome 6 Free";
-  font-weight: 400;
+  font-weight: 900;
   margin-right: 8px;
 }
 
 .theme-icon-adaptive:before {
   content: "\f017";  /* clock - thème adaptatif */
   font-family: "Font Awesome 6 Free";
-  font-weight: 400;
+  font-weight: 900;
   margin-right: 8px;
 }
 
 .theme-icon-smooth:before {
   content: "\f5a4";  /* sunset - thème progressif */
   font-family: "Font Awesome 6 Free";
-  font-weight: 400;
+  font-weight: 900;
   margin-right: 8px;
 }
 

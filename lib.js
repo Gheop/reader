@@ -1079,23 +1079,33 @@ function selectTheme(themeName) {
 
 function updateThemeIcon() {
   const themeCurrent = $('theme-current');
-  if (!themeCurrent) return;
+  if (!themeCurrent) {
+    console.warn('updateThemeIcon: #theme-current element not found');
+    return;
+  }
 
-  const stylesheet = $('stylesheet').href;
+  const stylesheet = $('stylesheet');
+  if (!stylesheet) {
+    console.warn('updateThemeIcon: #stylesheet element not found');
+    return;
+  }
+
   let iconClass = '';
+  const href = stylesheet.href;
 
-  if (stylesheet.includes('light.css')) {
+  if (href.includes('light.css')) {
     iconClass = 'theme-icon-light';
-  } else if (stylesheet.includes('dark.css')) {
+  } else if (href.includes('dark.css')) {
     iconClass = 'theme-icon-dark';
-  } else if (stylesheet.includes('adaptive.css')) {
+  } else if (href.includes('adaptive.css')) {
     iconClass = 'theme-icon-adaptive';
-  } else if (stylesheet.includes('adaptive-smooth.css')) {
+  } else if (href.includes('adaptive-smooth.css')) {
     iconClass = 'theme-icon-smooth';
-  } else if (stylesheet.includes('modern.css')) {
+  } else if (href.includes('modern.css')) {
     iconClass = 'theme-icon-modern';
   }
 
+  console.log('updateThemeIcon: Setting icon class:', iconClass, 'for stylesheet:', href);
   themeCurrent.innerHTML = '<i class="' + iconClass + '"></i>';
 }
 
