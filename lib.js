@@ -1492,16 +1492,16 @@ function view(i) {
   }
   console.log('Articles in memory for feed', i, '- Unread:', unreadCount, 'Read:', readCount);
 
-  // If menu says there are articles but we don't have them in d, load this specific feed
-  // Loading ALL articles with LIMIT 50 might miss older articles from this feed
-  if (!hasArticlesForFeed && m && m[i] && m[i].n > 0) {
-    console.log('Feed', i, 'has', m[i].n, 'articles in menu but none in d, loading feed-specific data');
+  // For specific feeds (not 'all'), always load from API to get fresh data
+  // This avoids displaying articles that were marked as read in the 'all' view
+  // but are still unread in the database
+  if (i !== 'all') {
+    console.log('Loading feed', i, 'from API to get fresh unread status');
     loadData(i, false); // Load THIS feed's articles (no cache, direct from API)
     return;
   }
 
-  // Just filter and display articles from cache
-  // The background sync will update automatically
+  // For 'all' view, use cached data if available
   if (d && Object.keys(d).length > 0) {
     renderArticles(d, i);
 
