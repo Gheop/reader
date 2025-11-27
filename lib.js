@@ -1043,15 +1043,17 @@ function selectTheme(themeName) {
 
   if(imageObserver) imageObserver.disconnect();
 
+  const stylesheet = $('stylesheet');
+
   // Appliquer le thème sélectionné
   if (themeName === 'light') {
-    $('stylesheet').href = 'themes/light.min.css';
+    stylesheet.href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (themeName === 'dark') {
-    $('stylesheet').href = 'themes/dark.min.css';
+    stylesheet.href = 'themes/dark.min.css';
     localStorage.setItem('theme', 'dark');
   } else if (themeName === 'adaptive') {
-    $('stylesheet').href = 'themes/adaptive.min.css';
+    stylesheet.href = 'themes/adaptive.min.css';
     localStorage.setItem('theme', 'adaptive');
     // Démarrer le thème adaptatif après un court délai
     setTimeout(() => {
@@ -1060,7 +1062,7 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'smooth') {
-    $('stylesheet').href = 'themes/adaptive-smooth.min.css';
+    stylesheet.href = 'themes/adaptive-smooth.min.css';
     localStorage.setItem('theme', 'smooth');
     // Démarrer le thème smooth après un court délai
     setTimeout(() => {
@@ -1069,9 +1071,14 @@ function selectTheme(themeName) {
       }
     }, 100);
   } else if (themeName === 'modern') {
-    $('stylesheet').href = 'themes/modern.min.css';
+    stylesheet.href = 'themes/modern.min.css';
     localStorage.setItem('theme', 'modern');
   }
+
+  // Remove integrity attribute when dynamically changing themes
+  // (we trust our own server, and updating integrity dynamically is complex)
+  stylesheet.removeAttribute('integrity');
+  stylesheet.removeAttribute('crossorigin');
 
   updateThemeIcon();
   setTimeout(scroll, 2000);
