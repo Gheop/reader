@@ -2933,3 +2933,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }, 500);
 });
+
+// Auto-initialize when user is logged in (menu exists)
+if (document.getElementById('menu')) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', i);
+  } else {
+    // DOM already loaded
+    i();
+  }
+}
