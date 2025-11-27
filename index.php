@@ -24,6 +24,10 @@ $sriHashes = [
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-EMFIAlyJtjQQqkglhlepz4z6Lsi3Ou3oVpU2JIfZHC4joWL8+07jSPnDjPSqMyx1',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
+    'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
+    'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
+    'themes/adaptive-smooth.min.css' => 'sha384-c81nycqtM0OqyFtDoWcYJ1Ik7AWTqtxdlEKCB80cfjfQTLPdmkVv/KegmU7v3C63',
+    'themes/modern.min.css' => 'sha384-WzdZG8/mSE1int8rel7jIV8DPoOgKTYmSs5Fwo+Z881q8LwDb5DoQ9jCpKxzoUbw',
     'fontawesome/css/all.min.css' => 'sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g'
 ];
 
