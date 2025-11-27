@@ -690,8 +690,12 @@ function appendNewArticles(newArticlesData) {
   if (d) {
     for(var i in d) {
       if (!newArticlesData[i]) {
-        // This article was in old data but not in new data = marked as read elsewhere
-        if ($(i)) {
+        // SAFETY CHECK: Only consider as "removed" if article belongs to current view
+        // This prevents marking articles from other feeds as read when context changes
+        var articleBelongsToCurrentView = (id === 'all') || (d[i] && d[i].f == id);
+
+        if (articleBelongsToCurrentView && $(i)) {
+          // This article was in old data but not in new data = marked as read elsewhere
           removedArticles.push(i);
         }
       }
@@ -704,6 +708,23 @@ function appendNewArticles(newArticlesData) {
   var newDataCount = Object.keys(newArticlesData).length;
   var oldDataCount = d ? Object.keys(d).length : 0;
   console.log('SSE: Old data had', oldDataCount, 'articles, new data has', newDataCount, 'articles');
+
+  // SAFETY CHECK: Detect abnormal data size changes that might indicate context mismatch
+  // If we're viewing a specific feed and suddenly get way more articles, something is wrong
+  if (id !== 'all' && oldDataCount > 0 && newDataCount > oldDataCount * 3) {
+    console.error('SSE SAFETY: Abnormal data size change detected!',
+                  'Old:', oldDataCount, 'New:', newDataCount, 'Feed:', id,
+                  '- This might indicate a context mismatch. Aborting update to prevent corruption.');
+    return; // Abort the update
+  }
+
+  // SAFETY CHECK: If too many articles would be marked as read (>50% of current view), warn
+  if (removedArticles.length > 0 && oldDataCount > 0 && removedArticles.length > oldDataCount * 0.5) {
+    console.warn('SSE SAFETY: Would mark', removedArticles.length, 'articles as read out of', oldDataCount,
+                 '(>' + Math.round(removedArticles.length/oldDataCount*100) + '%) - this seems excessive!',
+                 'Current feed:', id);
+    // Still proceed but log warning for debugging
+  }
 
   // Initialize read state for all articles from API (they are all unread)
   for(var i in newArticlesData) {
@@ -1986,6 +2007,14 @@ function read(k, v=0) {
     unr = 0;
     return;
   }
+
+  // SAFETY CHECK: When viewing a specific feed, only allow marking articles from that feed as read
+  // This prevents accidentally marking articles from other feeds when data gets mixed
+  if (id !== 'all' && d[k].f != id) {
+    console.error('SAFETY: Attempted to mark article', k, 'from feed', d[k].f, 'as read while viewing feed', id, '- Blocking!');
+    return;
+  }
+
   // Marquer immédiatement comme traité pour éviter les doubles appels
   d[k].r = 0;
   $(k).className = 'item0';
