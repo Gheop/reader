@@ -45,7 +45,8 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($token_data));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Accept: application/json'
+    'Accept: application/json',
+    'User-Agent: Gheop-Reader/1.0'
 ]);
 
 $token_response = curl_exec($ch);
@@ -65,7 +66,8 @@ $ch = curl_init($config['userinfo_url']);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Authorization: Bearer ' . $access_token,
-    'Accept: application/json'
+    'Accept: application/json',
+    'User-Agent: Gheop-Reader/1.0'
 ]);
 
 $userinfo_response = curl_exec($ch);
