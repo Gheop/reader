@@ -20,9 +20,9 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-mRmXI+4x5YezqrwzmvTIA3LqZZE6H8Vu9/384XIblpQuNcEIzTs44rsyjSEozGgf',
+    'lib.min.js' => 'sha384-3HgyHw0BEHj6HNFHgSxXdDe4j90SBvIgUypOL5GI8fnjdw9GZlH9YhCAuIv+9NMG',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-EMFIAlyJtjQQqkglhlepz4z6Lsi3Ou3oVpU2JIfZHC4joWL8+07jSPnDjPSqMyx1',
+    'themes/common.min.css' => 'sha384-NUflqF6WWdV02rdZQyzM5+BymjUHI37OFYLY9ZYDDKVw48kSGbYy3xtSdS5hSeKU',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
@@ -83,6 +83,7 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
   <div id="theme-selector">
     <a id="theme-current" href="#" onclick="toggleThemeDropdown();return false;"></a>
     <div id="theme-dropdown" class="theme-dropdown-hidden">
+      <a href="#" onclick="selectTheme('auto');return false;" data-theme="auto"><i class="theme-icon-auto"></i> Auto</a>
       <a href="#" onclick="selectTheme('light');return false;" data-theme="light"><i class="theme-icon-light"></i> Clair</a>
       <a href="#" onclick="selectTheme('dark');return false;" data-theme="dark"><i class="theme-icon-dark"></i> Sombre</a>
       <a href="#" onclick="selectTheme('adaptive');return false;" data-theme="adaptive"><i class="theme-icon-adaptive"></i> Adaptatif</a>

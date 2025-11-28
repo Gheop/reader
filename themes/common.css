@@ -301,6 +301,13 @@ li > input {
 }
 
 /* Icônes des thèmes */
+.theme-icon-auto:before {
+  content: "\f042";  /* circle-half-stroke - thème auto */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+}
+
 .theme-icon-light:before {
   content: "\f185";  /* sun - thème clair */
   font-family: "Font Awesome 6 Free";

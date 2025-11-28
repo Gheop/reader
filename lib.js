@@ -1039,6 +1039,33 @@ function toggleThemeDropdown() {
   }
 }
 
+function getSystemTheme() {
+  // Detect system color scheme preference
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+}
+
+function applyAutoTheme() {
+  // Apply theme based on system preference
+  const systemTheme = getSystemTheme();
+  const stylesheet = $('stylesheet');
+
+  if (systemTheme === 'dark') {
+    stylesheet.href = 'themes/dark.min.css';
+  } else {
+    stylesheet.href = 'themes/light.min.css';
+  }
+
+  // Remove integrity attribute when dynamically changing themes
+  stylesheet.removeAttribute('integrity');
+  stylesheet.removeAttribute('crossorigin');
+
+  updateThemeIcon();
+  setTimeout(scroll, 2000);
+}
+
 function selectTheme(themeName) {
   const dropdown = $('theme-dropdown');
   if (dropdown) {
@@ -1050,7 +1077,10 @@ function selectTheme(themeName) {
   const stylesheet = $('stylesheet');
 
   // Appliquer le thème sélectionné
-  if (themeName === 'light') {
+  if (themeName === 'auto') {
+    localStorage.setItem('theme', 'auto');
+    applyAutoTheme();
+  } else if (themeName === 'light') {
     stylesheet.href = 'themes/light.min.css';
     localStorage.setItem('theme', 'light');
   } else if (themeName === 'dark') {
@@ -1102,22 +1132,30 @@ function updateThemeIcon() {
   }
 
   let iconClass = '';
-  const href = stylesheet.href;
+  const savedTheme = localStorage.getItem('theme');
 
-  // Check for theme names (works with both .css and .min.css)
-  if (href.includes('/light')) {
-    iconClass = 'theme-icon-light';
-  } else if (href.includes('/dark')) {
-    iconClass = 'theme-icon-dark';
-  } else if (href.includes('/adaptive-smooth')) {
-    iconClass = 'theme-icon-smooth';
-  } else if (href.includes('/adaptive')) {
-    iconClass = 'theme-icon-adaptive';
-  } else if (href.includes('/modern')) {
-    iconClass = 'theme-icon-modern';
+  // If auto mode, show auto icon regardless of current stylesheet
+  if (savedTheme === 'auto') {
+    iconClass = 'theme-icon-auto';
+  } else {
+    // Otherwise, detect from current stylesheet
+    const href = stylesheet.href;
+
+    // Check for theme names (works with both .css and .min.css)
+    if (href.includes('/light')) {
+      iconClass = 'theme-icon-light';
+    } else if (href.includes('/dark')) {
+      iconClass = 'theme-icon-dark';
+    } else if (href.includes('/adaptive-smooth')) {
+      iconClass = 'theme-icon-smooth';
+    } else if (href.includes('/adaptive')) {
+      iconClass = 'theme-icon-adaptive';
+    } else if (href.includes('/modern')) {
+      iconClass = 'theme-icon-modern';
+    }
   }
 
-  console.log('updateThemeIcon: Setting icon class:', iconClass, 'for stylesheet:', href);
+  console.log('updateThemeIcon: Setting icon class:', iconClass, 'for saved theme:', savedTheme);
   themeCurrent.innerHTML = '<i class="' + iconClass + '"></i>';
 }
 
@@ -2542,7 +2580,10 @@ document.onload = i();
 window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
 
-  if (savedTheme === 'dark') {
+  if (savedTheme === 'auto') {
+    // Mode automatique : suivre la préférence système
+    applyAutoTheme();
+  } else if (savedTheme === 'dark') {
     // Utilisateur a choisi le thème sombre
     $('stylesheet').href = 'themes/dark.min.css';
   } else if (savedTheme === 'light') {
@@ -2583,6 +2624,19 @@ window.addEventListener('DOMContentLoaded', () => {
       updateThemeIcon();
     }
   }, 100);
+
+  // Écouter les changements de préférence système (uniquement en mode auto)
+  if (window.matchMedia) {
+    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    darkModeQuery.addEventListener('change', (e) => {
+      const savedTheme = localStorage.getItem('theme');
+      // Appliquer le changement seulement si en mode auto
+      if (savedTheme === 'auto') {
+        console.log('System theme changed to:', e.matches ? 'dark' : 'light');
+        applyAutoTheme();
+      }
+    });
+  }
 });
 
 // ============================================================================
