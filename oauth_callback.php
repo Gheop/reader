@@ -126,8 +126,15 @@ if ($row = $result->fetch_assoc()) {
         $_SESSION['pseudo'] = $user['pseudo'];
         $_SESSION['user_id'] = $user['id'];
 
-        // Set persistent cookie
-        setrawcookie("session", $user['pseudo'] . "|" . $user['pwd'], time() + 26000000, '/', '.gheop.com');
+        // Set persistent cookie with proper SameSite attribute
+        setcookie("session", $user['pseudo'] . "|" . $user['pwd'], [
+            'expires' => time() + 26000000,
+            'path' => '/',
+            'domain' => '.gheop.com',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
+        ]);
 
         // Redirect to reader
         header('Location: /');
@@ -177,8 +184,15 @@ if ($row = $result->fetch_assoc()) {
             $_SESSION['pseudo'] = $pseudo;
             $_SESSION['user_id'] = $user_id;
 
-            // Set persistent cookie
-            setrawcookie("session", $pseudo . "|" . $pwd_hash, time() + 26000000, '/', '.gheop.com');
+            // Set persistent cookie with proper SameSite attribute
+            setcookie("session", $pseudo . "|" . $pwd_hash, [
+                'expires' => time() + 26000000,
+                'path' => '/',
+                'domain' => '.gheop.com',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
+            ]);
 
             // Redirect to reader
             header('Location: /');
