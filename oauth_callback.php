@@ -5,7 +5,12 @@
  */
 
 session_start();
-include('/www/conf.php');
+
+// Create database connection
+$mysqli = new mysqli('localhost', 'gheop', 'REDACTED', 'gheop');
+if ($mysqli->connect_error) {
+    die('Database connection failed: ' . $mysqli->connect_error);
+}
 
 // Load OAuth configuration
 $oauth_config = include(__DIR__ . '/oauth_config.php');
