@@ -106,7 +106,8 @@ function getSRI($file, $sriHashes, $useMinified) {
 <?php
 // Handle logout
 if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
-    include('../destroy.php');
+    header('Location: logout.php');
+    exit;
 }
 ?>
 <div id="register">
@@ -126,7 +127,8 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
   </div>
 <?php
 if(!isset($_SESSION['pseudo'])) {
-  echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="http://www.gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
+  echo '<a href="register.php">[S\'enregister]</a> - <a href="login.php">[S\'identifier]</a>';
+}
 else {
   echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';
 
