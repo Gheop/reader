@@ -179,7 +179,7 @@ if ($row = $result->fetch_assoc()) {
         setcookie("session", $user['pseudo'] . "|" . $user['pwd'], [
             'expires' => time() + 26000000,
             'path' => '/',
-            'domain' => '.gheop.com',
+            'domain' => '',
             'secure' => true,
             'httponly' => true,
             'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
@@ -233,7 +233,7 @@ if ($row = $result->fetch_assoc()) {
         setcookie("session", $pseudo . "|" . $pwd_hash, [
             'expires' => time() + 26000000,
             'path' => '/',
-            'domain' => '.gheop.com',
+            'domain' => '',
             'secure' => true,
             'httponly' => true,
             'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect

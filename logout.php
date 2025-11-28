@@ -17,7 +17,8 @@ if (isset($_COOKIE[session_name()])) {
     setcookie(session_name(), '', time() - 3600, '/');
 }
 
-// Delete persistent session cookie
+// Delete persistent session cookie - try all possible domains
+// Delete cookie without domain (for local cookies)
 setcookie("session", '', [
     'expires' => time() - 3600,
     'path' => '/',
@@ -27,9 +28,16 @@ setcookie("session", '', [
     'samesite' => 'Lax'
 ]);
 
+// Delete cookie with .gheop.com domain (for OAuth cookies)
+setcookie("session", '', time() - 3600, '/', '.gheop.com');
+
+// Delete old cookies from previous system
+setcookie("session", '', time() - 3600, '/', '.gheop.net');
+setcookie("session", '', time() - 3600, '/', '.gheop.org');
+
 // Destroy session
 session_destroy();
 
-// Redirect to login page
-header('Location: login.php');
+// Redirect to home page
+header('Location: /');
 exit;
