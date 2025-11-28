@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
 
 
-                // Redirect to reader
-                header('Location: /');
+                // Redirect to success page (allows cookies to be set before final redirect)
+                header('Location: /login_success.php');
                 exit;
             } else {
                 $error = 'Failed to create account: ' . $mysqli->error;

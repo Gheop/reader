@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'samesite' => 'Lax'
                 ]);
 
-                // Redirect to reader (session will be written automatically)
-                header('Location: /');
+                // Redirect to success page (allows cookies to be set before final redirect)
+                header('Location: /login_success.php');
                 exit;
             } else {
                 $error = 'Invalid username or password';
