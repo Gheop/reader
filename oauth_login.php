@@ -35,6 +35,19 @@ $params = [
     'state' => $state
 ];
 
+// Add PKCE for providers that require it (Twitter)
+if (!empty($config['use_pkce'])) {
+    // Generate code verifier (random 43-128 character string)
+    $code_verifier = bin2hex(random_bytes(32)); // 64 characters
+    $_SESSION['oauth_code_verifier'] = $code_verifier;
+
+    // Generate code challenge (base64url encoded SHA256 hash of verifier)
+    $code_challenge = rtrim(strtr(base64_encode(hash('sha256', $code_verifier, true)), '+/', '-_'), '=');
+
+    $params['code_challenge'] = $code_challenge;
+    $params['code_challenge_method'] = 'S256';
+}
+
 $auth_url = $config['auth_url'] . '?' . http_build_query($params);
 
 // Redirect to OAuth provider

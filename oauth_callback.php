@@ -35,10 +35,16 @@ $code = $_GET['code'];
 $token_data = [
     'code' => $code,
     'client_id' => $config['client_id'],
-    'client_secret' => $config['client_secret'],
     'redirect_uri' => $config['redirect_uri'],
     'grant_type' => 'authorization_code'
 ];
+
+// For PKCE (Twitter), use code_verifier instead of client_secret
+if (!empty($config['use_pkce']) && isset($_SESSION['oauth_code_verifier'])) {
+    $token_data['code_verifier'] = $_SESSION['oauth_code_verifier'];
+} else {
+    $token_data['client_secret'] = $config['client_secret'];
+}
 
 $ch = curl_init($config['token_url']);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -123,6 +129,13 @@ switch ($provider) {
                 }
             }
         }
+        break;
+    case 'twitter':
+        // Twitter API v2 returns data in a "data" object
+        $data = $userinfo['data'] ?? $userinfo;
+        $provider_user_id = $data['id'] ?? '';
+        $email = $data['email'] ?? '';
+        $name = $data['name'] ?? $data['username'] ?? '';
         break;
 }
 

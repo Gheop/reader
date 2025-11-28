@@ -7,6 +7,7 @@ Ce document explique comment configurer l'authentification OAuth2 pour Gheop Rea
 Gheop Reader supporte l'authentification via:
 - **Google**
 - **GitHub**
+- **Twitter/X**
 
 L'authentification traditionnelle (inscription/connexion Gheop) reste totalement fonctionnelle.
 
@@ -45,6 +46,29 @@ L'authentification traditionnelle (inscription/connexion Gheop) reste totalement
    export GITHUB_CLIENT_SECRET="votre-client-secret"
    ```
 
+### Twitter/X OAuth2
+
+1. Aller sur [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+2. Créer un nouveau projet ou en sélectionner un existant
+3. Dans votre projet, créer une nouvelle application
+4. Aller dans l'onglet "Keys and tokens"
+5. Sous "OAuth 2.0 Client ID and Client Secret", cliquer sur "Generate"
+6. Copier le **Client ID** et le **Client Secret**
+7. Aller dans l'onglet "Settings" de votre application
+8. Sous "User authentication settings", cliquer sur "Set up"
+9. Configurer:
+   - **App permissions**: Read
+   - **Type of App**: Web App
+   - **Callback URL**: `https://reader.gheop.com/oauth_callback.php?provider=twitter`
+   - **Website URL**: https://reader.gheop.com
+10. Définir les variables d'environnement:
+   ```bash
+   export TWITTER_CLIENT_ID="votre-client-id"
+   export TWITTER_CLIENT_SECRET="votre-client-secret"
+   ```
+
+**Note**: Twitter OAuth2 utilise PKCE (Proof Key for Code Exchange) pour plus de sécurité, géré automatiquement par Gheop Reader.
+
 ## Méthode alternative: Configuration directe
 
 Si vous ne pouvez pas utiliser les variables d'environnement, éditez directement `/www/reader/oauth_config.php`:
@@ -66,7 +90,7 @@ return [
 
 1. Se déconnecter de Gheop Reader
 2. Actualiser la page d'accueil
-3. Cliquer sur un des boutons OAuth (Google, GitHub, Microsoft)
+3. Cliquer sur un des boutons OAuth (Google, GitHub, X/Twitter)
 4. Autoriser l'application
 5. Vous devriez être automatiquement connecté
 
