@@ -67,10 +67,19 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
             throw new Exception("Cache delete failed: " . $mysqli->error);
         }
 
-        // Update feed counter
-        $updateQuery = "UPDATE reader_flux SET unread_count_user_$userId = (
-            SELECT COUNT(*) FROM reader_unread_cache WHERE id_user = $userId AND id_flux = reader_flux.id
-        ) WHERE id IN (SELECT DISTINCT id_flux FROM reader_item WHERE id IN ($idsString))";
+        // Update feed counter in reader_flux_user_stats
+        // Use incremental decrement instead of full COUNT for performance
+        $updateQuery = "
+            UPDATE reader_flux_user_stats S
+            INNER JOIN (
+                SELECT I.id_flux, COUNT(*) as cnt
+                FROM reader_item I
+                WHERE I.id IN ($idsString)
+                GROUP BY I.id_flux
+            ) AS Counts ON Counts.id_flux = S.id_flux
+            SET S.unread_count = GREATEST(0, S.unread_count - Counts.cnt)
+            WHERE S.id_user = $userId
+        ";
         $query_start = microtime(true);
         $updateResult = $mysqli->query($updateQuery);
         logSlowQuery('read.php - counter update', (microtime(true) - $query_start) * 1000);
@@ -92,18 +101,58 @@ if(isset($_POST['ids']) && !empty($_POST['ids'])) {
     }
 
 } elseif(isset($_POST['id']) && is_numeric($_POST['id'])) {
-    // Single ID mode (backwards compatibility)
+    // Single ID mode - now handles cache/counters manually (no triggers needed)
     $itemId = (int)$_POST['id'];
 
-    $stmt = $mysqli->prepare("INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES (?, ?, NOW())");
-    $stmt->bind_param("ii", $userId, $itemId);
-    $query_start = microtime(true);
-    $stmt->execute();
-    logSlowQuery('read.php - single insert', (microtime(true) - $query_start) * 1000);
-    $stmt->close();
+    // Start transaction
+    $mysqli->begin_transaction();
 
-    header('Content-Type: application/json');
-    echo '{"read":true}';
+    try {
+        // Mark as read
+        $stmt = $mysqli->prepare("INSERT IGNORE INTO reader_user_item (id_user, id_item, date) VALUES (?, ?, NOW())");
+        $stmt->bind_param("ii", $userId, $itemId);
+        $query_start = microtime(true);
+        $stmt->execute();
+        logSlowQuery('read.php - single insert', (microtime(true) - $query_start) * 1000);
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        // Only update cache/counters if the article was actually marked as read (not already read)
+        if ($affected > 0) {
+            // Remove from unread cache
+            $stmt = $mysqli->prepare("DELETE FROM reader_unread_cache WHERE id_user = ? AND id_item = ?");
+            $stmt->bind_param("ii", $userId, $itemId);
+            $query_start = microtime(true);
+            $stmt->execute();
+            logSlowQuery('read.php - single cache delete', (microtime(true) - $query_start) * 1000);
+            $stmt->close();
+
+            // Update feed counter in reader_flux_user_stats
+            // Use incremental decrement instead of full COUNT for performance
+            $stmt = $mysqli->prepare("
+                UPDATE reader_flux_user_stats S
+                INNER JOIN reader_item I ON I.id = ? AND I.id_flux = S.id_flux
+                SET S.unread_count = GREATEST(0, S.unread_count - 1)
+                WHERE S.id_user = ?
+            ");
+            $stmt->bind_param("ii", $itemId, $userId);
+            $query_start = microtime(true);
+            $stmt->execute();
+            logSlowQuery('read.php - single counter update', (microtime(true) - $query_start) * 1000);
+            $stmt->close();
+        }
+
+        $mysqli->commit();
+
+        header('Content-Type: application/json');
+        echo '{"read":true}';
+
+    } catch (Exception $e) {
+        $mysqli->rollback();
+        error_log("Single read failed: " . $e->getMessage());
+        http_response_code(500);
+        echo '{"error":"Database error"}';
+    }
 
 } else {
     http_response_code(400);

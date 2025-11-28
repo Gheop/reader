@@ -21,7 +21,7 @@ var Now;
 var favicon_badge;
 var rtf;
 var syncInterval = null;
-var cacheVersion = 'v1';
+var cacheVersion = 'v2';
 var locallyModifiedArticles = {}; // Track articles manually marked as unread
 var eventSource = null; // SSE connection
 const hasSupportLoading = 'loading' in HTMLImageElement.prototype;
@@ -186,6 +186,9 @@ function clearCache() {
 // ============================================================================
 
 function loadData(feedId, useCache = true) {
+  // Clear display before loading to prevent flash of old content
+  DM.innerHTML = '';
+
   if (useCache) {
     const cached = loadFromCache();
     if (cached && cached.menu && cached.articles) {
@@ -339,8 +342,9 @@ function renderMenu(menuData) {
   }
 
   // Pour les flux modifiés localement, garder les compteurs locaux si plus petits
+  // IMPORTANT: Only keep local counters if there's an ACTIVE batch queue (not based on stale cache)
   for(var i in menuData) {
-    if (m && m[i] && m[i].locallyModified && m[i].n < menuData[i].n) {
+    if (m && m[i] && locallyModified[i] && m[i].n < menuData[i].n) {
       console.log('Keeping local counter for feed', i, '- Local:', m[i].n, 'Server:', menuData[i].n);
       menuData[i].n = m[i].n;
       menuData[i].locallyModified = true; // Garder le flag
@@ -1543,9 +1547,14 @@ function view(i) {
   // but are still unread in the database
   if (i !== 'all') {
     console.log('Loading feed', i, 'from API to get fresh unread status');
+    // Clear main display before loading to avoid flashing old content
+    DM.innerHTML = '';
     loadData(i, false); // Load THIS feed's articles (no cache, direct from API)
     return;
   }
+
+  // Clear main display before rendering to avoid flashing old content
+  DM.innerHTML = '';
 
   // For 'all' view, use cached data if available
   if (d && Object.keys(d).length > 0) {

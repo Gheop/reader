@@ -46,25 +46,24 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 // QUERY 1: MENU DATA (with unread counts)
 // ============================================================================
 
-$counterColumn = $userId == 1 ? 'unread_count_user_1' : 'unread_count_user_2';
-
-// Use prepared statement for menu query
+// Use reader_flux_user_stats table for user-specific unread counts
 $menuSql = "
     SELECT
         F.id,
         F.title,
-        F.$counterColumn as n,
+        S.unread_count as n,
         F.description,
         F.link
     FROM reader_flux F
     INNER JOIN reader_user_flux UF ON UF.id_flux = F.id
+    INNER JOIN reader_flux_user_stats S ON S.id_flux = F.id AND S.id_user = ?
     WHERE UF.id_user = ?
-        AND F.$counterColumn > 0
+        AND S.unread_count > 0
     ORDER BY F.title ASC
 ";
 
 $stmt = $_SESSION['mysqli']->prepare($menuSql);
-$stmt->bind_param("i", $userId);
+$stmt->bind_param("ii", $userId, $userId);
 $query_start = microtime(true);
 $stmt->execute();
 $menuResult = $stmt->get_result();

@@ -20,7 +20,7 @@ $cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-kk21yfhGEVARfHtgXDgQB1Qi8ymBAKd0rGHYuxPvtwzBzCkD3T+4g18dP7x+cNa/',
+    'lib.min.js' => 'sha384-mRmXI+4x5YezqrwzmvTIA3LqZZE6H8Vu9/384XIblpQuNcEIzTs44rsyjSEozGgf',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-EMFIAlyJtjQQqkglhlepz4z6Lsi3Ou3oVpU2JIfZHC4joWL8+07jSPnDjPSqMyx1',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
@@ -39,10 +39,9 @@ function getSRI($file, $sriHashes, $useMinified) {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<link rel="preload" href="<?php echo $jsFile . $cacheBuster; ?>" as="script">
-<link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style">
-<link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style">
-<link rel="preload" href="fontawesome/css/all.min.css" as="style">
+<link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?>>
+<link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?>>
+<link rel="preload" href="fontawesome/css/all.min.css" as="style"<?php echo getSRI('fontawesome/css/all.min.css', $sriHashes, $useMinified); ?>>
 <link rel="stylesheet" href="fontawesome/css/all.min.css"<?php echo getSRI('fontawesome/css/all.min.css', $sriHashes, $useMinified); ?>>
 <link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?> />
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?> />

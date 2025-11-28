@@ -330,12 +330,31 @@ for($j = 0; $j < $i; $j++) {
 
         // Clean link for database storage
         $link = str_replace(array(')', '(', '"', '\\'), array('', '', '', '\\\\'), $link);
-        $link_without_protocol = preg_replace('/^https?/', '', $link);
 
-        // Check if article already exists
-        $stmt = $mysqli->prepare("SELECT id FROM reader_item WHERE id_flux = ? AND link LIKE ?");
+        // Generate synthetic GUID if none provided (for feeds without proper GUIDs)
+        // This prevents re-importing old articles after archiving
+        // NOTE: Don't use title in hash (YouTube A/B testing changes titles)
+        if (!$guid || trim($guid) === '') {
+            $guid = 'synthetic-' . md5($feedIds[$j] . '|' . $link);
+        }
+
+        // Check if article already exists in reader_item, reader_item_archive, OR was already read
+        // Check by GUID OR by link (to handle GUID changes)
+        $link_without_protocol = preg_replace('/^https?:\/\//', '', $link);
+        $stmt = $mysqli->prepare("
+            SELECT 1 FROM reader_item
+            WHERE id_flux = ? AND (guid = ? OR link LIKE ?)
+            UNION
+            SELECT 1 FROM reader_item_archive
+            WHERE id_flux = ? AND (guid = ? OR link LIKE ?)
+            UNION
+            SELECT 1 FROM reader_user_item UI
+            INNER JOIN reader_item I ON I.id = UI.id_item
+            WHERE I.id_flux = ? AND I.link LIKE ?
+            LIMIT 1
+        ");
         $searchPattern = '%' . $link_without_protocol . '%';
-        $stmt->bind_param("is", $feedIds[$j], $searchPattern);
+        $stmt->bind_param("isssssss", $feedIds[$j], $guid, $searchPattern, $feedIds[$j], $guid, $searchPattern, $feedIds[$j], $searchPattern);
         $query_start = microtime(true);
         $stmt->execute();
         $existingResult = $stmt->get_result();
@@ -368,6 +387,12 @@ for($j = 0; $j < $i; $j++) {
             $iDate = $date->getTimestamp();
             if(!isset($iDate) || $iDate > time()) {
                 $iDate = time();
+            }
+
+            // Skip articles older than 30 days (avoid importing ancient articles from feeds)
+            $thirtyDaysAgo = time() - (30 * 24 * 60 * 60);
+            if($iDate < $thirtyDaysAgo) {
+                continue; // Skip old article
             }
 
             // Extract content
@@ -477,6 +502,30 @@ for($j = 0; $j < $i; $j++) {
             $query_start = microtime(true);
             $stmt->execute();
             logSlowQuery('up.php - insert article', (microtime(true) - $query_start) * 1000, 50);
+
+            // Manual cache/counter management (triggers disabled)
+            $newArticleId = $mysqli->insert_id;
+
+            // Add to reader_unread_cache for all users subscribed to this feed
+            $cacheStmt = $mysqli->prepare("
+                INSERT INTO reader_unread_cache (id_user, id_flux, id_item, pubdate)
+                SELECT UF.id_user, ?, ?, ?
+                FROM reader_user_flux UF
+                WHERE UF.id_flux = ?
+            ");
+            $cacheStmt->bind_param("iisi", $feedIds[$j], $newArticleId, $pubdate, $feedIds[$j]);
+            $cacheStmt->execute();
+
+            // Update counters in reader_flux_user_stats
+            $counterStmt = $mysqli->prepare("
+                INSERT INTO reader_flux_user_stats (id_user, id_flux, unread_count)
+                SELECT UF.id_user, ?, 1
+                FROM reader_user_flux UF
+                WHERE UF.id_flux = ?
+                ON DUPLICATE KEY UPDATE unread_count = unread_count + 1
+            ");
+            $counterStmt->bind_param("ii", $feedIds[$j], $feedIds[$j]);
+            $counterStmt->execute();
         }
 
         echo ".";
