@@ -50,3 +50,4 @@ package-lock.json
 # Configuration with sensitive data
 conf.php
 oauth_config.php
+reset_password.php
