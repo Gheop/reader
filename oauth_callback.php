@@ -185,8 +185,6 @@ if ($row = $result->fetch_assoc()) {
             'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
         ]);
 
-        // Write session data before redirect
-        session_write_close();
 
         // Redirect to reader
         header('Location: /');
@@ -242,8 +240,6 @@ if ($row = $result->fetch_assoc()) {
             'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
         ]);
 
-        // Write session data before redirect
-        session_write_close();
 
         // Redirect to reader
         header('Location: /');

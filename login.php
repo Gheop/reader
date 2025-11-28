@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['pseudo'] = $row['pseudo'];
                 $_SESSION['user_id'] = $row['id'];
 
-                // Set persistent cookie BEFORE closing session
+                // Set persistent cookie
                 setcookie("session", $row['pseudo'] . "|" . $row['pwd'], [
                     'expires' => time() + 26000000,
                     'path' => '/',
@@ -71,10 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'samesite' => 'Lax'
                 ]);
 
-                // Write session data before redirect
-                session_write_close();
-
-                // Redirect to reader
+                // Redirect to reader (session will be written automatically)
                 header('Location: /');
                 exit;
             } else {

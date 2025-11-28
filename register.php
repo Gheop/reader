@@ -61,8 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'samesite' => 'Lax'
                 ]);
 
-                // Write session data before redirect
-                session_write_close();
 
                 // Redirect to reader
                 header('Location: /');
