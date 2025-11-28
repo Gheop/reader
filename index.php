@@ -5,7 +5,39 @@ header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: SAMEORIGIN");
 header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
-header("Content-Security-Policy: img-src 'self' data: https:; frame-ancestors 'self'");
+
+// Content Security Policy - comprehensive protection
+$csp = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for dynamic theme switching
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests"
+];
+header("Content-Security-Policy: " . implode('; ', $csp));
+
+// Permissions Policy - disable unused browser features
+$permissions = [
+    "geolocation=()",
+    "microphone=()",
+    "camera=()",
+    "payment=()",
+    "usb=()",
+    "magnetometer=()",
+    "gyroscope=()",
+    "accelerometer=()",
+    "ambient-light-sensor=()",
+    "autoplay=()",
+    "encrypted-media=()",
+    "picture-in-picture=()"
+];
+header("Permissions-Policy: " . implode(', ', $permissions));
+
 header('Content-Type: text/html; charset=utf-8');
 
 include('/www/conf.php');
