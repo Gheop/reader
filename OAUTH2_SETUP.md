@@ -1,0 +1,103 @@
+# Configuration OAuth2
+
+Ce document explique comment configurer l'authentification OAuth2 pour Gheop Reader.
+
+## Vue d'ensemble
+
+Gheop Reader supporte l'authentification via:
+- **Google** (recommandé)
+- **GitHub**
+- **Microsoft** (Office 365/Outlook)
+
+L'authentification traditionnelle (inscription/connexion Gheop) reste totalement fonctionnelle.
+
+## Configuration des providers
+
+### Google OAuth2
+
+1. Aller sur [Google Cloud Console](https://console.cloud.google.com/)
+2. Créer un nouveau projet ou en sélectionner un existant
+3. Activer l'API "Google+ API"
+4. Aller dans "Identifiants" > "Créer des identifiants" > "ID client OAuth 2.0"
+5. Type d'application: **Application Web**
+6. URI de redirection autorisées:
+   ```
+   https://reader.gheop.com/oauth_callback.php?provider=google
+   ```
+7. Copier le **Client ID** et le **Client Secret**
+8. Définir les variables d'environnement:
+   ```bash
+   export GOOGLE_CLIENT_ID="votre-client-id.apps.googleusercontent.com"
+   export GOOGLE_CLIENT_SECRET="votre-client-secret"
+   ```
+
+### GitHub OAuth2
+
+1. Aller sur [GitHub Developer Settings](https://github.com/settings/developers)
+2. Cliquer sur "New OAuth App"
+3. Remplir:
+   - **Application name**: Gheop Reader
+   - **Homepage URL**: https://reader.gheop.com
+   - **Authorization callback URL**: `https://reader.gheop.com/oauth_callback.php?provider=github`
+4. Copier le **Client ID** et générer un **Client Secret**
+5. Définir les variables d'environnement:
+   ```bash
+   export GITHUB_CLIENT_ID="votre-client-id"
+   export GITHUB_CLIENT_SECRET="votre-client-secret"
+   ```
+
+### Microsoft OAuth2
+
+1. Aller sur [Azure Portal](https://portal.azure.com/)
+2. Naviguer vers "Azure Active Directory" > "App registrations"
+3. Cliquer sur "New registration"
+4. Remplir:
+   - **Name**: Gheop Reader
+   - **Supported account types**: Accounts in any organizational directory and personal Microsoft accounts
+   - **Redirect URI**: Web - `https://reader.gheop.com/oauth_callback.php?provider=microsoft`
+5. Copier l'**Application (client) ID**
+6. Aller dans "Certificates & secrets" > "New client secret"
+7. Copier le **Client Secret** (value)
+8. Définir les variables d'environnement:
+   ```bash
+   export MICROSOFT_CLIENT_ID="votre-application-id"
+   export MICROSOFT_CLIENT_SECRET="votre-client-secret"
+   ```
+
+## Méthode alternative: Configuration directe
+
+Si vous ne pouvez pas utiliser les variables d'environnement, éditez directement `/www/reader/oauth_config.php`:
+
+```php
+return [
+    'google' => [
+        'client_id' => 'votre-client-id.apps.googleusercontent.com',
+        'client_secret' => 'votre-client-secret',
+        // ...
+    ],
+    // ...
+];
+```
+
+**⚠️ Attention**: Ne committez jamais les secrets dans Git!
+
+## Test
+
+1. Se déconnecter de Gheop Reader
+2. Actualiser la page d'accueil
+3. Cliquer sur un des boutons OAuth (Google, GitHub, Microsoft)
+4. Autoriser l'application
+5. Vous devriez être automatiquement connecté
+
+## Fonctionnement
+
+1. **Première connexion**: Un nouveau compte utilisateur est créé automatiquement
+2. **Connexions suivantes**: Le système reconnaît votre compte OAuth et vous connecte
+3. **Partage entre domaines**: La session est partagée sur tous les sous-domaines `.gheop.com`
+
+## Sécurité
+
+- Les mots de passe OAuth ne sont jamais stockés
+- Seuls l'ID utilisateur du provider et l'email sont conservés
+- Protection CSRF avec tokens d'état
+- Communication chiffrée (HTTPS uniquement)

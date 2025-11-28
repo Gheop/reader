@@ -173,7 +173,29 @@ echo '<nav>
 <footer>&nbsp;</footer>';
 }
 else {
-  echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2><fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
+  echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2>';
+
+  // OAuth2 Login Buttons
+  echo '<div style="text-align: center; margin: 30px 0;">
+    <p style="margin-bottom: 20px; font-size: 1.1em;">Connexion rapide avec :</p>
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <a href="oauth_login.php?provider=google" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"/><path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"/><path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"/><path fill="none" d="M0 0h18v18H0z"/></svg>
+        Google
+      </a>
+      <a href="oauth_login.php?provider=github" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #24292e; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.03 0 0 4.03 0 9c0 3.98 2.58 7.35 6.16 8.54.45.08.62-.2.62-.43v-1.5c-2.51.55-3.04-1.21-3.04-1.21-.41-1.04-1-1.32-1-1.32-.82-.56.06-.55.06-.55.9.06 1.38.93 1.38.93.8 1.38 2.1.98 2.62.75.08-.58.31-.98.57-1.2-2-.23-4.1-1-4.1-4.45 0-.98.35-1.79.92-2.42-.09-.23-.4-1.14.09-2.38 0 0 .75-.24 2.46.92a8.5 8.5 0 0 1 4.48 0c1.71-1.16 2.46-.92 2.46-.92.49 1.24.18 2.15.09 2.38.57.63.92 1.44.92 2.42 0 3.46-2.1 4.22-4.1 4.45.32.28.61.83.61 1.67v2.48c0 .24.17.52.62.43C15.42 16.35 18 12.98 18 9c0-4.97-4.03-9-9-9z"/></svg>
+        GitHub
+      </a>
+      <a href="oauth_login.php?provider=microsoft" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #00a4ef; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path fill="#f25022" d="M0 0h8.6v8.6H0z"/><path fill="#00a4ef" d="M9.4 0H18v8.6H9.4z"/><path fill="#7fba00" d="M0 9.4h8.6V18H0z"/><path fill="#ffb900" d="M9.4 9.4H18V18H9.4z"/></svg>
+        Microsoft
+      </a>
+    </div>
+    <p style="margin: 25px 0 15px; color: #666;">ou</p>
+  </div>';
+
+  echo '<fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
 }
 ?>
 
