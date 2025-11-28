@@ -190,67 +190,60 @@ if ($row = $result->fetch_assoc()) {
         exit;
     }
 } else {
-    // New OAuth account - check if email already exists
-    if ($email) {
-        // For now, create a new user with a generated pseudo
-        // In the future, you might want to ask the user or link to existing account
+    // New OAuth account - create a new user
+    // Generate pseudo from name (or username for Twitter)
+    $pseudo = strtolower(str_replace([' ', '@', '.', '-'], ['_', '_', '_', '_'], $name ?: 'user'));
+    $pseudo = substr($pseudo, 0, 20); // Limit to 20 chars
 
-        // Generate pseudo from email or name
-        $pseudo = strtolower(str_replace([' ', '@', '.'], ['_', '_', '_'], $name ?: $email));
-        $pseudo = substr($pseudo, 0, 20); // Limit to 20 chars
+    // Check if pseudo exists, add number if needed
+    $original_pseudo = $pseudo;
+    $counter = 1;
+    while (true) {
+        $stmt = $mysqli->prepare("SELECT id FROM users WHERE pseudo = ?");
+        $stmt->bind_param("s", $pseudo);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        // Check if pseudo exists, add number if needed
-        $original_pseudo = $pseudo;
-        $counter = 1;
-        while (true) {
-            $stmt = $mysqli->prepare("SELECT id FROM users WHERE pseudo = ?");
-            $stmt->bind_param("s", $pseudo);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows == 0) {
-                break; // Pseudo is available
-            }
-
-            $pseudo = $original_pseudo . $counter;
-            $counter++;
+        if ($result->num_rows == 0) {
+            break; // Pseudo is available
         }
 
-        // Create new user
-        $pwd_hash = bin2hex(random_bytes(20)); // Random password hash
-        $stmt = $mysqli->prepare("INSERT INTO users (pseudo, pwd, mail, date_create) VALUES (?, ?, '', NOW())");
-        $stmt->bind_param("ss", $pseudo, $pwd_hash);
+        $pseudo = $original_pseudo . $counter;
+        $counter++;
+    }
 
-        if ($stmt->execute()) {
-            $user_id = $mysqli->insert_id;
+    // Create new user
+    $pwd_hash = bin2hex(random_bytes(20)); // Random password hash
+    $stmt = $mysqli->prepare("INSERT INTO users (pseudo, pwd, mail, date_create) VALUES (?, ?, '', NOW())");
+    $stmt->bind_param("ss", $pseudo, $pwd_hash);
 
-            // Create OAuth link
-            $stmt = $mysqli->prepare("INSERT INTO user_oauth (user_id, provider, provider_user_id, email, name) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("issss", $user_id, $provider, $provider_user_id, $email, $name);
-            $stmt->execute();
+    if ($stmt->execute()) {
+        $user_id = $mysqli->insert_id;
 
-            // Set session
-            $_SESSION['pseudo'] = $pseudo;
-            $_SESSION['user_id'] = $user_id;
+        // Create OAuth link
+        $stmt = $mysqli->prepare("INSERT INTO user_oauth (user_id, provider, provider_user_id, email, name) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("issss", $user_id, $provider, $provider_user_id, $email, $name);
+        $stmt->execute();
 
-            // Set persistent cookie with proper SameSite attribute
-            setcookie("session", $pseudo . "|" . $pwd_hash, [
-                'expires' => time() + 26000000,
-                'path' => '/',
-                'domain' => '.gheop.com',
-                'secure' => true,
-                'httponly' => true,
-                'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
-            ]);
+        // Set session
+        $_SESSION['pseudo'] = $pseudo;
+        $_SESSION['user_id'] = $user_id;
 
-            // Redirect to reader
-            header('Location: /');
-            exit;
-        } else {
-            die('Failed to create user account');
-        }
+        // Set persistent cookie with proper SameSite attribute
+        setcookie("session", $pseudo . "|" . $pwd_hash, [
+            'expires' => time() + 26000000,
+            'path' => '/',
+            'domain' => '.gheop.com',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax'  // Lax allows cookie after OAuth redirect
+        ]);
+
+        // Redirect to reader
+        header('Location: /');
+        exit;
     } else {
-        die('No email provided by OAuth provider');
+        die('Failed to create user account');
     }
 }
 

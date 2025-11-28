@@ -46,3 +46,7 @@ package-lock.json
 
 # Logs
 *.log
+
+# Configuration with sensitive data
+conf.php
+oauth_config.php
