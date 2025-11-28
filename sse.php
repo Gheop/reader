@@ -35,7 +35,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 $userId = (int)$_SESSION['user_id'];
-$mysqli = $_SESSION['mysqli'];
+global $mysqli;
 
 // IMPORTANT: Close session writing to prevent blocking other requests
 // SSE keeps connection open, but we don't need to write to session

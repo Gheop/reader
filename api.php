@@ -25,6 +25,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 $userId = (int)$_SESSION['user_id'];
+global $mysqli;
 
 // ============================================================================
 // PARAMETERS
@@ -62,7 +63,7 @@ $menuSql = "
     ORDER BY F.title ASC
 ";
 
-$stmt = $_SESSION['mysqli']->prepare($menuSql);
+$stmt = $mysqli->prepare($menuSql);
 $stmt->bind_param("ii", $userId, $userId);
 $query_start = microtime(true);
 $stmt->execute();
@@ -70,7 +71,7 @@ $menuResult = $stmt->get_result();
 logSlowQuery('api.php - menu query', (microtime(true) - $query_start) * 1000);
 
 if (!$menuResult) {
-    error_log('Menu query failed: ' . $_SESSION['mysqli']->error);
+    error_log('Menu query failed: ' . $mysqli->error);
     http_response_code(500);
     echo '{"error":"Database error"}';
     exit;
@@ -118,7 +119,7 @@ if ($feedId !== null) {
         LIMIT ?
     ";
 
-    $stmt = $_SESSION['mysqli']->prepare($articlesSql);
+    $stmt = $mysqli->prepare($articlesSql);
     $stmt->bind_param("iii", $userId, $feedId, $limit);
 } else {
     $articlesSql = "
@@ -141,7 +142,7 @@ if ($feedId !== null) {
         LIMIT ?
     ";
 
-    $stmt = $_SESSION['mysqli']->prepare($articlesSql);
+    $stmt = $mysqli->prepare($articlesSql);
     $stmt->bind_param("ii", $userId, $limit);
 }
 
@@ -151,7 +152,7 @@ $articlesResult = $stmt->get_result();
 logSlowQuery('api.php - articles query', (microtime(true) - $query_start) * 1000);
 
 if (!$articlesResult) {
-    error_log('Articles query failed: ' . $_SESSION['mysqli']->error);
+    error_log('Articles query failed: ' . $mysqli->error);
     http_response_code(500);
     echo '{"error":"Database error"}';
     exit;

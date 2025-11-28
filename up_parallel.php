@@ -33,8 +33,8 @@ if (php_sapi_name() === 'cli') {
         session_start();
     }
     $_SESSION['user_id'] = 1;
-    if (!isset($_SESSION['mysqli'])) {
-        $_SESSION['mysqli'] = $mysqli;
+    if (!isset($mysqli)) {
+        $mysqli = $mysqli;
     }
 }
 
@@ -45,7 +45,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 ini_set('max_execution_time', '900'); // 15 minutes max
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Release session lock
 session_write_close();

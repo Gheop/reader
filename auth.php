@@ -24,7 +24,14 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['session'])) {
                 $_SESSION['user_id'] = $d['id'];
 
                 // Refresh cookie to extend expiration (300 days)
-                setrawcookie("session", $d['pseudo'] . "|" . $d['pwd'], time() + 26000000, '/', '.gheop.com');
+                setcookie("session", $d['pseudo'] . "|" . $d['pwd'], [
+                    'expires' => time() + 26000000,
+                    'path' => '/',
+                    'domain' => '',
+                    'secure' => true,
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
             }
         }
 

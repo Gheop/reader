@@ -5,7 +5,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 $result = $mysqli->query('SHOW TRIGGERS');
 $triggers = [];

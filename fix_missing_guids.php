@@ -7,7 +7,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              FIX MISSING GUIDS                                 ║\n";

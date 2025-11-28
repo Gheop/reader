@@ -41,10 +41,10 @@ $sql = "
     ORDER BY F.title ASC
 ";
 
-$r = $_SESSION['mysqli']->query($sql);
+$r = $mysqli->query($sql);
 
 if (!$r) {
-    die($_SESSION['mysqli']->error);
+    die($mysqli->error);
 }
 
 // Build JSON with simple string concatenation (fastest)

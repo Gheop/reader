@@ -6,7 +6,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              CLEANUP DUPLICATE ARTICLES                        ║\n";

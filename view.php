@@ -56,10 +56,10 @@ $sql = "
     LIMIT $limit
 ";
 
-$result = $_SESSION['mysqli']->query($sql);
+$result = $mysqli->query($sql);
 
 if (!$result) {
-    error_log('View query failed: ' . $_SESSION['mysqli']->error);
+    error_log('View query failed: ' . $mysqli->error);
     echo '{}';
     exit;
 }

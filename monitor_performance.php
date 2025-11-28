@@ -6,7 +6,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              DATABASE PERFORMANCE MONITOR                      ║\n";

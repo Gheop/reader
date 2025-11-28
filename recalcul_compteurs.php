@@ -12,11 +12,11 @@ echo "=== Recalcul des compteurs d'articles non lus ===\n\n";
 
 include(__DIR__ . '/conf.php');
 
-if (!isset($_SESSION['mysqli'])) {
+if (!isset($mysqli)) {
     die("Erreur: Connexion MySQL non disponible\n");
 }
 
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Désactiver l'autocommit pour faire les opérations en transaction
 $mysqli->autocommit(false);

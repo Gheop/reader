@@ -19,7 +19,7 @@ if (session_status() != PHP_SESSION_ACTIVE) {
         'domain' => '',
         'secure' => true,      // Only send over HTTPS
         'httponly' => true,    // Prevent JavaScript access (XSS protection)
-        'samesite' => 'Strict' // CSRF protection
+        'samesite' => 'Lax'    // Allow cookies on redirects (OAuth, login)
     ]);
 
     session_start();

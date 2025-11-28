@@ -6,7 +6,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Configuration
 $userId = 1; // SiB

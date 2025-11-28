@@ -7,7 +7,7 @@
  */
 
 include(__DIR__ . '/conf.php');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Configuration
 $archiveDays = 30; // Archive articles older than 30 days
