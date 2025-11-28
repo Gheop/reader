@@ -5,9 +5,8 @@ Ce document explique comment configurer l'authentification OAuth2 pour Gheop Rea
 ## Vue d'ensemble
 
 Gheop Reader supporte l'authentification via:
-- **Google** (recommandé)
+- **Google**
 - **GitHub**
-- **Microsoft** (Office 365/Outlook)
 
 L'authentification traditionnelle (inscription/connexion Gheop) reste totalement fonctionnelle.
 
@@ -44,24 +43,6 @@ L'authentification traditionnelle (inscription/connexion Gheop) reste totalement
    ```bash
    export GITHUB_CLIENT_ID="votre-client-id"
    export GITHUB_CLIENT_SECRET="votre-client-secret"
-   ```
-
-### Microsoft OAuth2
-
-1. Aller sur [Azure Portal](https://portal.azure.com/)
-2. Naviguer vers "Azure Active Directory" > "App registrations"
-3. Cliquer sur "New registration"
-4. Remplir:
-   - **Name**: Gheop Reader
-   - **Supported account types**: Accounts in any organizational directory and personal Microsoft accounts
-   - **Redirect URI**: Web - `https://reader.gheop.com/oauth_callback.php?provider=microsoft`
-5. Copier l'**Application (client) ID**
-6. Aller dans "Certificates & secrets" > "New client secret"
-7. Copier le **Client Secret** (value)
-8. Définir les variables d'environnement:
-   ```bash
-   export MICROSOFT_CLIENT_ID="votre-application-id"
-   export MICROSOFT_CLIENT_SECRET="votre-client-secret"
    ```
 
 ## Méthode alternative: Configuration directe

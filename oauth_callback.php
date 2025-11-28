@@ -124,11 +124,6 @@ switch ($provider) {
             }
         }
         break;
-    case 'microsoft':
-        $provider_user_id = $userinfo['id'] ?? '';
-        $email = $userinfo['mail'] ?? $userinfo['userPrincipalName'] ?? '';
-        $name = $userinfo['displayName'] ?? '';
-        break;
 }
 
 if (!$provider_user_id) {
