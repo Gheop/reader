@@ -41,7 +41,7 @@ header("Permissions-Policy: " . implode(', ', $permissions));
 
 header('Content-Type: text/html; charset=utf-8');
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include(__DIR__ . '/auth.php');
 
 // Use minified assets in production, original files in debug mode

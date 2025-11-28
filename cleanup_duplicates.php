@@ -5,7 +5,7 @@
  * More efficient approach: find IDs first, then delete in batches
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

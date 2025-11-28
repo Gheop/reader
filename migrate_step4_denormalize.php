@@ -5,7 +5,7 @@
  * Add title, author, description, link to eliminate JOIN with reader_item
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "\n";

@@ -8,7 +8,7 @@
  * Run this monthly or after major data changes
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

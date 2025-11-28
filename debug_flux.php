@@ -4,7 +4,7 @@
  * Check what's different between counter and actual articles
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include(__DIR__ . '/auth.php');
 
 $fluxId = isset($argv[1]) ? (int)$argv[1] : 976;

@@ -5,7 +5,7 @@
  * Create reader_flux_user_stats table and migrate data
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "\n";

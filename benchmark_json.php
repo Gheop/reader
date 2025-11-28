@@ -5,7 +5,7 @@
  * Tests performance with real data from the database
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 $userId = 2;
 $limit = 200;

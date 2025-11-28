@@ -5,7 +5,7 @@
  */
 
 $start_time = microtime(true);
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     http_response_code(401);

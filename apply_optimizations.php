@@ -4,7 +4,7 @@
  * Apply Database Optimizations
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "\n";

@@ -4,7 +4,7 @@
  * This script should be run on startup or periodically
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 echo "Rebuilding reader_unread_cache...\n";
 

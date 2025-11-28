@@ -10,7 +10,7 @@
 
 echo "=== Recalcul des compteurs d'articles non lus ===\n\n";
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 if (!isset($_SESSION['mysqli'])) {
     die("Erreur: Connexion MySQL non disponible\n");

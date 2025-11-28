@@ -4,7 +4,7 @@
  * Fetches and updates RSS feeds using curl multi-handle for parallel requests
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include('clean_text.php');
 
 // Query performance monitoring helper

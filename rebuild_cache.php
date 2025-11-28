@@ -5,7 +5,7 @@
  * For all articles that are not marked as read
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

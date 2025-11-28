@@ -5,7 +5,7 @@
  * Run this periodically to fix any counter drift
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

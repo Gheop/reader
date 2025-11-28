@@ -6,7 +6,7 @@
 
 header('Content-Type: text/html; charset=utf-8');
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include(__DIR__ . '/auth.php');
 
 // Get shared data

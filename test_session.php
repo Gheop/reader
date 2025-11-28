@@ -1,5 +1,5 @@
 <?php
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 header('Content-Type: text/plain');
 

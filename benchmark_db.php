@@ -5,7 +5,7 @@
  * Tests the main queries used by the application
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 // Configuration

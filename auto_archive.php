@@ -6,7 +6,7 @@
  * Run this periodically (e.g., weekly via cron)
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 // Configuration

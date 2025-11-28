@@ -4,7 +4,7 @@
  * Analyze all triggers to understand their logic
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 $mysqli = $_SESSION['mysqli'];
 
 $result = $mysqli->query('SHOW TRIGGERS');
