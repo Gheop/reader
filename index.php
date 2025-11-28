@@ -10,6 +10,7 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 $csp = [
     "default-src 'self'",
     "script-src 'self'",
+    "script-src-attr 'unsafe-inline'", // Allow inline event handlers (onclick, etc.)
     "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for dynamic theme switching
     "img-src 'self' data: https:",
     "font-src 'self' data:",
