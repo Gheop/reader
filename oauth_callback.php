@@ -34,15 +34,18 @@ $code = $_GET['code'];
 // Exchange authorization code for access token
 $token_data = [
     'code' => $code,
-    'client_id' => $config['client_id'],
-    'redirect_uri' => $config['redirect_uri'],
-    'grant_type' => 'authorization_code'
+    'grant_type' => 'authorization_code',
+    'redirect_uri' => $config['redirect_uri']
 ];
 
-// For PKCE (Twitter), use code_verifier instead of client_secret
+// For PKCE (Twitter), use code_verifier; credentials go in Basic Auth header
 if (!empty($config['use_pkce']) && isset($_SESSION['oauth_code_verifier'])) {
     $token_data['code_verifier'] = $_SESSION['oauth_code_verifier'];
+    // Twitter still needs client_id in body even with Basic Auth
+    $token_data['client_id'] = $config['client_id'];
 } else {
+    // For non-PKCE providers, include credentials in body
+    $token_data['client_id'] = $config['client_id'];
     $token_data['client_secret'] = $config['client_secret'];
 }
 
@@ -50,10 +53,18 @@ $ch = curl_init($config['token_url']);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($token_data));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
+
+// Twitter requires Basic Auth with client credentials in header
+$headers = [
     'Accept: application/json',
     'User-Agent: Gheop-Reader/1.0'
-]);
+];
+if (!empty($config['use_pkce'])) {
+    // Use HTTP Basic Auth for PKCE providers (Twitter)
+    curl_setopt($ch, CURLOPT_USERPWD, $config['client_id'] . ':' . $config['client_secret']);
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+}
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $token_response = curl_exec($ch);
 curl_close($ch);
