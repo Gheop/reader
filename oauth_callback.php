@@ -95,6 +95,34 @@ switch ($provider) {
         $provider_user_id = $userinfo['id'] ?? '';
         $email = $userinfo['email'] ?? '';
         $name = $userinfo['name'] ?? $userinfo['login'] ?? '';
+
+        // If email is not public, fetch from /user/emails endpoint
+        if (empty($email)) {
+            $ch = curl_init('https://api.github.com/user/emails');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $access_token,
+                'Accept: application/json',
+                'User-Agent: Gheop-Reader/1.0'
+            ]);
+            $emails_response = curl_exec($ch);
+            curl_close($ch);
+
+            $emails = json_decode($emails_response, true);
+            if (is_array($emails)) {
+                // Find primary email
+                foreach ($emails as $email_obj) {
+                    if (isset($email_obj['primary']) && $email_obj['primary']) {
+                        $email = $email_obj['email'];
+                        break;
+                    }
+                }
+                // If no primary found, use first email
+                if (empty($email) && !empty($emails[0]['email'])) {
+                    $email = $emails[0]['email'];
+                }
+            }
+        }
         break;
     case 'microsoft':
         $provider_user_id = $userinfo['id'] ?? '';
