@@ -6,7 +6,7 @@
  * Run this periodically (e.g., weekly via cron)
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 // Configuration

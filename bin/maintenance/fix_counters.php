@@ -5,7 +5,7 @@
  * - Recalculate denormalized counters in reader_flux
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 
 echo "=== Fixing Reader Counters ===\n\n";
 

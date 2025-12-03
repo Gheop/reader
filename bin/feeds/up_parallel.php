@@ -11,8 +11,8 @@
  * - Error resilience: continues on failures
  */
 
-include(__DIR__ . '/conf.php');
-include('clean_text.php');
+include(__DIR__ . '/../../config/conf.php');
+include(__DIR__ . '/../../clean_text.php');
 
 // Query performance monitoring helper
 function logSlowQuery($queryName, $duration, $threshold = 100) {

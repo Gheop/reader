@@ -4,7 +4,7 @@
  * Allows new users to create an account
  */
 
-require_once(__DIR__ . '/conf.php');
+require_once(__DIR__ . '/config/conf.php');
 
 $error = '';
 $success = '';

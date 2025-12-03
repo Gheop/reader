@@ -5,7 +5,7 @@
  * For all articles that are not marked as read
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

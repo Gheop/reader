@@ -3,7 +3,7 @@
  * Mark All Feed Articles as Read
  * Security: Uses prepared statements and efficient single-query approach
  */
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/config/conf.php');
 
 // Security: Validate authentication and input
 if(!isset($_POST['f']) || !is_numeric($_POST['f']) || !isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {

@@ -48,6 +48,6 @@ package-lock.json
 *.log
 
 # Configuration with sensitive data
-conf.php
-oauth_config.php
+config/conf.php
+config/oauth_config.php
 reset_password.php

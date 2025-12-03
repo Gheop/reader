@@ -42,20 +42,20 @@ header("Permissions-Policy: " . implode(', ', $permissions));
 
 header('Content-Type: text/html; charset=utf-8');
 
-include(__DIR__ . '/conf.php');
-include(__DIR__ . '/auth.php');
+include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/config/auth.php');
 
 // Use minified assets in production, original files in debug mode
 $useMinified = !isset($_GET['debug']);
-$jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
+$jsFile = $useMinified ? 'assets/js/lib.min.js' : 'assets/js/lib.js';
 $cssExt = $useMinified ? '.min.css' : '.css';
 // Cache busting - use file modification time to bust cache on changes
 $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-g1F3AjqVkumpjErI8CdsciDR/eugJVdvYLklD8BbNsJadwqt7YS1cmLbjAfggDPC',
-    'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
+    'assets/js/lib.min.js' => 'sha384-g1F3AjqVkumpjErI8CdsciDR/eugJVdvYLklD8BbNsJadwqt7YS1cmLbjAfggDPC',
+    'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-uF1+R8I6nmJm3i8R7xu5eKO35EyKguvFgITVFoq16l+JIJzHJSgbxkWCes1dUZyW',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
@@ -80,12 +80,12 @@ function getSRI($file, $sriHashes, $useMinified) {
 <link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?> />
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?> />
 <title>Gheop Reader</title>
-<script src="background-sync.js" defer></script>
-<script src="favico.min.js"<?php echo getSRI('favico.min.js', $sriHashes, $useMinified); ?> defer></script>
+<script src="assets/js/background-sync.js" defer></script>
+<script src="assets/js/favico.min.js"<?php echo getSRI('assets/js/favico.min.js', $sriHashes, $useMinified); ?> defer></script>
 <script src="<?php echo $jsFile . $cacheBuster; ?>"<?php echo getSRI($jsFile, $sriHashes, $useMinified); ?> type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <link id="favico" href="favicon.png" rel="shortcut icon" type="image/png" />
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/assets/images/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />

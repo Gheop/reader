@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 
  // echo "<b>Efface des éléments plus vieux que trois mois :<br />";
  // $stmt = $mysqli->prepare("delete from reader_item where pubdate < (select now() - interval  3 month);") or die($mysqli->error);

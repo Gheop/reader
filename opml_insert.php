@@ -3,7 +3,7 @@
  * OPML Feed Import
  * Security: Uses prepared statements, authentication, and XSS protection
  */
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/config/conf.php');
 include('clean_text.php');
 
 // Security: Validate authentication

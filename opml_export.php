@@ -3,7 +3,7 @@ require_once __DIR__ . '/src/OPMLGenerator.php';
 
 use Gheop\Reader\OPMLGenerator;
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/config/conf.php');
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 
 // Récupérer tous les flux de l'utilisateur

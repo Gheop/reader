@@ -8,7 +8,7 @@
  * Run this monthly or after major data changes
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

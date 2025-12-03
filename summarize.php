@@ -1,7 +1,7 @@
 <?php
 ini_set('max_execution_time', '500');
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/config/conf.php');
 
 
 $logFile = __DIR__ . '/log_article.txt';

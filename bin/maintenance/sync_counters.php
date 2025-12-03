@@ -5,7 +5,7 @@
  * Run this periodically to fix any counter drift
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

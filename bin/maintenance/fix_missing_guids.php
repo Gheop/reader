@@ -6,7 +6,7 @@
  * This prevents re-importing old articles after archiving
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

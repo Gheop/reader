@@ -5,7 +5,7 @@
  * More efficient approach: find IDs first, then delete in batches
  */
 
-include(__DIR__ . '/conf.php');
+include(__DIR__ . '/../config/conf.php');
 $mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";

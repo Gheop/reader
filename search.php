@@ -1,5 +1,5 @@
 <?php
-include('conf.php');
+include(__DIR__ . '/config/conf.php');
 if(!isset($_SESSION['user_id'])) exit;
 if(isset($_GET['s'])) $_POST['s'] = $_GET['s'];
 if(!isset($_POST['s'])) exit;

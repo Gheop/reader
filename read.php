@@ -4,8 +4,8 @@
  * Supports batch operations via 'ids' parameter (comma-separated)
  * Security: Uses prepared statements to prevent SQL injection
  */
-include(__DIR__ . '/conf.php');
-include(__DIR__ . '/auth.php');
+include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/config/auth.php');
 
 // Query performance monitoring helper
 function logSlowQuery($queryName, $duration, $threshold = 100) {

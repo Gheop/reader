@@ -5,7 +5,7 @@
  */
 
 // Load OAuth configuration
-$oauth_config = include(__DIR__ . '/oauth_config.php');
+$oauth_config = include(__DIR__ . '/config/oauth_config.php');
 
 // Get provider from query parameter
 $provider = $_GET['provider'] ?? '';
