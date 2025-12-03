@@ -20,7 +20,7 @@ while (ob_get_level() > 0) {
     ob_end_flush();
 }
 
-include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/../config/conf.php');
 include(__DIR__ . '/config/auth.php');
 
 // Security: Validate user authentication

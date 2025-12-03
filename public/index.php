@@ -62,7 +62,7 @@ $sriHashes = [
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
     'themes/adaptive-smooth.min.css' => 'sha384-c81nycqtM0OqyFtDoWcYJ1Ik7AWTqtxdlEKCB80cfjfQTLPdmkVv/KegmU7v3C63',
     'themes/modern.min.css' => 'sha384-WzdZG8/mSE1int8rel7jIV8DPoOgKTYmSs5Fwo+Z881q8LwDb5DoQ9jCpKxzoUbw',
-    'assets/css/icons.min.css' => 'sha384-RpepoQ7vlsTt27mcwl9YF5hGnafHgfPxpvjxy/OEQ1CxFDDV+X3dDTX0yrUxAN4U',
+    'assets/css/icons.min.css' => 'sha384-7Y7wK4Ofwf5eUy0W38fSkkQjr5x8fWplWbYex45qpWStGixWrjrorxBUav53g4xJ',
     'assets/js/background-sync.min.js' => 'sha384-eGZnqmkcQq65jYJSLL1LPucWdhxGoWPwHk9SWC4atH0uo6yPaFvLQnWeObDQaaC+'
 ];
 

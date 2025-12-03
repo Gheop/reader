@@ -7,7 +7,7 @@
 
 $start_time = microtime(true);
 header("Content-Type: application/json; charset=UTF-8");
-include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/../config/conf.php');
 include(__DIR__ . '/config/auth.php');
 
 // Query performance monitoring helper

@@ -3,7 +3,7 @@
  * Unsubscribe from RSS Feed
  * Security: Properly uses prepared statements with parameter binding
  */
-include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/../config/conf.php');
 
 // Security: Validate authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
