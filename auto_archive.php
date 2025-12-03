@@ -6,8 +6,8 @@
  * Run this periodically (e.g., weekly via cron)
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 // Configuration
 $archiveDays = 30; // Archive articles older than 30 days

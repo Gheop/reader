@@ -5,8 +5,8 @@
  * For all articles that are not marked as read
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              REBUILD UNREAD CACHE                              ║\n";

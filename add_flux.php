@@ -6,7 +6,7 @@
  */
 
 error_reporting(E_ALL);
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include('scraping/simple_html_dom.php');
 include('clean_text.php');
 

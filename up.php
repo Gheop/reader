@@ -4,7 +4,7 @@
  * Fetches and updates RSS feeds using curl multi-handle for parallel requests
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include('clean_text.php');
 
 // Query performance monitoring helper
@@ -21,8 +21,8 @@ if (php_sapi_name() === 'cli') {
         session_start();
     }
     $_SESSION['user_id'] = 1; // Default user for CLI
-    if (!isset($_SESSION['mysqli'])) {
-        $_SESSION['mysqli'] = $mysqli;
+    if (!isset($mysqli)) {
+        $mysqli = $mysqli;
     }
 }
 
@@ -33,7 +33,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 ini_set('max_execution_time', '500');
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Release session lock to allow other requests to proceed
 session_write_close();

@@ -5,8 +5,8 @@
  * More efficient approach: find IDs first, then delete in batches
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              CLEANUP DUPLICATE ARTICLES                        ║\n";

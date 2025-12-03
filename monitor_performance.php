@@ -5,8 +5,8 @@
  * Shows database performance metrics and slow queries
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              DATABASE PERFORMANCE MONITOR                      ║\n";

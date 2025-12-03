@@ -5,8 +5,8 @@
  * Tests the main queries used by the application
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 // Configuration
 $userId = 1; // SiB

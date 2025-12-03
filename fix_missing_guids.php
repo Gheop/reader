@@ -6,8 +6,8 @@
  * This prevents re-importing old articles after archiving
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              FIX MISSING GUIDS                                 ║\n";

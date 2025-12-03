@@ -3,7 +3,7 @@
  * Mark Article as Unread
  * Security: Uses prepared statements to prevent SQL injection
  */
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 // Security: Validate authentication and input
 if(!isset($_POST['id']) || !is_numeric($_POST['id']) || !isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {

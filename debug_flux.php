@@ -4,7 +4,7 @@
  * Check what's different between counter and actual articles
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include(__DIR__ . '/auth.php');
 
 $fluxId = isset($argv[1]) ? (int)$argv[1] : 976;
@@ -12,7 +12,7 @@ $userId = isset($argv[2]) ? (int)$argv[2] : 1;
 
 echo "=== Debug Flux #$fluxId pour User #$userId ===\n\n";
 
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // 1. Check flux counter
 $result = $mysqli->query("

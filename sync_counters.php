@@ -5,8 +5,8 @@
  * Run this periodically to fix any counter drift
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "╔════════════════════════════════════════════════════════════════╗\n";
 echo "║              SYNCHRONIZE UNREAD COUNTERS                       ║\n";

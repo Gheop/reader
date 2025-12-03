@@ -10,10 +10,12 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 $csp = [
     "default-src 'self'",
     "script-src 'self'",
+    "script-src-attr 'unsafe-inline'", // Allow inline event handlers (onclick, etc.)
     "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for dynamic theme switching
     "img-src 'self' data: https:",
     "font-src 'self' data:",
     "connect-src 'self'",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com", // Allow YouTube embeds
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -40,21 +42,21 @@ header("Permissions-Policy: " . implode(', ', $permissions));
 
 header('Content-Type: text/html; charset=utf-8');
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include(__DIR__ . '/auth.php');
 
 // Use minified assets in production, original files in debug mode
 $useMinified = !isset($_GET['debug']);
 $jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
 $cssExt = $useMinified ? '.min.css' : '.css';
-// Cache busting only in debug mode
-$cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
+// Cache busting - use file modification time to bust cache on changes
+$cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-3HgyHw0BEHj6HNFHgSxXdDe4j90SBvIgUypOL5GI8fnjdw9GZlH9YhCAuIv+9NMG',
+    'lib.min.js' => 'sha384-g1F3AjqVkumpjErI8CdsciDR/eugJVdvYLklD8BbNsJadwqt7YS1cmLbjAfggDPC',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-NUflqF6WWdV02rdZQyzM5+BymjUHI37OFYLY9ZYDDKVw48kSGbYy3xtSdS5hSeKU',
+    'themes/common.min.css' => 'sha384-uF1+R8I6nmJm3i8R7xu5eKO35EyKguvFgITVFoq16l+JIJzHJSgbxkWCes1dUZyW',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
@@ -105,7 +107,8 @@ function getSRI($file, $sriHashes, $useMinified) {
 <?php
 // Handle logout
 if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
-    include('../destroy.php');
+    header('Location: logout.php');
+    exit;
 }
 ?>
 <div id="register">
@@ -125,7 +128,8 @@ if(isset($_GET['a']) && $_GET['a'] == 'destroy') {
   </div>
 <?php
 if(!isset($_SESSION['pseudo'])) {
-  echo '<a href="//gheop.com/register/?page=reader.gheop.com">[S\'enregister]</a> - <a href="http://www.gheop.com/register/ident.php?page=reader.gheop.com">[S\'identifier]</a>';}
+  echo '<a href="register.php">[S\'enregister]</a> - <a href="login.php">[S\'identifier]</a>';
+}
 else {
   echo $_SESSION['pseudo'],' <a id="disconnect" class="icon" href="?a=destroy" title="Se déconnecter"></a>';
 
@@ -144,7 +148,9 @@ else {
   ?>
   </a></h1>
 <?php
+error_log("[INDEX] Checking auth - user_id isset: " . (isset($_SESSION['user_id']) ? 'YES' : 'NO') . ", value: " . ($_SESSION['user_id'] ?? 'NOT SET'));
 if(isset($_SESSION['user_id'])) {
+error_log("[INDEX] User is logged in - showing main interface");
 echo '
 <div id="error" style="display:none;"></div>'; ?>
 
@@ -172,7 +178,39 @@ echo '<nav>
 <footer>&nbsp;</footer>';
 }
 else {
-  echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2><fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
+  echo '<h2>Suivez l\'actualité de tous vos sites et blogs préférés.</h2>';
+
+  // OAuth2 Login Buttons
+  echo '<div style="text-align: center; margin: 30px 0;">
+    <p style="margin-bottom: 20px; font-size: 1.1em;">Connexion rapide avec :</p>
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <a href="oauth_login.php?provider=google" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"/><path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"/><path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"/><path fill="none" d="M0 0h18v18H0z"/></svg>
+        Google
+      </a>
+      <a href="oauth_login.php?provider=github" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #24292e; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.03 0 0 4.03 0 9c0 3.98 2.58 7.35 6.16 8.54.45.08.62-.2.62-.43v-1.5c-2.51.55-3.04-1.21-3.04-1.21-.41-1.04-1-1.32-1-1.32-.82-.56.06-.55.06-.55.9.06 1.38.93 1.38.93.8 1.38 2.1.98 2.62.75.08-.58.31-.98.57-1.2-2-.23-4.1-1-4.1-4.45 0-.98.35-1.79.92-2.42-.09-.23-.4-1.14.09-2.38 0 0 .75-.24 2.46.92a8.5 8.5 0 0 1 4.48 0c1.71-1.16 2.46-.92 2.46-.92.49 1.24.18 2.15.09 2.38.57.63.92 1.44.92 2.42 0 3.46-2.1 4.22-4.1 4.45.32.28.61.83.61 1.67v2.48c0 .24.17.52.62.43C15.42 16.35 18 12.98 18 9c0-4.97-4.03-9-9-9z"/></svg>
+        GitHub
+      </a>
+      <a href="oauth_login.php?provider=twitter" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #000000; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X (Twitter)
+      </a>
+    </div>
+    <p style="margin: 25px 0 15px; color: #666;">ou</p>
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <a href="login.php" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/></svg>
+        Se connecter
+      </a>
+      <a href="register.php" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #764ba2; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background 0.3s;">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+        S\'inscrire
+      </a>
+    </div>
+  </div>';
+
+  echo '<fieldset><legend>Simple</legend><br />Gheop Reader récupère en permance les nouveautés de tous vos sites favoris grâce à leur flux RSS et Atom.<br />Totalement gratuit et libre, un simple navigateur vous permet de suivre toute votre actualité de partout sans rien installer.<br /><br /></fieldset><br /><br /><fieldset><legend>Comment faire ?</legend><br />Il suffit de vous inscrire ou de vous identifier sur Gheop, d\'ajouter ou d\'importer vos fluxs et c\'est parti !<br /><br /></fieldset><br /><br /><fieldset><legend>Et ma vie privée dans tout ça ?</legend><br />Vous pouvez quitter Gheop Reader dès que vous le souhaitez, récupérer vos données sans rien perdre, voir même héberger votre Gheop Reader chez vous pour être totalement indépendant.<br /><br /></fieldset>';
 }
 ?>
 

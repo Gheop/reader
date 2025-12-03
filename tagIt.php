@@ -1,6 +1,6 @@
 <?php
 ini_set('max_execution_time', '500');
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 
 $text = '';
 if(isset($_POST['text'])) $text = $_POST['text'];

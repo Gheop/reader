@@ -1,5 +1,5 @@
 <?php
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 //session_start();
 if(!isset($_SESSION['user_id'])) {
   echo "Vous n'êtes pas authentifié sur Gheop!";

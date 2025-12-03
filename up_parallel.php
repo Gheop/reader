@@ -11,7 +11,7 @@
  * - Error resilience: continues on failures
  */
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 include('clean_text.php');
 
 // Query performance monitoring helper
@@ -33,8 +33,8 @@ if (php_sapi_name() === 'cli') {
         session_start();
     }
     $_SESSION['user_id'] = 1;
-    if (!isset($_SESSION['mysqli'])) {
-        $_SESSION['mysqli'] = $mysqli;
+    if (!isset($mysqli)) {
+        $mysqli = $mysqli;
     }
 }
 
@@ -45,7 +45,7 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 }
 
 ini_set('max_execution_time', '900'); // 15 minutes max
-$mysqli = $_SESSION['mysqli'];
+$mysqli = $mysqli;
 
 // Release session lock
 session_write_close();
@@ -323,21 +323,31 @@ function process_batch($mysqli, $feeds, $maxConcurrent, $timeout, $connectTimeou
             $link_without_protocol = preg_replace('/^https?:\/\//', '', $link);
             $stmt = $mysqli->prepare("
                 SELECT 1 FROM reader_item
-                WHERE id_flux = ? AND (guid = ? OR link LIKE ?)
+                WHERE id_flux = ? AND (guid = ? OR link LIKE CONVERT(? USING utf8mb3) COLLATE utf8mb3_bin)
                 UNION
                 SELECT 1 FROM reader_item_archive
-                WHERE id_flux = ? AND (guid = ? OR link LIKE ?)
+                WHERE id_flux = ? AND (guid = ? OR link LIKE CONVERT(? USING utf8mb3) COLLATE utf8mb3_bin)
                 UNION
                 SELECT 1 FROM reader_user_item UI
                 INNER JOIN reader_item I ON I.id = UI.id_item
-                WHERE I.id_flux = ? AND I.link LIKE ?
+                WHERE I.id_flux = ? AND I.link LIKE CONVERT(? USING utf8mb3) COLLATE utf8mb3_bin
                 LIMIT 1
             ");
+
+            if (!$stmt) {
+                error_log("Prepare failed for feed $feedId: " . $mysqli->error);
+                continue;
+            }
+
             $searchPattern = '%' . $link_without_protocol . '%';
             $stmt->bind_param("isssssss", $feedId, $guid, $searchPattern, $feedId, $guid, $searchPattern, $feedId, $searchPattern);
 
             $query_start = microtime(true);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                error_log("Execute failed for feed $feedId: " . $stmt->error);
+                $stmt->close();
+                continue;
+            }
             $existingResult = $stmt->get_result();
             logSlowQuery('up_parallel.php - check existing article', (microtime(true) - $query_start) * 1000, 50);
 

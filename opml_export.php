@@ -3,15 +3,15 @@ require_once __DIR__ . '/src/OPMLGenerator.php';
 
 use Gheop\Reader\OPMLGenerator;
 
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) exit;
 
 // Récupérer tous les flux de l'utilisateur
-$r = $_SESSION['mysqli']->query('SELECT F.id, F.title, F.description, F.rss, F.link
+$r = $mysqli->query('SELECT F.id, F.title, F.description, F.rss, F.link
     FROM reader_flux F, reader_user_flux UF
     WHERE UF.id_user='.$_SESSION['user_id'].'
     AND UF.id_flux=F.id
-    ORDER BY F.title ASC') or die($_SESSION['mysqli']->error);
+    ORDER BY F.title ASC') or die($mysqli->error);
 
 // Convertir le résultat en tableau
 $feeds = [];

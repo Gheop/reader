@@ -5,8 +5,8 @@
  * PHP now handles cache/counter updates manually
  */
 
-include('/www/conf.php');
-$mysqli = $_SESSION['mysqli'];
+include(__DIR__ . '/conf.php');
+$mysqli = $mysqli;
 
 echo "\n";
 echo "╔════════════════════════════════════════════════════════════════╗\n";

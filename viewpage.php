@@ -1,5 +1,5 @@
 <?php
-include('/www/conf.php');
+include(__DIR__ . '/conf.php');
 echo '<style>
 .CSSTableGenerator {
 	margin:0px;padding:0px;
