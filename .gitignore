@@ -46,3 +46,4 @@ package-lock.json
 
 # Logs
 *.log
+node_modules/

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "gheop-reader": {
+      "command": "node",
+      "args": ["/www/reader/mcp-server.js"],
+      "env": {
+        "DB_HOST": "localhost",
+        "DB_USER": "gheop",
+        "DB_PASSWORD": "REDACTED",
+        "DB_NAME": "gheop"
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "gheop-reader-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Gheop RSS Reader - AI-powered article analysis and recommendations",
+  "type": "module",
+  "main": "mcp-server.js",
+  "scripts": {
+    "start": "node mcp-server.js",
+    "dev": "node --watch mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "rss",
+    "reader",
+    "ai",
+    "claude"
+  ],
+  "author": "Gheop",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "mysql2": "^3.11.5"
+  }
+}
