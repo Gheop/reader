@@ -139,12 +139,16 @@ else {
 </div>
     <h1 id="g"><a href="//reader.gheop.com/" title="ƒlux∑"><span id="g1">ƒlux∑</span><span id="g2"><!-- reader --></span>
 <?php  if(isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == "SiB") {
-  	$stringfromfile = file('.git/HEAD', FILE_USE_INCLUDE_PATH);
-    $firstLine = $stringfromfile[0];
-    $explodedstring = explode("/", $firstLine, 3);
-    $branchname = trim($explodedstring[2]);
-    if(file_exists('version')) $branchname .= ' '.file_get_contents('version');
-    if(strpos($branchname, 'master') !== 0)    echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
+  	$gitHeadFile = __DIR__ . '/../.git/HEAD';
+  	if (file_exists($gitHeadFile)) {
+  	  $stringfromfile = file($gitHeadFile);
+      $firstLine = $stringfromfile[0];
+      $explodedstring = explode("/", $firstLine, 3);
+      $branchname = trim($explodedstring[2]);
+      $versionFile = __DIR__ . '/version';
+      if(file_exists($versionFile)) $branchname .= ' '.file_get_contents($versionFile);
+      if(strpos($branchname, 'master') !== 0) echo "<span style='font-family: Helvetica; color: #d43f57; position: relative;bottom: 1px;font-size: .4em;line-height: .4em;vertical-align:super;text-decoration:none;'>" . $branchname . "</span>";
+    }
   }
   ?>
   </a></h1>
