@@ -62,7 +62,7 @@ $sriHashes = [
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
     'themes/adaptive-smooth.min.css' => 'sha384-c81nycqtM0OqyFtDoWcYJ1Ik7AWTqtxdlEKCB80cfjfQTLPdmkVv/KegmU7v3C63',
     'themes/modern.min.css' => 'sha384-WzdZG8/mSE1int8rel7jIV8DPoOgKTYmSs5Fwo+Z881q8LwDb5DoQ9jCpKxzoUbw',
-    'fontawesome/css/all.min.css' => 'sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g'
+    'assets/css/icons.min.css' => 'sha384-RpepoQ7vlsTt27mcwl9YF5hGnafHgfPxpvjxy/OEQ1CxFDDV+X3dDTX0yrUxAN4U'
 ];
 
 // Get SRI attribute helper
@@ -75,8 +75,8 @@ function getSRI($file, $sriHashes, $useMinified) {
 <head>
 <link rel="preload" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" as="style"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?>>
 <link rel="preload" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" as="style"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?>>
-<link rel="preload" href="fontawesome/css/all.min.css" as="style"<?php echo getSRI('fontawesome/css/all.min.css', $sriHashes, $useMinified); ?>>
-<link rel="stylesheet" href="fontawesome/css/all.min.css"<?php echo getSRI('fontawesome/css/all.min.css', $sriHashes, $useMinified); ?>>
+<link rel="preload" href="assets/css/icons.min.css" as="style"<?php echo getSRI('assets/css/icons.min.css', $sriHashes, $useMinified); ?>>
+<link rel="stylesheet" href="assets/css/icons.min.css"<?php echo getSRI('assets/css/icons.min.css', $sriHashes, $useMinified); ?>>
 <link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?> />
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?> />
 <title>Gheop Reader</title>

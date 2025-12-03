@@ -1,0 +1,9 @@
+/* Minimal Font Awesome subset - only used icons */
+@font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:block;src:url(../fonts/fa-solid-900.woff2) format("woff2")}
+.fa,.fas{font-family:"Font Awesome 6 Free";font-weight:900;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.fa-wifi:before{content:"\f1eb"}
+.fa-share-alt:before{content:"\f1e0"}
+.fa-exclamation-triangle:before{content:"\f071"}
+.fa-plus:before{content:"\2b"}
+.fa-times:before{content:"\f00d"}
+.fa-info-circle:before{content:"\f05a"}

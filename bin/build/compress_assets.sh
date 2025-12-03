@@ -23,10 +23,10 @@ for file in themes/*.min.css; do
     fi
 done
 
-# Compress Font Awesome CSS
-if [ -f "fontawesome/css/all.min.css" ]; then
-    gzip -9 -k -f "fontawesome/css/all.min.css"
-    echo "✓ fontawesome/css/all.min.css -> fontawesome/css/all.min.css.gz"
+# Compress icons CSS
+if [ -f "assets/css/icons.min.css" ]; then
+    gzip -9 -k -f "assets/css/icons.min.css"
+    echo "✓ assets/css/icons.min.css -> assets/css/icons.min.css.gz"
 fi
 
 # Compress SVG icon

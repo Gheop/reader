@@ -36,7 +36,7 @@ if (!filter_var($sharedUrl, FILTER_VALIDATE_URL)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ajouter au Reader - Gheop Reader</title>
-    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/icons.min.css">
     <link rel="stylesheet" href="themes/common.min.css">
     <link rel="stylesheet" href="themes/light.min.css">
     <style>
