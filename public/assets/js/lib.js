@@ -1550,6 +1550,14 @@ articleStyleSheet.replaceSync(`
     transform: rotate(360deg);
   }
 }
+  /* Search highlight */
+  .surligne {
+    border: 1px solid var(--color-text-dark, #333);
+    border-radius: var(--spacing-xs, 2px);
+    background: var(--color-text-dark, #333);
+    color: var(--color-bg, #fff);
+    padding: 0 2px;
+  }
 `);
 
 // Custom element for article content with shared stylesheet
@@ -1857,6 +1865,12 @@ return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<he
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
 
+// Generate article HTML for search results (with search icon before title)
+function generateSearchArticle(i) {
+  let datepub = dateArticle(d[i].p);
+  return '<article id="' + i + '" class="item1 search-result">\n\t<header>\n\t\t<h1 class="headline"><span class="search-icon"></span><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="' + (d[i].o || '') + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a></div>\n</article>';
+}
+
 function sendToKindle(k) {
   const article = $('ac'+k).shadowRoot.children[0].innerHTML;
   if (!article) {
@@ -1985,19 +1999,28 @@ function getHTTPObject(action) {
         $('f' + id).classList.add('show');
         loadmore = 0;
         if (xhr.responseText) {
-          d = JSON.parse(xhr.responseText);
-          // for(var i in d) {
-          //   loadmore++;
-          //   //voir pour charger le corps du texte en shadow DOM https://developer.mozilla.org/fr/docs/Web/Web_Components/Shadow_DOM (ne fonctionne pas encore dans Firefox)
-          //   page += generateArticle(i);
-          for (let y = 0, tlen = d.i.length; y < tlen; y++) {
+          let searchData = JSON.parse(xhr.responseText);
+          // Convert array format to object format for compatibility with generateArticle
+          d = {};
+          for (let y = 0, tlen = searchData.i.length; y < tlen; y++) {
+            let item = searchData.i[y];
+            d[item.i] = {
+              t: item.t,
+              p: item.p,
+              a: item.a,
+              d: item.d,
+              l: item.l,
+              f: item.f,
+              n: item.n,
+              o: item.o || '',
+              r: item.r
+            };
             loadmore++;
-            page += '<div id="' + d.i[y].i + '" class="item1">\n\t<a class="date" title="date">' + d.i[y].p + '</a>\n\t<a id="a' + d.i[y].i + '" href="' + d.i[y].l + '" class="title icon" target="_blank" title="' + d.i[y].t + '"> ' + d.i[y].t + '</a>\n\t<div class="author">From <a href="//gheop.com" title="' + d.i[y].n + '">' + d.i[y].n + '</a>' + ((d.i[y].a) ? (' by ' + d.i[y].a) : '') + '</div>\n\t<div class="descr">' + d.i[y].d + '</div>\n\t<div class="action"><a class="search icon" onclick="verif(' + y + ');return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
-          //voir pour foutre les tags en ul,li
+            page += generateSearchArticle(item.i);
           }
         }
         else {
-          DM.innerHTML = '<div id="0" class="item1">\n\t<a class="date" title="date">Maintenant</a>\n\t<a id="a0" href="#" class="title icon" target="_blank" title="Pas de résultat."> Recherche "' + search_value + '"</a>\n\t<div class="author">From <a href="//gheop.com" title="reader gheop">Reader</a></div>\n\t<div class="descr">Pas de résultat trouvé!</div>\n\t<div class="action"><a class="search icon" onclick="return true;" title="Lu"></a><!-- <span class="tags icon"> tag1, tag2, tag3, tagsuperlongdelamortquitue</span> ☺ ☻ ♡ ♥--></div>\n</div>\n';
+          DM.innerHTML = '<article id="0" class="item1">\n\t<header>\n\t\t<h1 class="headline"><span class="search-icon">\uf002</span><a href="#" class="title" target="_blank">Recherche "' + search_value + '"</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="//gheop.com" class="website">Reader</a></address>\n\t\t\t<time>Maintenant</time>\n\t\t</div>\n\t</header>\n\t<article-content><div class="article-content">Pas de résultat trouvé!</div></article-content>\n\t<div class="action"></div>\n</article>';
           return false;
         }
 

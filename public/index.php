@@ -54,15 +54,16 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-y9QY2gHUPradfR+7OJ916tiM6qKJnRlSVwHSL0qK3hVwbwfMfAQzBqxp7cRrnbNH',
+    'assets/js/lib.min.js' => 'sha384-4RewoU/6a4MZ9xB/+BAV+H4QEPVOyiW69E7Mjwvms2UbQw7tPActw4NGg1C9AL72',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-uF1+R8I6nmJm3i8R7xu5eKO35EyKguvFgITVFoq16l+JIJzHJSgbxkWCes1dUZyW',
+    'themes/common.min.css' => 'sha384-/1fyXB0Y67HfjBA9XUtaPnqQ8bmR2zkjbQ1x2snLStvXQKvkzsjTJUZkkLuSxJCG',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
     'themes/adaptive-smooth.min.css' => 'sha384-c81nycqtM0OqyFtDoWcYJ1Ik7AWTqtxdlEKCB80cfjfQTLPdmkVv/KegmU7v3C63',
     'themes/modern.min.css' => 'sha384-WzdZG8/mSE1int8rel7jIV8DPoOgKTYmSs5Fwo+Z881q8LwDb5DoQ9jCpKxzoUbw',
-    'assets/css/icons.min.css' => 'sha384-RpepoQ7vlsTt27mcwl9YF5hGnafHgfPxpvjxy/OEQ1CxFDDV+X3dDTX0yrUxAN4U'
+    'assets/css/icons.min.css' => 'sha384-RpepoQ7vlsTt27mcwl9YF5hGnafHgfPxpvjxy/OEQ1CxFDDV+X3dDTX0yrUxAN4U',
+    'assets/js/background-sync.min.js' => 'sha384-eGZnqmkcQq65jYJSLL1LPucWdhxGoWPwHk9SWC4atH0uo6yPaFvLQnWeObDQaaC+'
 ];
 
 // Get SRI attribute helper
@@ -80,7 +81,7 @@ function getSRI($file, $sriHashes, $useMinified) {
 <link rel="stylesheet" type="text/css" href="themes/common<?php echo $cssExt . $cacheBuster; ?>" media="screen"<?php echo getSRI('themes/common' . $cssExt, $sriHashes, $useMinified); ?> />
 <link rel="stylesheet prefetch" id="stylesheet" type="text/css" href="themes/light<?php echo $cssExt . $cacheBuster; ?>" media="screen" title="Normal"<?php echo getSRI('themes/light' . $cssExt, $sriHashes, $useMinified); ?> />
 <title>Gheop Reader</title>
-<script src="assets/js/background-sync.js" defer></script>
+<script src="assets/js/background-sync.min.js"<?php echo getSRI('assets/js/background-sync.min.js', $sriHashes, $useMinified); ?> defer></script>
 <script src="assets/js/favico.min.js"<?php echo getSRI('assets/js/favico.min.js', $sriHashes, $useMinified); ?> defer></script>
 <script src="<?php echo $jsFile . $cacheBuster; ?>"<?php echo getSRI($jsFile, $sriHashes, $useMinified); ?> type="text/javascript" defer></script>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />

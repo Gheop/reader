@@ -1,10 +1,14 @@
 <?php
-include(__DIR__ . '/config/conf.php');
+include(__DIR__ . '/../config/conf.php');
 if(!isset($_SESSION['user_id'])) {
   echo "Vous n'êtes pas authentifié sur Gheop!";
   exit;
 }
-$r = $mysqli->query("select F.id,F.title, F.description, F.link, F.language from reader_user_flux U, reader_flux F where U.id_user=$_SESSION[user_id] and U.id_flux=F.id order by F.title");
+$user_id = (int)$_SESSION['user_id'];
+$stmt = $mysqli->prepare("SELECT F.id, F.title, F.description, F.link, F.language FROM reader_user_flux U, reader_flux F WHERE U.id_user = ? AND U.id_flux = F.id ORDER BY F.title");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$r = $stmt->get_result();
 $i = 0;
 while($d = $r->fetch_row()) {
 	$i++;

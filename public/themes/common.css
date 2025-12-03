@@ -534,6 +534,7 @@ article-content {
 .sendTo:before { content: "\f1d8"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 .print:before { content: "\f02f"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 .search:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.search-icon:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 0.5em; color: var(--color-link); }
 .star:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
 .starred:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 .love0:before { content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
