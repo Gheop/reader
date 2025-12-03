@@ -16,7 +16,7 @@ Files protected:
 
 **Implementation**:
 1. `.htaccess` blocks access to sensitive files
-2. `nginx-security.conf` provides nginx-level protection
+2. `docs/nginx-security.conf` provides nginx-level protection
 
 ### ✅ High: Cookie Security Flags
 **Status**: Fixed in /www/conf.php
@@ -55,13 +55,13 @@ curl -I https://reader.gheop.com/.git/config
 
 ### 2. Nginx Configuration
 
-Add the contents of `nginx-security.conf` to your nginx site configuration:
+Add the contents of `docs/nginx-security.conf` to your nginx site configuration:
 
 ```bash
 # Edit nginx config
 sudo nano /etc/nginx/sites-available/reader.gheop.com
 
-# Add the security directives from nginx-security.conf
+# Add the security directives from docs/nginx-security.conf
 # Then test and reload
 sudo nginx -t
 sudo systemctl reload nginx
