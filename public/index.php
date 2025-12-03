@@ -42,8 +42,8 @@ header("Permissions-Policy: " . implode(', ', $permissions));
 
 header('Content-Type: text/html; charset=utf-8');
 
-include(__DIR__ . '/config/conf.php');
-include(__DIR__ . '/config/auth.php');
+include(__DIR__ . '/../config/conf.php');
+include(__DIR__ . '/../config/auth.php');
 
 // Use minified assets in production, original files in debug mode
 $useMinified = !isset($_GET['debug']);
@@ -54,7 +54,7 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-g1F3AjqVkumpjErI8CdsciDR/eugJVdvYLklD8BbNsJadwqt7YS1cmLbjAfggDPC',
+    'assets/js/lib.min.js' => 'sha384-zXDww2IvhrolHjY8TsiQeD8FBjqC/0xIgoUoppM3wZgznSyoq6RA4hmc/8l1n6ZH',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-uF1+R8I6nmJm3i8R7xu5eKO35EyKguvFgITVFoq16l+JIJzHJSgbxkWCes1dUZyW',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
