@@ -1645,7 +1645,7 @@ function removelight(i) {
 
 function light(i) {
   $(i).classList.add('blink');
-  setTimeout('removelight("' + i + '");', 250);
+  setTimeout(() => removelight(i), 250);
 }
 
 function addflux() {
