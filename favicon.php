@@ -1,6 +1,6 @@
 <?php
 //$image = new Imagick('favicon.gif') or die("msg error");
-$image = new Imagick('i/ico.png') or die("msg error");
+$image = new Imagick('assets/images/ico.png') or die("msg error");
 
 if(isset($_GET['n']) && is_numeric($_GET['n']) && $_GET['n'] > 0) {
 	$draw = new ImagickDraw();
@@ -11,7 +11,7 @@ if(isset($_GET['n']) && is_numeric($_GET['n']) && $_GET['n'] > 0) {
 	else $draw->setFontSize(35);
 	$draw->setGravity (Imagick::GRAVITY_CENTER);
 
-  $text_layer = new Imagick('i/trans.png'); # empty transparent png of the same size
+  $text_layer = new Imagick('assets/images/trans.png'); # empty transparent png of the same size
   $text_layer->annotateImage($draw, 0, 5, 0, $_GET['n']);
 
   /* create drop shadow on it's own layer */
