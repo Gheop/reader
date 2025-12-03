@@ -180,12 +180,12 @@ jobs:
     - name: Verify all files present
       run: |
         echo "Checking critical files..."
-        test -f index.php || exit 1
-        test -f assets/js/lib.js || exit 1
-        test -f themes/common.css || exit 1
-        test -f opml_export.php || exit 1
+        test -f public/index.php || exit 1
+        test -f public/assets/js/lib.js || exit 1
+        test -f public/themes/common.css || exit 1
+        test -f public/opml_export.php || exit 1
         test -f config/conf.example.php || exit 1
-        test -f assets/css/icons.min.css || exit 1
+        test -f public/assets/css/icons.min.css || exit 1
         echo "All critical files present!"
 
     - name: Build Status
