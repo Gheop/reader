@@ -1967,8 +1967,8 @@ function getHTTPObject(action) {
       } else if (action === 'unsubscribeflux') {
         return xhr.responseText ? affError(xhr.responseText) : location.reload();
       } else if (action === 'up') {
-        location.reload();
-//        return xhr.responseText ? affError(xhr.responseText) : location.reload();
+        // SSE handles automatic updates, no reload needed
+        console.log('up_parallel complete, SSE will handle updates');
       } else if (action === 'more') {
       	if(!xhr.responseText || xhr.responseText == '{}') return 0;
         var p = JSON.parse(xhr.responseText);
