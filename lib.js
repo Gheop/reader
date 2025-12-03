@@ -131,7 +131,7 @@ if(! /iPad|iPhone|iPod/.test(navigator.platform)) {
  	rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 }
 const D = document;
-const DM = document.getElementsByTagName("main")[0];
+let DM = null;  // Will be initialized in i() when DOM is ready
 var cptReadArticle = 0;
 var imageObserver;
 
@@ -186,6 +186,12 @@ function clearCache() {
 // ============================================================================
 
 function loadData(feedId, useCache = true) {
+  // Early return if DM doesn't exist (e.g., on login page)
+  if (!DM) {
+    console.log('loadData: DM not found, skipping');
+    return;
+  }
+
   // Clear display before loading to prevent flash of old content
   DM.innerHTML = '';
 
@@ -473,6 +479,12 @@ function renderMenu(menuData) {
 }
 
 function renderArticles(articlesData, feedId, fromAPI = false) {
+  // Early return if DM (main element) doesn't exist (e.g., on login page)
+  if (!DM) {
+    console.log('renderArticles: DM not found, skipping');
+    return;
+  }
+
   console.log('renderArticles called with feedId:', feedId, 'fromAPI:', fromAPI);
   console.log('articlesData keys:', Object.keys(articlesData).length);
   let page = '';
@@ -1179,8 +1191,10 @@ function handleConnectionChange(event){
     if(event.type == "online"){
       online = true;
       $('g').style.textDecoration='none';
-      // Restart SSE connection when back online
-      startSSEConnection();
+      // Restart SSE connection when back online (only if user is logged in)
+      if (DM) {
+        startSSEConnection();
+      }
     }
 }
 
@@ -1221,6 +1235,9 @@ function search(t) {
 let lastRootHeight = 0;
 
 function scroll() {
+    // Early return if DM doesn't exist (e.g., on login page)
+    if (!DM) return;
+
     //var unreadArticles = document.querySelectorAll(".item1");
     //plus rapide, voir support, retourne un HTMLCollections au lieu d'un NodeList d'ou le array.from devant
     let unreadArticles = Array.from(document.getElementsByClassName("item1"));
@@ -1299,7 +1316,10 @@ function oldScroll() {
 
 // Initialize scroll fallback and bounce handlers (once only)
 // These handlers are added ONCE when the page loads, not on every scroll() call
-(function initScrollHandlers() {
+function initScrollHandlers() {
+    // Early return if DM doesn't exist (e.g., on login page)
+    if (!DM) return;
+
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (!("IntersectionObserver" in window) || isSafari) return; // Only for IntersectionObserver mode
 
@@ -1380,7 +1400,7 @@ function oldScroll() {
     // Add resize/orientation handlers ONCE
     window.addEventListener("resize", scroll, {passive: true});
     window.addEventListener("orientationchange", scroll, {passive: true});
-})();
+}
 
 function goUp() {
   DM.scrollTop -= 20;
@@ -2328,6 +2348,12 @@ function konamistop() {
 */
 
 function i() {
+  // Initialize DM now that DOM is ready
+  DM = document.getElementsByTagName("main")[0];
+
+  // Initialize scroll handlers (bounce effect, fallback marking)
+  initScrollHandlers();
+
   // Initialize favicon_badge first (needed by renderMenu)
   favicon_badge=new Favico({
     animation:'none'
@@ -2345,22 +2371,27 @@ function i() {
   // Then load data
   loadData('all');
 
-  // Start SSE connection for real-time updates
-  startSSEConnection();
+  // Start SSE connection for real-time updates (only if user is logged in)
+  if (DM) {
+    startSSEConnection();
+  }
 
   window.addEventListener('online', handleConnectionChange);
   window.addEventListener('offline', handleConnectionChange);
   window.addEventListener('beforeunload', stopSSEConnection);
   window.onresize = scroll;
 
-  $('s').onfocus = function() {
-    search_focus = 1;
-    //log("Focus sur l'input de recherche.");
-  };
-  $('s').onblur = function() {
-    search_focus = 0;
-    //log("Perte du focus sur l'input de recherche.");
-  };
+  // Only set up search input handlers if element exists (not on login page)
+  if ($('s')) {
+    $('s').onfocus = function() {
+      search_focus = 1;
+      //log("Focus sur l'input de recherche.");
+    };
+    $('s').onblur = function() {
+      search_focus = 0;
+      //log("Perte du focus sur l'input de recherche.");
+    };
+  }
   D.onkeydown = function(evt) {
     if (search_focus === 1) return;
     var k = (evt.which) ? evt.which : evt.keyCode;
@@ -2422,9 +2453,11 @@ function i() {
 const nav = document.querySelector('nav');
 const main = document.querySelector('main');
 
-let isResizing = false;
+// Only set up menu resizer if elements exist (not on login page)
+if (resizer && nav && main) {
+  let isResizing = false;
 
-resizer.addEventListener('mousedown', (e) => {
+  resizer.addEventListener('mousedown', (e) => {
   isResizing = true;
   document.body.classList.add('resizing');
 
@@ -2460,21 +2493,22 @@ resizer.addEventListener('mousedown', (e) => {
 
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
-});
+  });
 
-// Charger la largeur sauvegardée au démarrage
-window.addEventListener('DOMContentLoaded', () => {
-  const savedWidth = localStorage.getItem('menuWidth');
-  if (savedWidth) {
-    nav.style.width = (parseInt(savedWidth)) + 'px';
-    resizer.style.left = (parseInt(savedWidth)) + 'px';
-    if(savedWidth < 20) {
-      resizer.innerHTML ='⇹';
-      resizer.style.height='auto';
+  // Charger la largeur sauvegardée au démarrage
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedWidth = localStorage.getItem('menuWidth');
+    if (savedWidth) {
+      nav.style.width = (parseInt(savedWidth)) + 'px';
+      resizer.style.left = (parseInt(savedWidth)) + 'px';
+      if(savedWidth < 20) {
+        resizer.innerHTML ='⇹';
+        resizer.style.height='auto';
+      }
+      main.style.left = (parseInt(savedWidth)) + 'px';
     }
-    main.style.left = (parseInt(savedWidth)) + 'px';
-  }
-});
+  });
+}
 
 }
 
@@ -2570,7 +2604,7 @@ function showPaintTimings() {
     console.log('Performance timing isn\'t supported.');
   }
 }*/
-document.onload = i();
+//document.onload = i(); // REMOVED: was calling i() immediately instead of on load, and we already have DOMContentLoaded listener
 //showPaintTimings();
 //i();
 
@@ -3016,11 +3050,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Auto-initialize when user is logged in (menu exists)
-if (document.getElementById('menu')) {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', i);
-  } else {
-    // DOM already loaded
+// Always wait for DOMContentLoaded to ensure DOM is fully ready
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('menu')) {
     i();
   }
-}
+});

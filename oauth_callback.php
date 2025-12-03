@@ -186,8 +186,8 @@ if ($row = $result->fetch_assoc()) {
         ]);
 
 
-        // Redirect to success page (allows cookies to be set before final redirect)
-        header('Location: /login_success.php');
+        // Show success page directly (no HTTP redirect, so cookies are sent with the response)
+        include(__DIR__ . '/login_success.php');
         exit;
     }
 } else {
@@ -241,8 +241,8 @@ if ($row = $result->fetch_assoc()) {
         ]);
 
 
-        // Redirect to success page (allows cookies to be set before final redirect)
-        header('Location: /login_success.php');
+        // Show success page directly (no HTTP redirect, so cookies are sent with the response)
+        include(__DIR__ . '/login_success.php');
         exit;
     } else {
         die('Failed to create user account');

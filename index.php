@@ -15,6 +15,7 @@ $csp = [
     "img-src 'self' data: https:",
     "font-src 'self' data:",
     "connect-src 'self'",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com", // Allow YouTube embeds
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -48,14 +49,14 @@ include(__DIR__ . '/auth.php');
 $useMinified = !isset($_GET['debug']);
 $jsFile = $useMinified ? 'lib.min.js' : 'lib.js';
 $cssExt = $useMinified ? '.min.css' : '.css';
-// Cache busting only in debug mode
-$cacheBuster = isset($_GET['debug']) ? '?v=' . time() : '';
+// Cache busting - use file modification time to bust cache on changes
+$cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'lib.min.js' => 'sha384-3HgyHw0BEHj6HNFHgSxXdDe4j90SBvIgUypOL5GI8fnjdw9GZlH9YhCAuIv+9NMG',
+    'lib.min.js' => 'sha384-g1F3AjqVkumpjErI8CdsciDR/eugJVdvYLklD8BbNsJadwqt7YS1cmLbjAfggDPC',
     'favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-NUflqF6WWdV02rdZQyzM5+BymjUHI37OFYLY9ZYDDKVw48kSGbYy3xtSdS5hSeKU',
+    'themes/common.min.css' => 'sha384-uF1+R8I6nmJm3i8R7xu5eKO35EyKguvFgITVFoq16l+JIJzHJSgbxkWCes1dUZyW',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
@@ -147,7 +148,9 @@ else {
   ?>
   </a></h1>
 <?php
+error_log("[INDEX] Checking auth - user_id isset: " . (isset($_SESSION['user_id']) ? 'YES' : 'NO') . ", value: " . ($_SESSION['user_id'] ?? 'NOT SET'));
 if(isset($_SESSION['user_id'])) {
+error_log("[INDEX] User is logged in - showing main interface");
 echo '
 <div id="error" style="display:none;"></div>'; ?>
 

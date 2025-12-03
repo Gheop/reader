@@ -38,6 +38,6 @@ setcookie("session", '', time() - 3600, '/', '.gheop.org');
 // Destroy session
 session_destroy();
 
-// Redirect to logout success page (allows cookies to be cleared before final redirect)
-header('Location: /logout_success.php');
+// Show logout success page directly (no HTTP redirect, so cookies are cleared with the response)
+include(__DIR__ . '/logout_success.php');
 exit;

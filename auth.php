@@ -5,8 +5,10 @@
  * Should be included after conf.php
  */
 
-// If user is not already authenticated in session, check cookie
+// Always check cookie if user_id is not in session
+// This handles both: no session yet, and expired session
 if (!isset($_SESSION['user_id']) && isset($_COOKIE['session'])) {
+    global $mysqli;  // Need to access global $mysqli variable
     $auth = explode("|", $_COOKIE['session']);
 
     if (count($auth) === 2 && !empty($auth[0])) {
@@ -25,7 +27,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['session'])) {
 
                 // Refresh cookie to extend expiration (300 days)
                 setcookie("session", $d['pseudo'] . "|" . $d['pwd'], [
-                    'expires' => time() + 26000000,
+                    'expires' => time() + 26000000, // ~300 days
                     'path' => '/',
                     'domain' => '',
                     'secure' => true,

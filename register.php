@@ -61,9 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'samesite' => 'Lax'
                 ]);
 
-
-                // Redirect to success page (allows cookies to be set before final redirect)
-                header('Location: /login_success.php');
+                // Show success page directly (no HTTP redirect, so cookies are sent with the response)
+                include(__DIR__ . '/login_success.php');
                 exit;
             } else {
                 $error = 'Failed to create account: ' . $mysqli->error;

@@ -2,7 +2,6 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=/">
     <title>Déconnexion réussie</title>
     <style>
         body {
@@ -44,10 +43,10 @@
         }
     </style>
     <script>
-        // Fallback if meta refresh doesn't work
+        // Wait 1 second to ensure cookies are cleared
         setTimeout(function() {
             window.location.href = '/';
-        }, 100);
+        }, 1000);
     </script>
 </head>
 <body>

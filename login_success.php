@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=/">
+    
     <title>Connexion réussie</title>
     <style>
         body {
@@ -47,7 +47,7 @@
         // Fallback if meta refresh doesn't work
         setTimeout(function() {
             window.location.href = '/';
-        }, 100);
+        }, 1000);
     </script>
 </head>
 <body>

@@ -8,16 +8,15 @@
  * - Images: Cache-first with background update
  */
 
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 const CACHE_NAME = `gheop-reader-v${VERSION}`;
 const CACHE_STATIC = `${CACHE_NAME}-static`;
 const CACHE_API = `${CACHE_NAME}-api`;
 const CACHE_IMAGES = `${CACHE_NAME}-images`;
 
 // Assets to cache on install
+// NOTE: Do NOT cache / or /index.php as they change based on login state
 const STATIC_ASSETS = [
-  '/',
-  '/index.php',
   '/manifest.json',
   '/lib.min.js',
   '/favico.min.js',
