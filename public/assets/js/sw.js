@@ -18,9 +18,9 @@ const CACHE_IMAGES = `${CACHE_NAME}-images`;
 // NOTE: Do NOT cache / or /index.php as they change based on login state
 const STATIC_ASSETS = [
   '/manifest.json',
-  '/lib.min.js',
-  '/favico.min.js',
-  '/background-sync.js',
+  '/assets/js/lib.min.js',
+  '/assets/js/favico.min.js',
+  '/assets/js/background-sync.js',
   '/themes/common.min.css',
   '/themes/light.min.css',
   '/themes/dark.min.css',
