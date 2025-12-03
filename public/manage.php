@@ -1,8 +1,10 @@
 <?php
 include(__DIR__ . '/../config/conf.php');
-if(!isset($_SESSION['user_id'])) {
-  echo "Vous n'êtes pas authentifié sur Gheop!";
-  exit;
+
+// Debug endpoint - restricted to admin only
+if (!isset($_SESSION['pseudo']) || $_SESSION['pseudo'] !== 'SiB') {
+    http_response_code(403);
+    die('Access denied');
 }
 $user_id = (int)$_SESSION['user_id'];
 $stmt = $mysqli->prepare("SELECT F.id, F.title, F.description, F.link, F.language FROM reader_user_flux U, reader_flux F WHERE U.id_user = ? AND U.id_flux = F.id ORDER BY F.title");

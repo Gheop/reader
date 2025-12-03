@@ -4,16 +4,11 @@
  * Handles OAuth2 callbacks from various providers
  */
 
-session_start();
-
-// Create database connection
-$mysqli = new mysqli('localhost', 'gheop', 'REDACTED', 'gheop');
-if ($mysqli->connect_error) {
-    die('Database connection failed: ' . $mysqli->connect_error);
-}
+// Use shared config (includes session_start and $mysqli connection)
+include(__DIR__ . '/../config/conf.php');
 
 // Load OAuth configuration
-$oauth_config = include(__DIR__ . '/config/oauth_config.php');
+$oauth_config = include(__DIR__ . '/../config/oauth_config.php');
 
 // Get provider from query parameter
 $provider = $_GET['provider'] ?? '';

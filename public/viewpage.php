@@ -1,5 +1,12 @@
 <?php
 include(__DIR__ . '/../config/conf.php');
+
+// Debug endpoint - restricted to admin only
+if (!isset($_SESSION['pseudo']) || $_SESSION['pseudo'] !== 'SiB') {
+    http_response_code(403);
+    die('Access denied');
+}
+
 echo '<style>
 .CSSTableGenerator {
 	margin:0px;padding:0px;
