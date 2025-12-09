@@ -21,7 +21,7 @@ while (ob_get_level() > 0) {
 }
 
 include(__DIR__ . '/../config/conf.php');
-include(__DIR__ . '/config/auth.php');
+include(__DIR__ . '/../config/auth.php');
 
 // Security: Validate user authentication
 if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {

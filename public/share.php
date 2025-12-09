@@ -7,7 +7,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 include(__DIR__ . '/../config/conf.php');
-include(__DIR__ . '/config/auth.php');
+include(__DIR__ . '/../config/auth.php');
 
 // Get shared data
 $title = $_POST['title'] ?? $_GET['title'] ?? '';
