@@ -61,29 +61,32 @@ function imgbase64($f) {
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpfile);
     if($type == "inode/x-empty") return "";
 
-    //apt install webp on debian
-
-    if(($type == "image/jpeg" || $type == "image/png" || $type == "image/tiff") &&  `which cwebp`) {
-        //exec('convert '.$tmpfile.' '.$tmpfile.'.webp');
-        exec('cwebp -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
+    // Convert to WebP for smaller file sizes (apt install webp on debian)
+    if(($type == "image/jpeg" || $type == "image/png" || $type == "image/tiff") && `which cwebp`) {
+        // -q 75 for good quality/size balance, -m 6 for best compression
+        exec('cwebp -q 75 -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
         unlink($tmpfile);
         $tmpfile .= '.webp';
-        /* if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile); */
-        /* else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile); */
-
-
-        /* return '<picture><source class="lazy" data-srcset="'.$tmpfile.'.webp" type="image/webp"><source class="lazy" data-srcset="'.$tmpfile.'" type="'.$type.'"><img class="lazy" data-src="'.$tmpfile.'"></picture>'; */
-
     }
-/*    if($type == "image/jpeg" && `which jpegoptim`) exec('jpegoptim --strip-all --all-progressive '.$tmpfile);
-      else if($type == "image/png" && `which pngquant`) exec('pngquant -f --output '.$tmpfile.' '.$tmpfile);*/
     else if($type == "image/gif" && `which gif2webp`) {
-      //exec('giflossy -O3 --lossy=80 -o '.$tmpfile.'.gif '.$tmpfile);
-      //$tmpfile .= '.gif';
-      exec('gif2webp -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
-      $tmpfile .= '.webp';
+      $origSize = filesize($tmpfile);
+      // Skip conversion for large GIFs (>2MB) - WebP animated can be larger
+      if ($origSize > 2 * 1024 * 1024) {
+        // Keep original GIF, just serve it
+        $tmpfile = str_replace("/www/reader/", "", $tmpfile);
+        return '<img loading="lazy" decoding="async" src="https://reader.gheop.com/'.$tmpfile.'" '.$attr.' onerror="this.src=\''.$f[1].'\';" />';
+      }
+      exec('gif2webp -q 75 -m 6 -mt "'.$tmpfile.'" -o "'.$tmpfile.'.webp"');
+      // Only use WebP if it's smaller than original
+      if (file_exists($tmpfile.'.webp') && filesize($tmpfile.'.webp') < $origSize) {
+        unlink($tmpfile);
+        $tmpfile .= '.webp';
+      } else {
+        // WebP larger than GIF, keep original
+        @unlink($tmpfile.'.webp');
+      }
     }
-    else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';//return "IMAGE UNKNOW $type $f[1]";
+    else return '<img class="lazy" data-src="'.$f[1].'" '.$attr.'" />';
 //    $base64 = "//reader.gheop.com/$tmpfile";
 
 //    return '<img class="lazy" data-src="'.$base64.'" '.$attr.' style="max-width: 100%;" onerror="this.src=\''.$f[1].'\';this.width=\'100%\';this.height=\'\';"   />';
