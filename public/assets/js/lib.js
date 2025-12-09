@@ -591,11 +591,35 @@ function startSSEConnection() {
     setTimeout(() => startSSEConnection(), 1000);
   });
 
+  // Handle server-sent error events (e.g., authentication failure)
+  eventSource.addEventListener('error', function(e) {
+    if (e.data) {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.error === 'Unauthorized') {
+          console.warn('SSE: Session expired, stopping reconnection attempts');
+          eventSource.close();
+          eventSource = null;
+          // Don't reconnect - user needs to re-authenticate
+          return;
+        }
+      } catch (err) {
+        // Not JSON, handled by onerror below
+      }
+    }
+  });
+
   eventSource.onerror = function(e) {
-    console.error('SSE error:', e);
+    // This handles connection errors, not server-sent error events
+    if (eventSource.readyState === EventSource.CLOSED) {
+      console.log('SSE connection closed');
+      eventSource = null;
+      // Don't auto-reconnect if it was closed intentionally
+      return;
+    }
+    console.error('SSE connection error, reconnecting in 5s...');
     eventSource.close();
     eventSource = null;
-    // Try to reconnect after 5 seconds
     setTimeout(() => startSSEConnection(), 5000);
   };
 }
