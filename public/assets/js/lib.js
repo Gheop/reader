@@ -827,7 +827,7 @@ function appendNewArticles(newArticlesData) {
     if (id !== 'all') {
       var hasUnreadArticlesForCurrentFeed = false;
       for(var i in d) {
-        if (d[i].f == id) {
+        if (d[i].f == id && d[i].r == 1) { // Must be in feed AND unread
           hasUnreadArticlesForCurrentFeed = true;
           break;
         }
