@@ -197,15 +197,12 @@ function loadData(feedId, useCache = true) {
 
   if (useCache) {
     const cached = loadFromCache();
-    if (cached && cached.menu && cached.articles) {
-      console.log('Loading from cache (age: ' + Math.round(getCacheAge()/1000) + 's)');
+    if (cached && cached.menu) {
+      console.log('Loading menu from cache (age: ' + Math.round(getCacheAge()/1000) + 's)');
       renderMenu(cached.menu);
-      // Use current global 'id' if feedId is 'all' (reload scenario)
-      // This maintains the current feed view when reloading all data
-      var displayFeed = (feedId === 'all' && id !== 'all') ? id : (feedId || 'all');
-      renderArticles(cached.articles, displayFeed);
-      setTimeout(() => fetchAndUpdateData(feedId), 100);
-      return;
+      // Don't show cached articles - they may be stale (already read)
+      // Show loading indicator instead, then fetch fresh data
+      DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Chargement...</a></h1></header></article>';
     }
   }
   console.log('No cache available, loading from server');
