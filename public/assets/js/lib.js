@@ -835,20 +835,8 @@ function appendNewArticles(newArticlesData) {
 
       console.log('Checking if feed', id, 'has unread articles:', hasUnreadArticlesForCurrentFeed);
 
-      if (!hasUnreadArticlesForCurrentFeed) {
-        console.log('Current feed has no more unread articles, switching to "All"');
-        // Update UI state
-        var oldFeed = $('f' + id);
-        if (oldFeed) {
-          oldFeed.classList.remove('show');
-        }
-        id = 'all';
-        if ($('fall')) {
-          $('fall').classList.add('show');
-        }
-        // Force re-render with all articles
-        renderArticles(d, 'all');
-      }
+      // Don't auto-switch to "All" - let user stay on current feed with read articles visible
+      // They can manually switch when ready
     }
   }
 
