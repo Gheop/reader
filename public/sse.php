@@ -47,36 +47,37 @@ echo "data: {\"status\":\"ok\",\"timestamp\":" . time() . "}\n\n";
 flush();
 
 // Get initial state
-$counterColumn = $userId == 1 ? 'unread_count_user_1' : 'unread_count_user_2';
 $lastCheck = time();
 $lastHash = '';
 
-// Function to get current state hash
-function getCurrentHash($mysqli, $userId, $counterColumn) {
-    // Note: $counterColumn is validated as one of two specific column names, safe to embed
+// Function to get current state hash - uses reader_flux_user_stats for accurate counts
+function getCurrentHash($mysqli, $userId) {
     $stmt = $mysqli->prepare("
-        SELECT SUM($counterColumn) as total,
-               MAX(UNIX_TIMESTAMP(GREATEST(
-                   COALESCE((SELECT MAX(pubdate) FROM reader_item), '1970-01-01'),
-                   COALESCE((SELECT MAX(pubdate) FROM reader_unread_cache WHERE id_user = ?), '1970-01-01')
-               ))) as last_change
-        FROM reader_flux
+        SELECT
+            COALESCE(SUM(S.unread_count), 0) as total,
+            COALESCE(MAX(UNIX_TIMESTAMP(I.pubdate)), 0) as last_item,
+            COALESCE(MAX(UNIX_TIMESTAMP(R.date)), 0) as last_read
+        FROM reader_flux_user_stats S
+        LEFT JOIN reader_item I ON I.id = (SELECT MAX(id) FROM reader_item)
+        LEFT JOIN reader_user_item R ON R.id_user = ? AND R.id_item = (SELECT MAX(id_item) FROM reader_user_item WHERE id_user = ?)
+        WHERE S.id_user = ?
     ");
 
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("iii", $userId, $userId, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result) {
         $data = $result->fetch_assoc();
         $stmt->close();
-        return md5($data['total'] . '_' . $data['last_change']);
+        // Hash includes: total unread count + last new article + last read action
+        return md5($data['total'] . '_' . $data['last_item'] . '_' . $data['last_read']);
     }
     return '';
 }
 
 // Initial hash
-$lastHash = getCurrentHash($mysqli, $userId, $counterColumn);
+$lastHash = getCurrentHash($mysqli, $userId);
 
 // Keep connection alive and check for changes every 2 seconds
 $maxDuration = 300; // 5 minutes max connection time
@@ -89,7 +90,7 @@ while (time() - $startTime < $maxDuration) {
     }
 
     // Check for changes
-    $currentHash = getCurrentHash($mysqli, $userId, $counterColumn);
+    $currentHash = getCurrentHash($mysqli, $userId);
 
     if ($currentHash !== $lastHash && $currentHash !== '') {
         // Data has changed, notify client
