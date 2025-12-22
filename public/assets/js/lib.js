@@ -714,12 +714,10 @@ function appendNewArticles(newArticlesData) {
         // Article exists in DOM and is displayed as read, but it's in newArticlesData
         // which only contains unread articles, so it was marked as unread elsewhere
         reactivatedArticles.push(i);
-      } else if (!d || !d[i]) {
-        // This article is not in the current data object, so it's new
-        // But only add if it's not already in the DOM
-        if (!$(i)) {
-          newArticles.push(i);
-        }
+      } else if (!$(i)) {
+        // Article not in DOM but is unread on server - add it
+        // This handles: new articles AND articles marked unread elsewhere that were removed from DOM
+        newArticles.push(i);
       }
     }
   }
