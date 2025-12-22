@@ -27,26 +27,40 @@ try {
     $stmt->close();
 
     if ($wasRead) {
+        // Get article info (id_flux, pubdate) for cache
+        $stmt = $mysqli->prepare("SELECT id_flux, pubdate FROM reader_item WHERE id = ?");
+        $stmt->bind_param("i", $itemId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $item = $result->fetch_assoc();
+        $stmt->close();
+
+        if (!$item) {
+            throw new Exception("Article not found");
+        }
+
+        $feedId = $item['id_flux'];
+        $pubdate = $item['pubdate'];
+
         // Remove read mark
         $stmt = $mysqli->prepare("DELETE FROM reader_user_item WHERE id_user = ? AND id_item = ?");
         $stmt->bind_param("ii", $userId, $itemId);
         $stmt->execute();
         $stmt->close();
 
-        // Add to unread cache
-        $stmt = $mysqli->prepare("INSERT IGNORE INTO reader_unread_cache (id_user, id_item) VALUES (?, ?)");
-        $stmt->bind_param("ii", $userId, $itemId);
+        // Add to unread cache (with id_flux and pubdate)
+        $stmt = $mysqli->prepare("INSERT IGNORE INTO reader_unread_cache (id_user, id_flux, id_item, pubdate) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiis", $userId, $feedId, $itemId, $pubdate);
         $stmt->execute();
         $stmt->close();
 
         // Increment feed counter in reader_flux_user_stats
         $stmt = $mysqli->prepare("
             UPDATE reader_flux_user_stats S
-            INNER JOIN reader_item I ON I.id = ? AND I.id_flux = S.id_flux
             SET S.unread_count = S.unread_count + 1
-            WHERE S.id_user = ?
+            WHERE S.id_user = ? AND S.id_flux = ?
         ");
-        $stmt->bind_param("ii", $itemId, $userId);
+        $stmt->bind_param("ii", $userId, $feedId);
         $stmt->execute();
         $stmt->close();
     }
