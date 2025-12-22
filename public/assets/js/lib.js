@@ -203,9 +203,10 @@ function loadData(feedId, useCache = true) {
       // Don't show cached articles - they may be stale (already read)
       // Show loading indicator instead, then fetch fresh data
       DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Chargement...</a></h1></header></article>';
+    } else {
+      console.log('No cache available');
     }
   }
-  console.log('No cache available, loading from server');
   fetchAndUpdateData(feedId);
 }
 
