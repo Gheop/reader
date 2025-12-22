@@ -17,27 +17,22 @@ if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 $userId = (int)$_SESSION['user_id'];
 
 // ============================================================================
-// REQUÊTE OPTIMISÉE PHASE 2
+// REQUÊTE OPTIMISÉE - utilise reader_flux_user_stats
 // ============================================================================
-// Utilise les compteurs dénormalisés au lieu de COUNT(*) + GROUP BY
-// Plus besoin de scanner reader_item ni de faire des NOT EXISTS
-// Résultat: Lecture directe des compteurs
-// Performance: 2-5ms au lieu de 50ms+
-
-// Déterminer quelle colonne de compteur utiliser
-$counterColumn = $userId == 1 ? 'unread_count_user_1' : 'unread_count_user_2';
+// Utilise les compteurs dans reader_flux_user_stats (mis à jour par read.php)
+// Performance: 2-5ms
 
 $sql = "
     SELECT
         F.id,
         F.title,
-        F.$counterColumn as n,
+        S.unread_count as n,
         F.description,
         F.link
     FROM reader_flux F
-    INNER JOIN reader_user_flux UF ON UF.id_flux = F.id
-    WHERE UF.id_user = $userId
-        AND F.$counterColumn > 0
+    INNER JOIN reader_user_flux UF ON UF.id_flux = F.id AND UF.id_user = $userId
+    INNER JOIN reader_flux_user_stats S ON S.id_flux = F.id AND S.id_user = $userId
+    WHERE S.unread_count > 0
     ORDER BY F.title ASC
 ";
 
