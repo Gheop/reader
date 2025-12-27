@@ -185,6 +185,10 @@ function clean_txt($v) {
  // $v = preg_replace('#<yt>([^<]*)</yt>#Ssi', "<iframe class=\"lazy\" width=\"560\" height=\"315\" data-src=\"https://www.youtube.com/embed/$1\" frameborder=\"0\" allowfullscreen></iframe>", $v);
   /*$v = @preg_replace_callback('#<\s*img[^>]+src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v); */
 
+  // Convert lazy-loaded images (data-src) to regular src before processing
+  // This handles feeds that use lazy loading in their HTML
+  $v = preg_replace('/<img([^>]*)\s+data-src=["\']([^"\']+)["\']([^>]*)>/i', '<img$1 src="$2"$3>', $v);
+
   $v = @preg_replace_callback('#<\s*img[^>]+?src=["\' ]*([^> "\']*)["\' ]*.*?>#Ssi', "imgbase64", $v);
 
 /*  $q =array();
