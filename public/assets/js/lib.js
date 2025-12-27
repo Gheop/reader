@@ -1627,32 +1627,11 @@ function view(i) {
     return;
   }
 
-  // Clear main display before rendering to avoid flashing old content
+  // For 'all' view, always load from API to get fresh complete data
+  // (d may have been replaced with single-feed data when viewing a specific feed)
+  console.log('Loading all articles from API');
   DM.innerHTML = '';
-
-  // For 'all' view, use cached data if available
-  if (d && Object.keys(d).length > 0) {
-    renderArticles(d, i);
-
-    // Trigger background preload if this is a specific feed (not 'all')
-    // This will load ALL articles for this feed to avoid pagination delays
-    if (i !== 'all' && m && m[i] && m[i].n > unreadCount) {
-      console.log('Feed', i, 'has more articles in menu (', m[i].n, ') than in memory (', unreadCount, '), triggering preload after 1 second...');
-      setTimeout(() => preloadFeedArticles(i), 1000);
-    }
-  } else {
-    // No data in memory, try cache
-    const cached = loadFromCache();
-    if (cached && cached.articles) {
-      renderArticles(cached.articles, i);
-
-      // Trigger background preload for specific feeds
-      if (i !== 'all' && m && m[i] && m[i].n > 0) {
-        console.log('Feed', i, 'loaded from cache, triggering preload after 1 second...');
-        setTimeout(() => preloadFeedArticles(i), 1000);
-      }
-    }
-  }
+  loadData('all', false);
 }
 
 function removelight(i) {
