@@ -2100,9 +2100,19 @@ function unread(k, v=0) {
 	}
 
 	m[d[k].f].n++;
-        $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
-        $('f' + d[k].f).className = "fluxnew";
-	if (id == d[k].f) $('f' + d[k].f).className = "fluxnew show";
+	var feedEl = $('f' + d[k].f);
+	var counterSpan = feedEl.querySelector('.nb_flux');
+	if (counterSpan) {
+		counterSpan.textContent = ' ' + m[d[k].f].n;
+	} else {
+		// Create the counter span if it doesn't exist (feed had 0 unread)
+		var iconSpan = feedEl.querySelector('.icon');
+		if (iconSpan) {
+			iconSpan.insertAdjacentHTML('beforebegin', '<span class="nb_flux"> ' + m[d[k].f].n + '</span>');
+		}
+	}
+	feedEl.className = "fluxnew";
+	if (id == d[k].f) feedEl.className = "fluxnew show";
 	light('f' + d[k].f);
 	favicon(nb_title);
 	readItems--;
@@ -2158,13 +2168,19 @@ function read(k, v=0) {
   m[d[k].f].n--;
   m[d[k].f].locallyModified = true; // Marquer comme modifié localement
   console.log('Menu counter after:', m[d[k].f].n, '- Total in title:', nb_title);
+  var feedEl = $('f' + d[k].f);
+  var counterSpan = feedEl.querySelector('.nb_flux');
   if (m[d[k].f].n > 0) {
-     $('f' + d[k].f).children[0].innerHTML = m[d[k].f].n;
-      light('f' + d[k].f);
+    if (counterSpan) {
+      counterSpan.textContent = ' ' + m[d[k].f].n;
+    }
+    light('f' + d[k].f);
   } else {
-      $('f' + d[k].f).children[0].innerHTML = '';
-      if (id == d[k].f) $('f' + d[k].f).className = "flux show";
-      else $('f' + d[k].f).className = "flux";
+    if (counterSpan) {
+      counterSpan.remove();
+    }
+    if (id == d[k].f) feedEl.className = "flux show";
+    else feedEl.className = "flux";
   }
 }
 
