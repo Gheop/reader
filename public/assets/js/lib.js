@@ -363,8 +363,11 @@ function renderMenu(menuData) {
     m[id].n = 0; // Ensure counter is 0
   }
 
-  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris</li>\n';
+  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
   menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+
+  // Fetch starred count asynchronously
+  updateStarredCount();
   var changedFeeds = [];
   var newFeeds = [];
   var feedsToShow = {};
@@ -1495,9 +1498,10 @@ function markallread(i) {
 
 function menu() {
   myFetch('menu.php').then(result => {
-      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris</li>\n';
+      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
       menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
+      updateStarredCount();
       for(var i in m) {
         if (m[i].n > 0) {
           /* voir pour faire un event à la place des onclick and co */
@@ -2029,6 +2033,83 @@ function printIt(k) {
     iframe.contentWindow.print();
     setTimeout(() => document.body.removeChild(iframe), 1000);
   };
+}
+
+// Get current article (visible at top of scroll)
+function getCurrentArticleId() {
+  if (!d) return null;
+  for (let i in d) {
+    if (!$(i)) continue;
+    if ($(i).offsetTop >= DM.scrollTop - 10) {
+      return i;
+    }
+  }
+  return null;
+}
+
+// Toggle star on current article (keyboard shortcut S)
+function toggleStarCurrent() {
+  const articleId = getCurrentArticleId();
+  if (articleId) {
+    toggleStar(articleId);
+  }
+}
+
+// Mark current article as read (keyboard shortcut M)
+function markCurrentRead() {
+  const articleId = getCurrentArticleId();
+  if (articleId && d[articleId] && d[articleId].r === 1) {
+    read(articleId, 1);
+  }
+}
+
+// Update starred count in menu
+function updateStarredCount() {
+  fetch('starred.php?count=1', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(data => {
+      const count = data.count || Object.keys(data).length;
+      const el = document.getElementById('starred-count');
+      if (el) {
+        el.textContent = count > 0 ? ' ' + count : '';
+        el.className = count > 0 ? 'nb_flux' : '';
+      }
+    })
+    .catch(() => {});
+}
+
+// Show keyboard shortcuts cheatsheet
+function showKeyboardShortcuts() {
+  // Remove existing if present
+  const existing = document.getElementById('keyboard-shortcuts');
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'keyboard-shortcuts';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = () => overlay.remove();
+
+  overlay.innerHTML = `
+    <div style="background:#fff;padding:30px;border-radius:10px;max-width:500px;font-family:sans-serif;" onclick="event.stopPropagation()">
+      <h2 style="margin-top:0;border-bottom:2px solid #d43f57;padding-bottom:10px;">Raccourcis clavier</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">j</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">↓</kbd></td><td>Article suivant</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">k</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">↑</kbd></td><td>Article précédent</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">s</kbd></td><td>Ajouter/retirer des favoris</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">m</kbd></td><td>Marquer comme lu</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">o</kbd></td><td>Ouvrir le lien</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">g</kbd></td><td>Rechercher sur Google</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">w</kbd></td><td>Rechercher sur Wikipedia</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">?</kbd></td><td>Afficher cette aide</td></tr>
+      </table>
+      <p style="margin-bottom:0;color:#888;font-size:0.9em;text-align:center;margin-top:20px;">Cliquez n'importe où pour fermer</p>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
 }
 
 // voir https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch si on reçoit bien du json<
@@ -2581,8 +2662,23 @@ function i() {
       case 87:
         goWikipedia();
         break;
-      case 79:
+      case 79: // O - open article link
         openActif();
+        break;
+      case 74: // J - next article
+        goNext();
+        break;
+      case 75: // K - previous article
+        goPrev();
+        break;
+      case 83: // S - toggle star
+        toggleStarCurrent();
+        break;
+      case 77: // M - mark as read
+        markCurrentRead();
+        break;
+      case 191: // ? - show keyboard shortcuts (shift+/)
+        if (evt.shiftKey) showKeyboardShortcuts();
         break;
       default:
         //log("Touche non implémentée. Code : " + k);

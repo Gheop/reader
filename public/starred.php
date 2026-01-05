@@ -17,6 +17,17 @@ if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
 
 $userId = (int)$_SESSION['user_id'];
 
+// Count only mode (for menu badge)
+if (isset($_GET['count'])) {
+    $stmt = $mysqli->prepare("SELECT COUNT(*) as count FROM reader_starred_items WHERE id_user = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    echo '{"count":' . ($row['count'] ?? 0) . '}';
+    exit;
+}
+
 // Limit
 $limit = 100;
 if (isset($_GET['nb']) && is_numeric($_GET['nb'])) {
