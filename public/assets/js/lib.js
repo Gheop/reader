@@ -646,6 +646,12 @@ function startBackgroundSync(intervalSeconds = 30) {
 async function fetchAndUpdateDataBackground() {
   console.log('=== SSE BACKGROUND SYNC START ===');
 
+  // Skip background sync when viewing starred articles (not a real feed)
+  if (id === 'starred') {
+    console.log('SSE: Skipping sync for starred view');
+    return;
+  }
+
   // Wait for read activity to stop (2 seconds of inactivity)
   const timeSinceLastRead = Date.now() - lastReadActivity;
   if (timeSinceLastRead < 2000) {
