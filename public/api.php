@@ -110,10 +110,12 @@ if ($feedId !== null) {
             I.id_flux,
             F.title as feed_title,
             F.description as feed_description,
-            F.link as feed_link
+            F.link as feed_link,
+            CASE WHEN S.id IS NOT NULL THEN 1 ELSE 0 END as starred
         FROM reader_unread_cache C
         INNER JOIN reader_item I ON C.id_item = I.id
         INNER JOIN reader_flux F ON I.id_flux = F.id
+        LEFT JOIN reader_starred_items S ON S.id_item = I.id AND S.id_user = C.id_user
         WHERE C.id_user = ? AND C.id_flux = ?
         ORDER BY I.pubdate DESC
         LIMIT ?
@@ -133,10 +135,12 @@ if ($feedId !== null) {
             I.id_flux,
             F.title as feed_title,
             F.description as feed_description,
-            F.link as feed_link
+            F.link as feed_link,
+            CASE WHEN S.id IS NOT NULL THEN 1 ELSE 0 END as starred
         FROM reader_unread_cache C
         INNER JOIN reader_item I ON C.id_item = I.id
         INNER JOIN reader_flux F ON I.id_flux = F.id
+        LEFT JOIN reader_starred_items S ON S.id_item = I.id AND S.id_user = C.id_user
         WHERE C.id_user = ?
         ORDER BY I.pubdate DESC
         LIMIT ?
@@ -179,7 +183,8 @@ while ($row = $articlesResult->fetch_assoc()) {
     }
 
     $articlesJson .= ',"d":"' . $desc . '","l":"' . ($row['link'] ?? '') . '","o":"' . ($row['feed_link'] ?? '') . '"';
-    $articlesJson .= ',"f":"' . ($row['id_flux'] ?? '') . '","n":"' . $feed_title . '","e":"' . $feed_desc . '"}';
+    $articlesJson .= ',"f":"' . ($row['id_flux'] ?? '') . '","n":"' . $feed_title . '","e":"' . $feed_desc . '"';
+    $articlesJson .= ',"s":' . ($row['starred'] ?? 0) . '}';
 }
 $articlesJson .= '}';
 

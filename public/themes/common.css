@@ -536,7 +536,8 @@ article-content {
 .search:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 .search-icon:before { content: "\f002"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 0.5em; color: var(--color-link); }
 .star:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
-.starred:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.starred:before { content: "\f005"; font-family: "Font Awesome 6 Free"; font-weight: 900; color: gold; }
+.star-menu-icon:before { content: "\f005 "; font-family: "Font Awesome 6 Free"; font-weight: 900; color: gold; }
 .love0:before { content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 400; }
 .love1:before { color: red; content: "\f004"; font-family: "Font Awesome 6 Free"; font-weight: 900; }
 .tags:before { content: "\f02b"; font-family: "Font Awesome 6 Free"; font-weight: 900; }

@@ -1634,6 +1634,157 @@ function view(i) {
   loadData('all', false);
 }
 
+function viewStarred() {
+  console.log('=== VIEW STARRED ===');
+
+  // Update UI state - remove 'show' from old feed
+  var oldFeed = $('f' + id);
+  if (oldFeed) {
+    oldFeed.classList.remove('show');
+  }
+
+  // Remove 'show' from 'all' view and search
+  if ($('fall')) $('fall').classList.remove('show');
+  if ($('fsearch')) $('fsearch').className = "flux";
+  search_active = 0;
+
+  // Highlight Favoris in menu
+  if ($('fstarred')) $('fstarred').classList.add('show');
+
+  id = 'starred'; // Special ID for starred view
+
+  // Clear main display
+  DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Chargement des favoris...</a></h1></header></article>';
+
+  // Fetch starred articles
+  fetch('starred.php')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
+    .then(articlesData => {
+      console.log('Starred articles received:', Object.keys(articlesData).length);
+      renderStarredArticles(articlesData);
+    })
+    .catch(err => {
+      console.error('Failed to fetch starred articles:', err);
+      DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Erreur de chargement des favoris</a></h1></header></article>';
+    });
+}
+
+function renderStarredArticles(articlesData) {
+  let page = '';
+  cptReadArticle = 0;
+  varscroll = 0;
+  loadmore = 0;
+
+  // Store starred articles separately (don't overwrite d)
+  const starredD = articlesData;
+
+  // Sort by date (most recent first)
+  const sortedIds = Object.keys(starredD).sort((a, b) => {
+    const dateA = new Date(starredD[a].p);
+    const dateB = new Date(starredD[b].p);
+    return dateB - dateA;
+  });
+
+  console.log('Rendering', sortedIds.length, 'starred articles');
+
+  if (sortedIds.length === 0) {
+    DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Aucun article favori</a></h1></header></article>';
+    return;
+  }
+
+  // Generate articles HTML
+  for (let i = 0; i < sortedIds.length; i++) {
+    const articleId = sortedIds[i];
+    const article = starredD[articleId];
+    page += generateStarredArticle(articleId, article);
+  }
+
+  DM.innerHTML = page;
+
+  // Initialize image handlers for starred articles
+  setTimeout(() => {
+    sortedIds.forEach(articleId => {
+      initArticleImageHandlers(articleId);
+    });
+  }, 100);
+}
+
+function generateStarredArticle(articleId, article) {
+  const title = article.t || 'Sans titre';
+  const description = article.d || '';
+  const link = article.l || '#';
+  const feedTitle = article.n || '';
+  const pubdate = article.p ? formatDate(article.p) : '';
+  const author = article.a || '';
+
+  let authorHtml = '';
+  if (author) {
+    authorHtml = '<span class="by">par <span class="author">' + author + '</span></span>';
+  }
+
+  // Starred articles always have star filled (s=1)
+  return '<article id="' + articleId + '" class="item1">' +
+    '<header onclick="toggleStarredArticle(' + articleId + ')">' +
+      '<h1 class="headline"><a href="' + link + '" class="title" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + title + '</a></h1>' +
+      '<p class="subline">' +
+        '<span class="origin" title="' + (article.e || '') + '">' + feedTitle + '</span>' +
+        '<span class="time">' + pubdate + '</span>' +
+        authorHtml +
+      '</p>' +
+      '<div class="action">' +
+        '<a class="star starred" onclick="toggleStarFromStarred(' + articleId + ');event.stopPropagation();" title="Retirer des favoris"></a>' +
+      '</div>' +
+    '</header>' +
+    '<section id="desc_' + articleId + '" class="description"></section>' +
+  '</article>';
+}
+
+function toggleStarredArticle(articleId) {
+  const article = document.getElementById(articleId);
+  if (!article) return;
+
+  const section = article.querySelector('.description');
+  if (!section) return;
+
+  // Toggle visibility
+  if (section.innerHTML === '') {
+    // Expand - need to fetch article description
+    fetch('starred.php')
+      .then(r => r.json())
+      .then(data => {
+        if (data[articleId]) {
+          section.innerHTML = '<article-content>' + (data[articleId].d || '') + '</article-content>';
+        }
+      });
+    article.classList.add('open');
+  } else if (article.classList.contains('open')) {
+    article.classList.remove('open');
+  } else {
+    article.classList.add('open');
+  }
+}
+
+function toggleStarFromStarred(articleId) {
+  event.stopPropagation();
+  myFetch('star.php', 'id=' + articleId, 0)
+    .then(response => {
+      if (response && response.starred === false) {
+        // Remove from view
+        const article = document.getElementById(articleId);
+        if (article) {
+          article.style.transition = 'opacity 0.3s';
+          article.style.opacity = '0';
+          setTimeout(() => article.remove(), 300);
+        }
+      }
+    });
+}
+
 function removelight(i) {
   $(i).classList.remove('blink');
 }
@@ -1846,8 +1997,9 @@ function countWords(elem) {
 //ne pas vider la 'page' pour more...
 function generateArticle(i) {
  	let datepub = dateArticle(d[i].p);
+  let starClass = d[i].s ? 'star starred' : 'star';
 //voir http://microformats.org/wiki/hcard
-return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a> <a class="sendTo" onclick="sendTo('+i+')"></a><a class="print" onclick="printIt('+i+')"></a><span id="tag'+i+'" class="tags icon"><a onclick="tagIt('+i+')"></a></span></div>\n</article>';
+return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="' + starClass + '" onclick="toggleStar(' + i + ');event.stopPropagation();" title="Favoris"></a> <a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a> <a id="full'+i+'" class="readability" onclick="readability('+i+')"></a> <a id="sum'+i+'" class="summarize" onclick="summarize('+i+')"></a> <a class="sendTo" onclick="sendTo('+i+')"></a><a class="print" onclick="printIt('+i+')"></a><span id="tag'+i+'" class="tags icon"><a onclick="tagIt('+i+')"></a></span></div>\n</article>';
 //<!--href="https://gheop.com/readability/?url=' + d[i].l + '" -->
 //return '<article id="' + i + '" class="item1" onclick="read(this.id)">\n\t<header>\n\t\t<h1 class="headline"><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author"><a href="' + d[i].o + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t</div>\n\t</header>\n\t<div class="article-content">' + d[i].d + '</div>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ');return true;" title="Lu"></a></div>\n</article>';
 }
@@ -1856,6 +2008,24 @@ return '<article id="' + i + '" class="item1" onclick="read(this.id, 1)">\n\t<he
 function generateSearchArticle(i) {
   let datepub = dateArticle(d[i].p);
   return '<article id="' + i + '" class="item1 search-result">\n\t<header>\n\t\t<h1 class="headline"><span class="search-icon"></span><a href="' + d[i].l + '" class="title" target="_blank" title="' + d[i].t + '">' + d[i].t + '</a></h1>\n\t\t<div class="byline vcard">\n\t\t\t<address class="author">From <a href="' + (d[i].o || '') + '" title="' + d[i].n + '" class="website">' + d[i].n + '</a>' +((d[i].a) ? (' <a rel="author" class="nickname">' + d[i].a + '</a>') : '') + '</address>\n\t\t\t<time pubdate datetime="'+d[i].p+'" title="'+datepub+'">' + datepub+ '</time>\n\t\t</div>\n\t</header>\n\t<article-content id="ac'+i+'"><div class="article-content">' + d[i].d + '</div></article-content>\n\t<div class="action"><a class="lu" onclick="verif(' + i + ', 1);return true;" title="Lu"></a></div>\n</article>';
+}
+
+function toggleStar(k) {
+  event.stopPropagation();
+  myFetch('star.php', 'id=' + k, 0)
+    .then(response => {
+      if (response && response.starred !== undefined) {
+        d[k].s = response.starred ? 1 : 0;
+        var starEl = $(k).querySelector('.star');
+        if (starEl) {
+          starEl.classList.toggle('starred', response.starred);
+        }
+        console.log('Article', k, response.starred ? 'starred' : 'unstarred');
+      }
+    })
+    .catch(err => {
+      console.error('Failed to toggle star:', err);
+    });
 }
 
 function sendToKindle(k) {

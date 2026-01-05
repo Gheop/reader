@@ -22,7 +22,7 @@ $userId = (int)$_SESSION['user_id'];
 // Utilise les compteurs dans reader_flux_user_stats (mis à jour par read.php)
 // Performance: 2-5ms
 
-$sql = "
+$stmt = $mysqli->prepare("
     SELECT
         F.id,
         F.title,
@@ -30,13 +30,14 @@ $sql = "
         F.description,
         F.link
     FROM reader_flux F
-    INNER JOIN reader_user_flux UF ON UF.id_flux = F.id AND UF.id_user = $userId
-    INNER JOIN reader_flux_user_stats S ON S.id_flux = F.id AND S.id_user = $userId
+    INNER JOIN reader_user_flux UF ON UF.id_flux = F.id AND UF.id_user = ?
+    INNER JOIN reader_flux_user_stats S ON S.id_flux = F.id AND S.id_user = ?
     WHERE S.unread_count > 0
     ORDER BY F.title ASC
-";
-
-$r = $mysqli->query($sql);
+");
+$stmt->bind_param("ii", $userId, $userId);
+$stmt->execute();
+$r = $stmt->get_result();
 
 if (!$r) {
     die($mysqli->error);

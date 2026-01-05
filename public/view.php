@@ -22,10 +22,9 @@ if (isset($_POST['nb']) && is_numeric($_POST['nb'])) {
 }
 
 // Build feed filter
-$feedFilter = '';
+$feedId = null;
 if (isset($_POST['id']) && is_numeric($_POST['id'])) {
     $feedId = (int)$_POST['id'];
-    $feedFilter = 'AND C.id_flux = '.$feedId;
 }
 
 // ============================================================================
@@ -35,28 +34,52 @@ if (isset($_POST['id']) && is_numeric($_POST['id'])) {
 // Résultat: Scan de ~3k lignes au lieu de 80k+
 // Performance: 5-10ms au lieu de 200ms+
 
-$sql = "
-    SELECT
-        I.id,
-        I.title,
-        I.pubdate,
-        I.author,
-        I.description,
-        I.link,
-        I.id_flux,
-        F.title as feed_title,
-        F.description as feed_description,
-        F.link as feed_link
-    FROM reader_unread_cache C
-    INNER JOIN reader_item I ON C.id_item = I.id
-    INNER JOIN reader_flux F ON I.id_flux = F.id
-    WHERE C.id_user = $userId
-        $feedFilter
-    ORDER BY I.pubdate DESC
-    LIMIT $limit
-";
+if ($feedId !== null) {
+    $stmt = $mysqli->prepare("
+        SELECT
+            I.id,
+            I.title,
+            I.pubdate,
+            I.author,
+            I.description,
+            I.link,
+            I.id_flux,
+            F.title as feed_title,
+            F.description as feed_description,
+            F.link as feed_link
+        FROM reader_unread_cache C
+        INNER JOIN reader_item I ON C.id_item = I.id
+        INNER JOIN reader_flux F ON I.id_flux = F.id
+        WHERE C.id_user = ? AND C.id_flux = ?
+        ORDER BY I.pubdate DESC
+        LIMIT ?
+    ");
+    $stmt->bind_param("iii", $userId, $feedId, $limit);
+} else {
+    $stmt = $mysqli->prepare("
+        SELECT
+            I.id,
+            I.title,
+            I.pubdate,
+            I.author,
+            I.description,
+            I.link,
+            I.id_flux,
+            F.title as feed_title,
+            F.description as feed_description,
+            F.link as feed_link
+        FROM reader_unread_cache C
+        INNER JOIN reader_item I ON C.id_item = I.id
+        INNER JOIN reader_flux F ON I.id_flux = F.id
+        WHERE C.id_user = ?
+        ORDER BY I.pubdate DESC
+        LIMIT ?
+    ");
+    $stmt->bind_param("ii", $userId, $limit);
+}
 
-$result = $mysqli->query($sql);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if (!$result) {
     error_log('View query failed: ' . $mysqli->error);
