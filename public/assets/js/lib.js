@@ -2068,9 +2068,10 @@ function getHTTPObject(action) {
       } else if (action === 'up') {
         // SSE handles automatic updates, no reload needed
         console.log('up_parallel complete, SSE will handle updates');
-        // Stop the spinning animation
-        $('up').style.animation = 'none';
+        // Stop the spinning animation and restore default state (hidden until hover)
+        $('up').style.animation = '';
         $('up').style.color = '';
+        $('up').style.display = '';
       } else if (action === 'more') {
       	if(!xhr.responseText || xhr.responseText == '{}') return 0;
         var p = JSON.parse(xhr.responseText);
