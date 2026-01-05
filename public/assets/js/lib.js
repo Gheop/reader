@@ -1688,13 +1688,20 @@ function renderStarredArticles(articlesData) {
   varscroll = 0;
   loadmore = 0;
 
-  // Store starred articles separately (don't overwrite d)
-  const starredD = articlesData;
+  // Store starred articles in global d (like regular articles)
+  d = articlesData;
+
+  // Mark all as "read" state (they're starred, not unread)
+  // and ensure starred flag is set
+  for (let i in d) {
+    d[i].r = 0; // Not unread (so no "mark as read" behavior)
+    d[i].s = 1; // Starred
+  }
 
   // Sort by date (most recent first)
-  const sortedIds = Object.keys(starredD).sort((a, b) => {
-    const dateA = new Date(starredD[a].p);
-    const dateB = new Date(starredD[b].p);
+  const sortedIds = Object.keys(d).sort((a, b) => {
+    const dateA = new Date(d[a].p);
+    const dateB = new Date(d[b].p);
     return dateB - dateA;
   });
 
@@ -1705,11 +1712,9 @@ function renderStarredArticles(articlesData) {
     return;
   }
 
-  // Generate articles HTML
+  // Generate articles HTML using the standard generateArticle function
   for (let i = 0; i < sortedIds.length; i++) {
-    const articleId = sortedIds[i];
-    const article = starredD[articleId];
-    page += generateStarredArticle(articleId, article);
+    page += generateArticle(sortedIds[i]);
   }
 
   DM.innerHTML = page;
@@ -1720,77 +1725,6 @@ function renderStarredArticles(articlesData) {
       initArticleImageHandlers(articleId);
     });
   }, 100);
-}
-
-function generateStarredArticle(articleId, article) {
-  const title = article.t || 'Sans titre';
-  const description = article.d || '';
-  const link = article.l || '#';
-  const feedTitle = article.n || '';
-  const pubdate = article.p ? dateArticle(article.p) : '';
-  const author = article.a || '';
-
-  let authorHtml = '';
-  if (author) {
-    authorHtml = '<span class="by">par <span class="author">' + author + '</span></span>';
-  }
-
-  // Starred articles always have star filled (s=1)
-  return '<article id="' + articleId + '" class="item1">' +
-    '<header onclick="toggleStarredArticle(' + articleId + ')">' +
-      '<h1 class="headline"><a href="' + link + '" class="title" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + title + '</a></h1>' +
-      '<p class="subline">' +
-        '<span class="origin" title="' + (article.e || '') + '">' + feedTitle + '</span>' +
-        '<span class="time">' + pubdate + '</span>' +
-        authorHtml +
-      '</p>' +
-      '<div class="action">' +
-        '<a class="star starred" onclick="toggleStarFromStarred(' + articleId + ');event.stopPropagation();" title="Retirer des favoris"></a>' +
-      '</div>' +
-    '</header>' +
-    '<section id="desc_' + articleId + '" class="description"></section>' +
-  '</article>';
-}
-
-function toggleStarredArticle(articleId) {
-  const article = document.getElementById(articleId);
-  if (!article) return;
-
-  const section = article.querySelector('.description');
-  if (!section) return;
-
-  // Toggle visibility
-  if (section.innerHTML === '') {
-    // Expand - need to fetch article description
-    fetch('starred.php', { credentials: 'same-origin' })
-      .then(r => r.json())
-      .then(data => {
-        if (data[articleId]) {
-          section.innerHTML = '<article-content>' + (data[articleId].d || '') + '</article-content>';
-        }
-      });
-    article.classList.add('open');
-  } else if (article.classList.contains('open')) {
-    article.classList.remove('open');
-  } else {
-    article.classList.add('open');
-  }
-}
-
-function toggleStarFromStarred(articleId) {
-  event.stopPropagation();
-  myFetch('star.php', 'id=' + articleId, 0)
-    .then(response => {
-      if (response && response.starred === false) {
-        // Remove from view
-        const article = document.getElementById(articleId);
-        if (article) {
-          article.style.transition = 'opacity 0.3s';
-          article.style.opacity = '0';
-          setTimeout(() => article.remove(), 300);
-        }
-      }
-    });
 }
 
 function removelight(i) {
