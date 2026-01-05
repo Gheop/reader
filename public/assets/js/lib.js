@@ -2650,12 +2650,7 @@ function i() {
       case 37:
         goPrev();
         break;
-      case 38:
-        goUp();
-        break;
-      case 40:
-        goDown();
-        break;
+      // case 38/40 (up/down arrows) removed to keep native browser scrolling
       case 71:
         goGoogle();
         break;
