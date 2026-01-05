@@ -363,7 +363,8 @@ function renderMenu(menuData) {
     m[id].n = 0; // Ensure counter is 0
   }
 
-  var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span>Favoris</li>\n';
+  menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
   var changedFeeds = [];
   var newFeeds = [];
   var feedsToShow = {};
@@ -1488,7 +1489,8 @@ function markallread(i) {
 
 function menu() {
   myFetch('menu.php').then(result => {
-      var menu = '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
+      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span>Favoris</li>\n';
+      menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
       for(var i in m) {
         if (m[i].n > 0) {

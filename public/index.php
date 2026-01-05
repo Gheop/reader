@@ -54,9 +54,9 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-5HtwbRhKiJVXPT5ARhfioa44rp1n/Tx2HxgNVPJazbQ6Gv1+oIQeGOgdPLhGEQN3',
+    'assets/js/lib.min.js' => 'sha384-fMd5KKcRpMKhZuIXu43ko29iLy/+7CYu4wspYOs+mK+YNoYFW1qHJEks/rBdjwti',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-XQg7yJ8bf3Ix+jZPaZQL0PXJqmeAbw0vlp/h9ek4xZRKAO62iGUiqk92nQR8EnP9',
+    'themes/common.min.css' => 'sha384-RGxzjURwHpwBOlkiVmXaw2hdFdA8pzDj9V1l9rDqBr3FP7DVlJoVHWrQxjHnK9Kg',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',
@@ -167,7 +167,7 @@ echo '<nav>
     <a id="export" href="opml_export.php" onclick="event.stopPropagation();" title="Exporter les flux (OPML)"></a>
     </span>
     </li>
-    <li id="fstarred" class="flux" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span>Favoris</li>
+    <li id="fstarred" class="flux" onclick="viewStarred()" title="Articles favoris" style="display:list-item !important;"><span class="star-menu-icon"></span>Favoris</li>
   </ul>
 
 </nav>

@@ -601,7 +601,7 @@ p {
 }
 
 #fstarred {
-  display: list-item;
+  display: list-item !important;
   cursor: pointer;
   padding-left: var(--spacing-xs);
 }
