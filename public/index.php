@@ -54,7 +54,7 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-fMd5KKcRpMKhZuIXu43ko29iLy/+7CYu4wspYOs+mK+YNoYFW1qHJEks/rBdjwti',
+    'assets/js/lib.min.js' => 'sha384-NydCuSSShEmUcco2lPChy+i2fFiRqVS4zFM/CQ90WwjamaxsZExej5CFuLB3n1oP',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-RGxzjURwHpwBOlkiVmXaw2hdFdA8pzDj9V1l9rDqBr3FP7DVlJoVHWrQxjHnK9Kg',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
@@ -167,7 +167,7 @@ echo '<nav>
     <a id="export" href="opml_export.php" onclick="event.stopPropagation();" title="Exporter les flux (OPML)"></a>
     </span>
     </li>
-    <li id="fstarred" class="flux" onclick="viewStarred()" title="Articles favoris" style="display:list-item !important;"><span class="star-menu-icon"></span>Favoris</li>
+    <li id="fstarred" class="flux" onclick="viewStarred()" title="Articles favoris" style="display:list-item !important;"><span class="star-menu-icon"></span> Favoris</li>
   </ul>
 
 </nav>

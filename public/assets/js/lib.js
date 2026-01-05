@@ -363,7 +363,7 @@ function renderMenu(menuData) {
     m[id].n = 0; // Ensure counter is 0
   }
 
-  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span>Favoris</li>\n';
+  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris</li>\n';
   menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
   var changedFeeds = [];
   var newFeeds = [];
@@ -1489,7 +1489,7 @@ function markallread(i) {
 
 function menu() {
   myFetch('menu.php').then(result => {
-      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span>Favoris</li>\n';
+      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris</li>\n';
       menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
       for(var i in m) {
@@ -1659,7 +1659,7 @@ function viewStarred() {
   DM.innerHTML = '<article class="item1"><header><h1 class="headline"><a class="title">Chargement des favoris...</a></h1></header></article>';
 
   // Fetch starred articles
-  fetch('starred.php')
+  fetch('starred.php', { credentials: 'same-origin' })
     .then(response => {
       if (!response.ok) {
         throw new Error('HTTP error ' + response.status);
@@ -1756,7 +1756,7 @@ function toggleStarredArticle(articleId) {
   // Toggle visibility
   if (section.innerHTML === '') {
     // Expand - need to fetch article description
-    fetch('starred.php')
+    fetch('starred.php', { credentials: 'same-origin' })
       .then(r => r.json())
       .then(data => {
         if (data[articleId]) {
