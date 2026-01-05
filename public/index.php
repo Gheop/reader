@@ -54,7 +54,7 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-NydCuSSShEmUcco2lPChy+i2fFiRqVS4zFM/CQ90WwjamaxsZExej5CFuLB3n1oP',
+    'assets/js/lib.min.js' => 'sha384-raMD/o213wz7kCxxVSSfjSIQFOnNcfnbDvKqJ9q3jyu95d0suhFGUUAVDotzt83q',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
     'themes/common.min.css' => 'sha384-RGxzjURwHpwBOlkiVmXaw2hdFdA8pzDj9V1l9rDqBr3FP7DVlJoVHWrQxjHnK9Kg',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',

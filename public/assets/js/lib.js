@@ -1721,7 +1721,7 @@ function generateStarredArticle(articleId, article) {
   const description = article.d || '';
   const link = article.l || '#';
   const feedTitle = article.n || '';
-  const pubdate = article.p ? formatDate(article.p) : '';
+  const pubdate = article.p ? dateArticle(article.p) : '';
   const author = article.a || '';
 
   let authorHtml = '';
