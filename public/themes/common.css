@@ -600,6 +600,12 @@ p {
   font-weight: 900;
 }
 
+#fstarred {
+  display: list-item;
+  cursor: pointer;
+  padding-left: var(--spacing-xs);
+}
+
 .fluxnew a, .flux a {
   text-shadow: none;
   display: none;
