@@ -2096,8 +2096,8 @@ function showKeyboardShortcuts() {
     <div style="background:#fff;padding:30px;border-radius:10px;max-width:500px;font-family:sans-serif;" onclick="event.stopPropagation()">
       <h2 style="margin-top:0;border-bottom:2px solid #d43f57;padding-bottom:10px;">Raccourcis clavier</h2>
       <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">j</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">↓</kbd></td><td>Article suivant</td></tr>
-        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">k</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">↑</kbd></td><td>Article précédent</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">j</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">→</kbd></td><td>Article suivant</td></tr>
+        <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">k</kbd> / <kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">←</kbd></td><td>Article précédent</td></tr>
         <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">s</kbd></td><td>Ajouter/retirer des favoris</td></tr>
         <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">m</kbd></td><td>Marquer comme lu</td></tr>
         <tr><td style="padding:8px 20px 8px 0;"><kbd style="background:#eee;padding:3px 8px;border-radius:3px;border:1px solid #ccc;">o</kbd></td><td>Ouvrir le lien</td></tr>
