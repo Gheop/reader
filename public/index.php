@@ -54,9 +54,9 @@ $cacheBuster = '?v=' . filemtime($jsFile);
 
 // Subresource Integrity (SRI) hashes for security
 $sriHashes = [
-    'assets/js/lib.min.js' => 'sha384-3p3nw91gmDnVl0+4e3T03e1OWmEda6XWaWLU1Tn4j6tdF/PpWeFt1AORHzR8Hj9M',
+    'assets/js/lib.min.js' => 'sha384-PcS4PBGSgEgdo/Dfi5vLAWJF00hSTC9U0SIElMvOL61Q2jx82vuEJqDflKHl9++0',
     'assets/js/favico.min.js' => 'sha384-Wld99sh+AF8uAaf89VTlOSXGb5nMw9OIVxXywbRTHrv/G3LvqWLyZC24rPr/b9os',
-    'themes/common.min.css' => 'sha384-RGxzjURwHpwBOlkiVmXaw2hdFdA8pzDj9V1l9rDqBr3FP7DVlJoVHWrQxjHnK9Kg',
+    'themes/common.min.css' => 'sha384-q17ewI4VenM89TkRPCOdWr15m/1RspRBk2u7ncrheOfrCqJsbo+qqTtobIwF8XKQ',
     'themes/light.min.css' => 'sha384-K1mHexSQvND0Y7cRn5jOhHbVwn5w1BI2DEqUdqM6iGoD0RHWKbZ2DpCdPUQaz8is',
     'themes/dark.min.css' => 'sha384-7HsYmfNgJ9+ySlQa7keqLZda8bZaw/87gg8wdBOMb2Z++ZwAkv2rpBYTu30CZx9o',
     'themes/adaptive.min.css' => 'sha384-Sen3SWx5Zhz4F+gziVIfX+rRulX/70cHfiDxGLcIftcEUXN2Og7Ro4jUcrKgFiRZ',

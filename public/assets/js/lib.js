@@ -363,11 +363,8 @@ function renderMenu(menuData) {
     m[id].n = 0; // Ensure counter is 0
   }
 
-  var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
+  var menu = '\t<li id="fstarred" class="flux" style="display:none" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
   menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
-
-  // Fetch starred count asynchronously
-  updateStarredCount();
   var changedFeeds = [];
   var newFeeds = [];
   var feedsToShow = {};
@@ -447,6 +444,9 @@ function renderMenu(menuData) {
       }
     }
   }
+
+  // Update starred count (must be after menu is in DOM)
+  updateStarredCount();
 
   // Apply fade-in animation to new feeds
   newFeeds.forEach(function(feedId) {
@@ -1498,10 +1498,9 @@ function markallread(i) {
 
 function menu() {
   myFetch('menu.php').then(result => {
-      var menu = '\t<li id="fstarred" class="flux" style="display:list-item" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
+      var menu = '\t<li id="fstarred" class="flux" style="display:none" onclick="viewStarred()" title="Articles favoris"><span class="star-menu-icon"></span> Favoris<span id="starred-count"></span></li>\n';
       menu += '\t<li id="fsearch" class="flux" title="Recherche" onclick="return false;">Résultats de la recherche</li>\n';
       m = result;
-      updateStarredCount();
       for(var i in m) {
         if (m[i].n > 0) {
           /* voir pour faire un event à la place des onclick and co */
@@ -1513,6 +1512,7 @@ function menu() {
         }
       }
       $('menu').insertAdjacentHTML('beforeend', menu);
+      updateStarredCount(); // Must be after menu is in DOM
       D.title = 'Gheop Reader' + ((nb_title > 0) ? ' (' + nb_title + ')' : '');
       favicon(nb_title);
       totalItems = nb_title;
@@ -2068,11 +2068,16 @@ function updateStarredCount() {
   fetch('starred.php?count=1', { credentials: 'same-origin' })
     .then(r => r.json())
     .then(data => {
-      const count = data.count || Object.keys(data).length;
+      const count = 'count' in data ? data.count : Object.keys(data).length;
       const el = document.getElementById('starred-count');
+      const li = $('fstarred');
       if (el) {
         el.textContent = count > 0 ? ' ' + count : '';
         el.className = count > 0 ? 'nb_flux' : '';
+      }
+      // Hide/show Favoris menu item based on count
+      if (li) {
+        li.style.display = count > 0 ? '' : 'none';
       }
     })
     .catch(() => {});
@@ -2672,8 +2677,9 @@ function i() {
       case 77: // M - mark as read
         markCurrentRead();
         break;
-      case 191: // ? - show keyboard shortcuts (shift+/)
-        if (evt.shiftKey) showKeyboardShortcuts();
+      case 191: // ? on QWERTY (shift+/)
+      case 188: // ? on AZERTY
+        if (evt.key === '?') showKeyboardShortcuts();
         break;
       default:
         //log("Touche non implémentée. Code : " + k);
@@ -2883,6 +2889,15 @@ window.addEventListener('DOMContentLoaded', () => {
       $('stylesheet').href = 'themes/dark.min.css';
     }
     // Sinon on garde light.min.css qui est déjà chargé par défaut
+  }
+
+  // Remove integrity when theme was changed dynamically (hash won't match)
+  // This happens when savedTheme is not light, or when system prefers dark
+  const themeChanged = (savedTheme && savedTheme !== 'light') ||
+                       (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (themeChanged) {
+    $('stylesheet').removeAttribute('integrity');
+    $('stylesheet').removeAttribute('crossorigin');
   }
 
   // Mettre à jour l'icône du thème après un court délai pour s'assurer que le DOM est prêt
